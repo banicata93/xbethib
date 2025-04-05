@@ -70,21 +70,6 @@ app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// Admin route with authentication check
-app.get('/admin', (req, res, next) => {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) {
-        res.redirect('/login');
-        return;
-    }
-    
-    try {
-        jwt.verify(token, JWT_SECRET);
-        next();
-    } catch (error) {
-        res.redirect('/login');
-        return;
-    }
-}, (req, res) => {
+app.get('/admin', auth, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
