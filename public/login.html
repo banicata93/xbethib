@@ -26,66 +26,20 @@
 <body>
     <div class="login-container">
         <h2 class="text-center mb-4">Admin Login</h2>
-        <form id="loginForm">
+        <form id="loginForm" method="POST">
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" required autocomplete="username">
+                <input type="text" class="form-control" id="username" name="username" required>
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" required autocomplete="current-password">
+                <input type="password" class="form-control" id="password" name="password" required>
             </div>
             <button type="submit" class="btn btn-primary w-100">Login</button>
         </form>
         <div id="error-message" class="alert alert-danger mt-3" style="display: none;"></div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if already logged in
-            const token = localStorage.getItem('token');
-            if (token) {
-                window.location.href = '/admin';
-                return;
-            }
-
-            // Handle form submission
-            const form = document.getElementById('loginForm');
-            form.addEventListener('submit', async function(event) {
-                event.preventDefault();
-                
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                
-                try {
-                    const response = await fetch('/api/auth/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ username, password })
-                    });
-
-                    const data = await response.json();
-                    
-                    if (response.ok) {
-                        // Store the token
-                        localStorage.setItem('token', data.token);
-                        // Redirect to admin page
-                        window.location.href = '/admin';
-                    } else {
-                        const errorMessage = document.getElementById('error-message');
-                        errorMessage.textContent = data.message;
-                        errorMessage.style.display = 'block';
-                    }
-                } catch (error) {
-                    console.error('Login error:', error);
-                    const errorMessage = document.getElementById('error-message');
-                    errorMessage.textContent = 'An error occurred. Please try again.';
-                    errorMessage.style.display = 'block';
-                }
-            });
-        });
-    </script>
+    <script src="/js/login.js" defer></script>
 </body>
 </html>
