@@ -20,30 +20,30 @@
     </div>
 
     <script>
-        // Check authentication on page load
-        window.addEventListener('load', async () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = '/login';
-                return;
+        // Add token to all fetch requests
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        const originalFetch = window.fetch;
+        window.fetch = function() {
+            let [resource, config] = arguments;
+            if(config === undefined) {
+                config = {};
             }
+            if(config.headers === undefined) {
+                config.headers = {};
+            }
+            config.headers['Authorization'] = `Bearer ${token}`;
+            return originalFetch(resource, config);
+        };
 
-            // Add token to all fetch requests
-            const originalFetch = window.fetch;
-            window.fetch = function() {
-                let [resource, config] = arguments;
-                if(config === undefined) {
-                    config = {};
-                }
-                if(config.headers === undefined) {
-                    config.headers = {};
-                }
-                config.headers['Authorization'] = `Bearer ${token}`;
-                return originalFetch(resource, config);
-            };
+        // Load predictions
+        loadPredictions();
 
+        async function loadPredictions() {
             try {
-                // Try to load predictions
                 const response = await fetch('/api/predictions');
                 if (response.ok) {
                     const predictions = await response.json();
@@ -55,7 +55,7 @@
                 console.error('Error:', error);
                 document.getElementById('content').innerHTML = 'Error loading content. Please try again.';
             }
-        });
+        }
 
         function displayPredictions(predictions) {
             const content = document.getElementById('content');
@@ -167,21 +167,6 @@
             } catch (error) {
                 console.error('Error:', error);
                 alert('Failed to delete prediction');
-            }
-        }
-
-        async function loadPredictions() {
-            try {
-                const response = await fetch('/api/predictions');
-                if (response.ok) {
-                    const predictions = await response.json();
-                    displayPredictions(predictions);
-                } else {
-                    throw new Error('Failed to load predictions');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('content').innerHTML = 'Error loading content. Please try again.';
             }
         }
 
