@@ -44,14 +44,22 @@ if (!JWT_SECRET) {
 const auth = (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
-        return res.status(401).json({ message: 'Authentication required' });
+        // If it's an API request, return JSON
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(401).json({ message: 'Authentication required' });
+        }
+        // If it's a page request, redirect to login
+        return res.redirect('/login');
     }
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         req.user = decoded;
         next();
     } catch (error) {
-        return res.status(401).json({ message: 'Invalid token' });
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(401).json({ message: 'Invalid token' });
+        }
+        return res.redirect('/login');
     }
 };
 
@@ -71,5 +79,9 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/admin', auth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        res.status(200).json({ message: 'Admin page' });
+    } else {
+        res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+    }
 });
