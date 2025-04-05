@@ -26,7 +26,7 @@
 <body>
     <div class="login-container">
         <h2 class="text-center mb-4">Admin Login</h2>
-        <form id="loginForm" onsubmit="handleLogin(event)">
+        <form id="loginForm">
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
                 <input type="text" class="form-control" id="username" required autocomplete="username">
@@ -41,46 +41,51 @@
     </div>
 
     <script>
-        // Check if already logged in
-        const token = localStorage.getItem('token');
-        if (token) {
-            window.location.href = '/admin';
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if already logged in
+            const token = localStorage.getItem('token');
+            if (token) {
+                window.location.href = '/admin';
+                return;
+            }
 
-        async function handleLogin(event) {
-            event.preventDefault(); // Prevent form submission
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password })
-                });
-
-                const data = await response.json();
+            // Handle form submission
+            const form = document.getElementById('loginForm');
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
                 
-                if (response.ok) {
-                    // Store the token
-                    localStorage.setItem('token', data.token);
-                    // Redirect to admin page
-                    window.location.href = '/admin';
-                } else {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        // Store the token
+                        localStorage.setItem('token', data.token);
+                        // Redirect to admin page
+                        window.location.href = '/admin';
+                    } else {
+                        const errorMessage = document.getElementById('error-message');
+                        errorMessage.textContent = data.message;
+                        errorMessage.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
                     const errorMessage = document.getElementById('error-message');
-                    errorMessage.textContent = data.message;
+                    errorMessage.textContent = 'An error occurred. Please try again.';
                     errorMessage.style.display = 'block';
                 }
-            } catch (error) {
-                console.error('Login error:', error);
-                const errorMessage = document.getElementById('error-message');
-                errorMessage.textContent = 'An error occurred. Please try again.';
-                errorMessage.style.display = 'block';
-            }
-        }
+            });
+        });
     </script>
 </body>
 </html>
