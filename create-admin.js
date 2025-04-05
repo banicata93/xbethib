@@ -2,43 +2,40 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const Admin = require('./models/admin');
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-    console.error('Please set MONGODB_URI in environment variables');
-    process.exit(1);
-}
-
-mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(async () => {
-    console.log('Connected to MongoDB');
-    
+async function createAdmin() {
     try {
+        await mongoose.connect(process.env.MONGODB_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+        
+        console.log('Connected to MongoDB');
+
         // Check if admin already exists
         const existingAdmin = await Admin.findOne({ username: 'admin' });
         if (existingAdmin) {
             console.log('Admin user already exists');
-            process.exit(0);
+            return;
         }
 
         // Create admin user
         const admin = new Admin({
             username: 'admin',
-            password: 'admin123'  // Ще бъде хеширана автоматично от pre-save hook
+            password: 'admin123'  // Will be hashed by the pre-save hook
         });
 
         await admin.save();
         console.log('Admin user created successfully');
     } catch (error) {
-        console.error('Error creating admin:', error);
+        console.error('Error:', error);
+    } finally {
+        await mongoose.disconnect();
     }
-    
-    process.exit(0);
-})
-.catch(err => {
-    console.error('MongoDB connection error:', err);
-    process.exit(1);
-});
+}
+
+// Only run if this file is run directly
+if (require.main === module) {
+    createAdmin();
+}
+
+module.exports = createAdmin;
