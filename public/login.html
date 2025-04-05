@@ -75,6 +75,8 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
+            console.log('Attempting login with:', { username });
+            
             try {
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
@@ -84,7 +86,9 @@
                     body: JSON.stringify({ username, password })
                 });
 
+                console.log('Login response status:', response.status);
                 const data = await response.json();
+                console.log('Login response data:', data);
                 
                 if (response.ok) {
                     // Store the token
@@ -96,6 +100,7 @@
                     document.getElementById('error-message').style.display = 'block';
                 }
             } catch (error) {
+                console.error('Login error:', error);
                 document.getElementById('error-message').textContent = 'An error occurred. Please try again.';
                 document.getElementById('error-message').style.display = 'block';
             }
