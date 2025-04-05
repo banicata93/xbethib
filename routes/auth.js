@@ -8,15 +8,19 @@ const Admin = require('../models/admin');
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
+        console.log('Login attempt:', { username });
 
         // Find admin in database
         const admin = await Admin.findOne({ username });
         if (!admin) {
+            console.log('Admin not found');
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
         // Check password
         const isValidPassword = await bcrypt.compare(password, admin.password);
+        console.log('Password check:', { isValid: isValidPassword });
+        
         if (!isValidPassword) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
