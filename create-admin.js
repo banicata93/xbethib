@@ -1,38 +1,46 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 const Admin = require('./models/admin');
-require('dotenv').config();
+const bcrypt = require('bcryptjs');
 
-mongoose.connect('mongodb://127.0.0.1:27017/xbethub', {
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+    console.error('Please set MONGODB_URI in environment variables');
+    process.exit(1);
+}
+
+mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
-
-async function createAdmin() {
+.then(async () => {
+    console.log('Connected to MongoDB');
+    
     try {
-        // Първо проверяваме дали вече съществува админ
+        // Check if admin already exists
         const existingAdmin = await Admin.findOne({ username: 'admin' });
         if (existingAdmin) {
-            console.log('Admin account already exists!');
-            mongoose.connection.close();
-            return;
+            console.log('Admin user already exists');
+            process.exit(0);
         }
 
+        // Create admin user
+        const hashedPassword = await bcrypt.hash('admin123', 10);
         const admin = new Admin({
             username: 'admin',
-            password: 'admin123'
+            password: hashedPassword
         });
-        
+
         await admin.save();
-        console.log('Admin account created successfully!');
-        console.log('Username: admin');
-        console.log('Password: admin123');
+        console.log('Admin user created successfully');
     } catch (error) {
         console.error('Error creating admin:', error);
-    } finally {
-        mongoose.connection.close();
     }
-}
-
-createAdmin(); 
+    
+    process.exit(0);
+})
+.catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+});
