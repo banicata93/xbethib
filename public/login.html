@@ -41,49 +41,69 @@
     </div>
 
     <script>
-        // Изчакваме DOM-а да се зареди
-        document.addEventListener('DOMContentLoaded', () => {
-            // Първо проверяваме за токен
+        // Check if already logged in
+        window.addEventListener('load', () => {
             const token = localStorage.getItem('token');
             if (token) {
-                window.location.href = '/admin';
-                return;
+                checkAndRedirect(token);
             }
+        });
 
-            // След това закачаме event listener-а
-            const form = document.getElementById('loginForm');
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                
-                try {
-                    const response = await fetch('/api/auth/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ username, password })
-                    });
-
-                    const data = await response.json();
-                    
-                    if (response.ok) {
-                        localStorage.setItem('token', data.token);
-                        window.location.href = '/admin';
-                    } else {
-                        const errorMessage = document.getElementById('error-message');
-                        errorMessage.textContent = data.message;
-                        errorMessage.style.display = 'block';
+        // Function to check token and redirect
+        async function checkAndRedirect(token) {
+            try {
+                const response = await fetch('/admin', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
                     }
-                } catch (error) {
-                    console.error('Login error:', error);
-                    const errorMessage = document.getElementById('error-message');
-                    errorMessage.textContent = 'An error occurred. Please try again.';
-                    errorMessage.style.display = 'block';
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/admin';
+                } else {
+                    localStorage.removeItem('token');
                 }
-            });
+            } catch (error) {
+                console.error('Error:', error);
+                localStorage.removeItem('token');
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            console.log('Attempting login with:', { username });
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                console.log('Login response status:', response.status);
+                const data = await response.json();
+                console.log('Login response data:', data);
+                
+                if (response.ok) {
+                    // Store the token
+                    localStorage.setItem('token', data.token);
+                    // Try to access admin with the token
+                    await checkAndRedirect(data.token);
+                } else {
+                    document.getElementById('error-message').textContent = data.message;
+                    document.getElementById('error-message').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                document.getElementById('error-message').textContent = 'An error occurred. Please try again.';
+                document.getElementById('error-message').style.display = 'block';
+            }
         });
     </script>
 </body>
