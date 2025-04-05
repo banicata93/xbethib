@@ -1,7 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Admin = require('./models/admin');
-const bcrypt = require('bcryptjs');
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -26,10 +25,9 @@ mongoose.connect(MONGODB_URI, {
         }
 
         // Create admin user
-        const hashedPassword = await bcrypt.hash('admin123', 10);
         const admin = new Admin({
             username: 'admin',
-            password: hashedPassword
+            password: 'admin123'  // Ще бъде хеширана автоматично от pre-save hook
         });
 
         await admin.save();
