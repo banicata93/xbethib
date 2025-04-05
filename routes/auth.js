@@ -7,11 +7,14 @@ const Admin = require('../models/admin');
 // Login route
 router.post('/login', async (req, res) => {
     try {
+        console.log('Login request received:', req.body);
         const { username, password } = req.body;
         console.log('Login attempt:', { username });
 
         // Find admin in database
         const admin = await Admin.findOne({ username });
+        console.log('Admin found:', admin ? 'yes' : 'no');
+        
         if (!admin) {
             console.log('Admin not found');
             return res.status(401).json({ message: 'Invalid credentials' });
@@ -32,6 +35,7 @@ router.post('/login', async (req, res) => {
             { expiresIn: '24h' }
         );
 
+        console.log('Login successful, token created');
         res.json({ token });
     } catch (error) {
         console.error('Login error:', error);
