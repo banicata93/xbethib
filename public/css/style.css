@@ -1,0 +1,428 @@
+:root {
+    --primary-color: #00ff66;      /* Неоново зелено */
+    --secondary-color: #00ccff;    /* Светло синьо */
+    --accent-color: #111827;       /* Тъмно сиво за контраст */
+    --background-color: #1a1a1a;   /* Тъмен фон */
+    --text-color: #ffffff;         /* Бял текст */
+    --dark-overlay: #111827;       /* Тъмен овърлей */
+    --card-bg: rgba(17, 24, 39, 0.9);  /* Полупрозрачно тъмно */
+    --card-shadow: 0 10px 15px -3px rgba(0, 255, 102, 0.1), 0 4px 6px -2px rgba(0, 204, 255, 0.05);
+    --gradient-primary: linear-gradient(135deg, #00ff66, #00ccff);
+    --gradient-secondary: linear-gradient(135deg, #00ccff, #00ff66);
+    --neon-shadow: 0 0 10px rgba(0, 255, 102, 0.5), 0 0 20px rgba(0, 204, 255, 0.3);
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: 'Inter', 'Roboto', sans-serif;
+    line-height: 1.6;
+}
+
+/* Navbar Styles */
+.navbar {
+    background: var(--dark-overlay);
+    padding: 1.25rem 2rem;
+    box-shadow: var(--neon-shadow);
+}
+
+.navbar-brand {
+    color: white !important;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    text-shadow: 0 0 10px rgba(0, 255, 102, 0.7);
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand img {
+    height: 40px;
+    margin-right: 10px;
+    filter: drop-shadow(0 0 10px rgba(0, 255, 102, 0.5));
+}
+
+/* Премахваме центрирането */
+.container-fluid {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navbar-nav {
+    margin: 0;
+}
+
+.nav-link {
+    color: rgba(255,255,255,0.9) !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    color: white !important;
+    transform: translateY(-1px);
+}
+
+/* Sidebar Styles */
+.sidebar {
+    background: var(--card-bg);
+    padding: 2.5rem;
+    min-height: 100vh;
+    border-right: 1px solid rgba(0, 255, 102, 0.1);
+    box-shadow: var(--neon-shadow);
+}
+
+.sidebar h3 {
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--secondary-color);
+    letter-spacing: -0.5px;
+    font-size: 1.5rem;
+    text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+}
+
+.sidebar ul li {
+    margin-bottom: 1rem;
+}
+
+.sidebar ul li a {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    display: block;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    border: 1px solid rgba(0, 255, 102, 0.1);
+}
+
+.sidebar ul li a:hover {
+    background: var(--gradient-primary);
+    color: var(--dark-overlay);
+    transform: translateX(5px);
+    box-shadow: var(--neon-shadow);
+}
+
+/* Predictions Table */
+.predictions-container {
+    background: var(--card-bg);
+    border-radius: 24px;
+    box-shadow: var(--card-shadow);
+    padding: 2.5rem;
+    margin: 2rem 0;
+    border: 1px solid rgba(0, 255, 102, 0.1);
+}
+
+.predictions-container h1 {
+    color: var(--primary-color);
+    font-weight: 800;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    text-align: center;
+    letter-spacing: -1px;
+    text-shadow: 0 0 15px rgba(0, 255, 102, 0.5);
+}
+
+/* Table Styles */
+#predictions-table {
+    border-radius: 16px;
+    overflow: hidden;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    table-layout: fixed;
+}
+
+/* Задаване на специфични ширини на колоните */
+#predictions-table th:nth-child(1) { /* Date */
+    width: 15%;
+}
+
+#predictions-table th:nth-child(2) { /* Flag */
+    width: 8%;
+}
+
+#predictions-table th:nth-child(3), /* Home Team */
+#predictions-table th:nth-child(4) { /* Away Team */
+    width: 28%;
+}
+
+#predictions-table th:nth-child(5) { /* Prediction */
+    width: 21%;
+}
+
+/* Table Headers */
+#predictions-table th {
+    padding: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--primary-color);
+    font-size: 0.85rem;  /* Намален размер на шрифта */
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+/* Table Cells */
+#predictions-table td {
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid rgba(0, 255, 102, 0.1);
+    color: var(--text-color);
+    font-size: 0.95rem;  /* Намален размер на шрифта */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Стилове за клетките */
+#predictions-table td:nth-child(1) {
+    text-align: center;
+    white-space: nowrap;
+}
+
+#predictions-table td:nth-child(2) {
+    text-align: center;
+    padding: 0.5rem;
+}
+
+/* Стилове за отбори и прогноза */
+#predictions-table td:nth-child(3),
+#predictions-table td:nth-child(4),
+#predictions-table td:nth-child(5) {
+    padding: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.team-flag {
+    font-size: 1.8em;
+    margin-right: 5px;
+}
+
+/* Admin Panel Styles */
+.admin-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 3rem;
+    margin-bottom: 2.5rem;
+    border-radius: 24px;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+}
+
+.admin-header h2 {
+    font-weight: 800;
+    letter-spacing: -1px;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#login-form {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    padding: 2.5rem;
+}
+
+#admin-dashboard {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    padding: 2rem;
+}
+
+.form-control {
+    background: var(--dark-overlay);
+    border: 2px solid rgba(0, 255, 102, 0.2);
+    color: var(--text-color);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(0, 255, 102, 0.1);
+    background: var(--dark-overlay);
+    color: var(--text-color);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.btn {
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    border: none;
+    color: var(--dark-overlay);
+    box-shadow: var(--neon-shadow);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 20px rgba(0, 255, 102, 0.7);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border: none;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+}
+
+.card {
+    background: var(--card-bg);
+    border: 1px solid rgba(0, 255, 102, 0.1);
+    border-radius: 24px;
+    box-shadow: var(--neon-shadow);
+    overflow: hidden;
+}
+
+.card-header {
+    background: var(--dark-overlay);
+    padding: 2rem;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.card-header h3 {
+    color: var(--primary-color);
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.5px;
+    font-size: 1.5rem;
+    text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+}
+
+/* Ad Banner Styles */
+.ad-banner {
+    margin: 2rem 0;
+    padding: 1rem;
+    border-radius: 16px;
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 255, 102, 0.1);
+    overflow: hidden;
+}
+
+.ad-banner img {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.ad-banner:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--neon-shadow);
+}
+
+.ad-banner a {
+    display: block;
+    text-decoration: none;
+}
+
+/* Vertical Banner Styles */
+.vertical-banner {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.sticky-banner {
+    position: sticky;
+    top: 2rem;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+}
+
+.sticky-banner:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sidebar {
+        min-height: auto;
+        margin-bottom: 2rem;
+        border-radius: 24px;
+    }
+    
+    .predictions-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .navbar {
+        padding: 1rem;
+    }
+    
+    .navbar-brand img {
+        height: 50px;
+    }
+    
+    .navbar-brand {
+        font-size: 2rem;
+    }
+    
+    #predictions-table th,
+    #predictions-table td {
+        padding: 1rem;
+    }
+    
+    .vertical-banner {
+        display: none; /* Скриваме вертикалния банер на малки екрани */
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    #predictions-table td {
+        padding: 1rem 0.5rem;
+    }
+    
+    .team-flag {
+        font-size: 1.5em;
+    }
+}
+
+/* Стилове за админ таблицата */
+.admin-table {
+    color: var(--text-color) !important;
+}
+
+.admin-table td, 
+.admin-table th {
+    color: var(--text-color) !important;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Стил за групиране по дата */
+.date-separator {
+    background: rgba(0, 255, 102, 0.1);
+    border-bottom: 2px solid var(--primary-color);
+} 
