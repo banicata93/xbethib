@@ -26,20 +26,57 @@
 <body>
     <div class="login-container">
         <h2 class="text-center mb-4">Admin Login</h2>
-        <form id="loginForm" method="POST">
+        <form id="loginForm">
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" name="username" required>
+                <input type="text" class="form-control" id="username" required>
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" required>
+                <input type="password" class="form-control" id="password" required>
             </div>
             <button type="submit" class="btn btn-primary w-100">Login</button>
         </form>
         <div id="error-message" class="alert alert-danger mt-3" style="display: none;"></div>
     </div>
 
-    <script src="/js/login.js" defer></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    window.location.href = '/admin';
+                } else {
+                    document.getElementById('error-message').textContent = data.message;
+                    document.getElementById('error-message').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                document.getElementById('error-message').textContent = 'An error occurred. Please try again.';
+                document.getElementById('error-message').style.display = 'block';
+            }
+        });
+
+        // Check if already logged in
+        const token = localStorage.getItem('token');
+        if (token) {
+            window.location.href = '/admin';
+        }
+    </script>
 </body>
 </html>
