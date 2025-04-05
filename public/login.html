@@ -41,34 +41,6 @@
     </div>
 
     <script>
-        // Check if already logged in
-        window.addEventListener('load', () => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                checkAndRedirect(token);
-            }
-        });
-
-        // Function to check token and redirect
-        async function checkAndRedirect(token) {
-            try {
-                const response = await fetch('/admin', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                if (response.ok) {
-                    window.location.href = '/admin';
-                } else {
-                    localStorage.removeItem('token');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                localStorage.removeItem('token');
-            }
-        }
-
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -93,8 +65,8 @@
                 if (response.ok) {
                     // Store the token
                     localStorage.setItem('token', data.token);
-                    // Try to access admin with the token
-                    await checkAndRedirect(data.token);
+                    // Redirect to admin
+                    window.location.href = '/admin';
                 } else {
                     document.getElementById('error-message').textContent = data.message;
                     document.getElementById('error-message').style.display = 'block';
