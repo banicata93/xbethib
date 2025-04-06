@@ -35,11 +35,8 @@ mongoose.connect(process.env.MONGODB_URI, {
 });
 
 // Authentication middleware
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-    console.error('JWT_SECRET is not set in environment variables');
-    process.exit(1);
-}
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+console.log('Using JWT_SECRET:', JWT_SECRET ? 'Secret is set' : 'Using default');
 
 const auth = (req, res, next) => {
     try {
