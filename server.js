@@ -15,6 +15,13 @@ app.use(cors({
 app.use(express.json());
 app.use(express.static('public'));
 
+// Log all requests
+app.use((req, res, next) => {
+    console.log(`Request: ${req.method} ${req.url}`);
+    console.log('Headers:', req.headers);
+    next();
+});
+
 // MongoDB connection
 console.log('Connecting to MongoDB...');
 console.log('MONGODB_URI:', process.env.MONGODB_URI || 'Not set');
@@ -50,6 +57,9 @@ if (!JWT_SECRET) {
 console.log('Using JWT_SECRET:', JWT_SECRET ? 'Secret is set' : 'Using default');
 
 const auth = (req, res, next) => {
+    console.log('Auth middleware triggered');
+    console.log('Request headers:', req.headers);
+    
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         console.log('Received token:', token);
@@ -66,6 +76,7 @@ const auth = (req, res, next) => {
             next();
         } catch (error) {
             console.log('Token verification failed:', error.message);
+            console.log('Token:', token);
             return res.status(401).json({ message: 'Invalid token' });
         }
     } catch (error) {
@@ -92,6 +103,7 @@ app.get('/login', (req, res) => {
 // Admin route with authentication
 app.get('/admin', auth, (req, res) => {
     console.log('Admin route accessed');
+    console.log('User:', req.user);
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
