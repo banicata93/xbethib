@@ -4,7 +4,7 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt'); // Added bcrypt module
+const bcrypt = require('bcryptjs'); // Changed to bcryptjs
 const Admin = require('./models/Admin'); // Assuming Admin model is defined in this file
 
 const app = express();
