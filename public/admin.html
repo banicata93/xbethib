@@ -13,7 +13,7 @@
         const tokenFromUrl = urlParams.get('token');
         
         // Check for token in localStorage or URL
-        const token = localStorage.getItem('token') || tokenFromUrl;
+        let token = localStorage.getItem('token') || tokenFromUrl;
         console.log('Token found:', token);
         
         if (!token) {
@@ -22,11 +22,22 @@
             return;
         }
 
+        // Store token from URL to localStorage if it exists
+        if (tokenFromUrl) {
+            localStorage.setItem('token', tokenFromUrl);
+            token = tokenFromUrl;
+            console.log('Token saved to localStorage:', token);
+            // Clean URL by removing token parameter
+            window.history.replaceState({}, document.title, '/admin');
+        }
+
         // Verify token on page load
         fetch('/admin', {
+            method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
-            }
+            },
+            credentials: 'include'
         }).then(response => {
             console.log('Admin access response:', response.status);
             if (!response.ok) {
@@ -141,10 +152,18 @@
         // Load predictions
         async function loadPredictions() {
             try {
+                const currentToken = localStorage.getItem('token');
+                if (!currentToken) {
+                    console.error('No token found when loading predictions');
+                    window.location.href = '/login';
+                    return;
+                }
+                
                 const response = await fetch('/api/predictions', {
                     headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                        'Authorization': `Bearer ${currentToken}`
+                    },
+                    credentials: 'include'
                 });
 
                 console.log('Predictions response:', response.status);
@@ -192,12 +211,20 @@
             };
 
             try {
+                const currentToken = localStorage.getItem('token');
+                if (!currentToken) {
+                    console.error('No token found when adding prediction');
+                    window.location.href = '/login';
+                    return;
+                }
+                
                 const response = await fetch('/api/predictions', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${currentToken}`
                     },
+                    credentials: 'include',
                     body: JSON.stringify(formData)
                 });
 
@@ -221,11 +248,19 @@
             }
 
             try {
+                const currentToken = localStorage.getItem('token');
+                if (!currentToken) {
+                    console.error('No token found when deleting prediction');
+                    window.location.href = '/login';
+                    return;
+                }
+                
                 const response = await fetch(`/api/predictions/${id}`, {
                     method: 'DELETE',
                     headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                        'Authorization': `Bearer ${currentToken}`
+                    },
+                    credentials: 'include'
                 });
 
                 console.log('Delete prediction response:', response.status);
@@ -237,6 +272,13 @@
             } catch (error) {
                 console.error('Error deleting prediction:', error);
             }
+        }
+
+        // Logout function
+        function logout() {
+            console.log('Logging out...');
+            localStorage.removeItem('token');
+            window.location.href = '/login';
         }
 
         // Load predictions when page loads
