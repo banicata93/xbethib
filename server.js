@@ -100,11 +100,17 @@ app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// Admin route with authentication
-app.get('/admin', auth, (req, res) => {
-    console.log('Admin route accessed');
-    console.log('User:', req.user);
+// Admin routes - separate the page serving from the authentication check
+app.get('/admin', (req, res) => {
+    console.log('Admin page requested');
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// API endpoint to verify admin access
+app.get('/api/admin/verify', auth, (req, res) => {
+    console.log('Admin verification successful');
+    console.log('User:', req.user);
+    res.json({ success: true, userId: req.user.id });
 });
 
 // Error handling middleware
