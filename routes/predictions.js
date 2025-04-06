@@ -38,7 +38,8 @@ const auth = (req, res, next) => {
 // Get all predictions
 router.get('/', async (req, res) => {
     try {
-        const predictions = await Prediction.find();
+        // Намираме всички прогнози и ги сортираме по дата (най-новите първи)
+        const predictions = await Prediction.find().sort({ matchDate: -1 });
         console.log('Raw predictions from DB:', predictions.map(p => ({
             date: p.matchDate,
             isoDate: new Date(p.matchDate).toISOString(),
@@ -69,13 +70,14 @@ router.get('/', async (req, res) => {
 // Add new prediction (protected route)
 router.post('/', auth, async (req, res) => {
     try {
-        const { matchDate, homeTeam, awayTeam, league, prediction } = req.body;
+        console.log('Received prediction data:', req.body);
+        const { matchDate, homeTeam, awayTeam, leagueFlag, prediction } = req.body;
         
         // Валидация на входящите данни
-        if (!matchDate || !homeTeam || !awayTeam || !league || !league.flag || !prediction) {
+        if (!matchDate || !homeTeam || !awayTeam || !leagueFlag || !prediction) {
             return res.status(400).json({ 
                 message: 'All fields are required',
-                received: { matchDate, homeTeam, awayTeam, league, prediction }
+                received: req.body
             });
         }
 
@@ -84,7 +86,7 @@ router.post('/', auth, async (req, res) => {
             date: date.toISOString(),
             homeTeam,
             awayTeam,
-            league,
+            leagueFlag,
             prediction
         });
 
@@ -92,7 +94,7 @@ router.post('/', auth, async (req, res) => {
             matchDate: date,
             homeTeam,
             awayTeam,
-            league,
+            leagueFlag,
             prediction
         });
 
