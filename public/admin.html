@@ -14,7 +14,7 @@
         
         // Check for token in localStorage or URL
         let token = localStorage.getItem('token') || tokenFromUrl;
-        console.log('Token found:', token);
+        console.log('Token found:', token ? 'Yes (hidden for security)' : 'No');
         
         if (!token) {
             console.log('No token found, redirecting to login');
@@ -26,25 +26,32 @@
         if (tokenFromUrl) {
             localStorage.setItem('token', tokenFromUrl);
             token = tokenFromUrl;
-            console.log('Token saved to localStorage:', token);
+            console.log('Token saved to localStorage');
             // Clean URL by removing token parameter
             window.history.replaceState({}, document.title, '/admin');
         }
 
         // Verify token on page load
-        fetch('/admin', {
+        fetch('/api/admin/verify', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
             },
             credentials: 'include'
-        }).then(response => {
-            console.log('Admin access response:', response.status);
+        }).then(async response => {
+            console.log('Admin verification response:', response.status);
             if (!response.ok) {
-                console.log('Admin access failed, removing token');
+                console.log('Admin verification failed, removing token');
                 localStorage.removeItem('token');
                 window.location.href = '/login';
+                return;
             }
+            
+            // Successfully verified
+            const data = await response.json();
+            console.log('Admin verification successful:', data.success);
+            // Continue loading the admin dashboard
+            loadPredictions();
         }).catch(error => {
             console.error('Error verifying token:', error);
             localStorage.removeItem('token');
@@ -281,8 +288,7 @@
             window.location.href = '/login';
         }
 
-        // Load predictions when page loads
-        loadPredictions();
+        // Don't load predictions immediately - wait for token verification
     </script>
 </body>
 </html>
