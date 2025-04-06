@@ -8,35 +8,37 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <script>
-        // Check for token before page loads
-        (function() {
-            const token = localStorage.getItem('token');
-            console.log('Token from localStorage:', token);
-            
-            if (!token) {
-                console.log('No token found, redirecting to login');
-                window.location.href = '/login';
-                return;
-            }
+        // Get token from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get('token');
+        
+        // Check for token in localStorage or URL
+        const token = localStorage.getItem('token') || tokenFromUrl;
+        console.log('Token found:', token);
+        
+        if (!token) {
+            console.log('No token found, redirecting to login');
+            window.location.href = '/login';
+            return;
+        }
 
-            // Verify token on page load
-            fetch('/admin', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            }).then(response => {
-                console.log('Admin access response:', response.status);
-                if (!response.ok) {
-                    console.log('Admin access failed, removing token');
-                    localStorage.removeItem('token');
-                    window.location.href = '/login';
-                }
-            }).catch(error => {
-                console.error('Error verifying token:', error);
+        // Verify token on page load
+        fetch('/admin', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        }).then(response => {
+            console.log('Admin access response:', response.status);
+            if (!response.ok) {
+                console.log('Admin access failed, removing token');
                 localStorage.removeItem('token');
                 window.location.href = '/login';
-            });
-        })();
+            }
+        }).catch(error => {
+            console.error('Error verifying token:', error);
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        });
     </script>
 </head>
 <body>
@@ -139,9 +141,6 @@
         // Load predictions
         async function loadPredictions() {
             try {
-                const token = localStorage.getItem('token');
-                console.log('Loading predictions with token:', token);
-                
                 const response = await fetch('/api/predictions', {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -184,9 +183,6 @@
         document.getElementById('predictionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const token = localStorage.getItem('token');
-            console.log('Adding prediction with token:', token);
-            
             const formData = {
                 matchDate: document.getElementById('matchDate').value,
                 leagueFlag: document.getElementById('leagueFlag').value,
@@ -225,9 +221,6 @@
             }
 
             try {
-                const token = localStorage.getItem('token');
-                console.log('Deleting prediction with token:', token);
-                
                 const response = await fetch(`/api/predictions/${id}`, {
                     method: 'DELETE',
                     headers: {
