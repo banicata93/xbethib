@@ -13,6 +13,9 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // MongoDB connection
+console.log('Connecting to MongoDB...');
+console.log('MONGODB_URI:', process.env.MONGODB_URI || 'Not set');
+
 if (!process.env.MONGODB_URI) {
     console.error('MONGODB_URI is not set in environment variables');
     process.exit(1);
