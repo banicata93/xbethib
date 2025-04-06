@@ -6,12 +6,24 @@ const Prediction = require('../models/prediction');
 // Middleware to verify JWT token
 const auth = (req, res, next) => {
     try {
-        const token = req.header('Authorization').replace('Bearer ', '');
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-        req.adminId = decoded.id;
-        next();
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        
+        if (!token) {
+            return res.status(401).json({ message: 'Authentication required' });
+        }
+
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+            console.log('Token verified:', decoded);
+            req.user = decoded;
+            next();
+        } catch (error) {
+            console.log('Token verification failed:', error.message);
+            return res.status(401).json({ message: 'Invalid token' });
+        }
     } catch (error) {
-        res.status(401).json({ message: 'Authentication required' });
+        console.error('Auth middleware error:', error);
+        return res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -109,4 +121,4 @@ router.delete('/:id', auth, async (req, res) => {
     }
 });
 
-module.exports = router; 
+module.exports = router;
