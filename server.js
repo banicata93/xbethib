@@ -4,8 +4,8 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs'); // Changed to bcryptjs
-const Admin = require('./models/Admin'); // Assuming Admin model is defined in this file
+const bcrypt = require('bcryptjs');
+const Admin = require('./models/Admin');
 
 const app = express();
 
@@ -26,6 +26,26 @@ mongoose.connect(process.env.MONGODB_URI, {
 })
 .then(() => {
     console.log('MongoDB Connected Successfully');
+    
+    // Create default admin if not exists
+    const createDefaultAdmin = async () => {
+        try {
+            const admin = await Admin.findOne({ username: 'admin' });
+            if (!admin) {
+                const hashedPassword = await bcrypt.hash('admin123', 10);
+                await Admin.create({
+                    username: 'admin',
+                    password: hashedPassword
+                });
+                console.log('Default admin created');
+            }
+        } catch (error) {
+            console.error('Error creating default admin:', error);
+        }
+    };
+
+    createDefaultAdmin();
+
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
