@@ -41,35 +41,6 @@
     </div>
 
     <script>
-        // Check for existing token on page load
-        window.addEventListener('load', () => {
-            const token = localStorage.getItem('token');
-            console.log('Existing token:', token);
-            
-            if (token) {
-                console.log('Token exists in localStorage');
-                // Test token validity
-                fetch('/admin', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                }).then(response => {
-                    if (response.ok) {
-                        console.log('Token is valid, redirecting to admin');
-                        window.location.href = '/admin';
-                    } else {
-                        console.log('Token is invalid, removing from localStorage');
-                        localStorage.removeItem('token');
-                    }
-                }).catch(error => {
-                    console.error('Error testing token:', error);
-                    localStorage.removeItem('token');
-                });
-            } else {
-                console.log('No token found in localStorage');
-            }
-        });
-
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
