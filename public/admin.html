@@ -13,7 +13,23 @@
             const token = localStorage.getItem('token');
             if (!token) {
                 window.location.href = '/login';
+                return;
             }
+
+            // Verify token on page load
+            fetch('/admin', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }).then(response => {
+                if (!response.ok) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                }
+            }).catch(() => {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            });
         })();
     </script>
 </head>
@@ -54,7 +70,7 @@
                     <h3 class="card-title mb-0">Add New Prediction</h3>
                 </div>
                 <div class="card-body">
-                    <form id="predictionForm" onsubmit="return false;">
+                    <form id="predictionForm">
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="matchDate" class="form-label">Match Date</label>
@@ -80,9 +96,30 @@
                         <button type="submit" class="btn btn-primary">Add Prediction</button>
                     </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="addPrediction()">Add</button>
+            </div>
+
+            <!-- Existing Predictions Table -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">Manage Predictions</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Flag</th>
+                                    <th>Match</th>
+                                    <th>Prediction</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="predictionsTableBody">
+                                <!-- Predictions will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -95,6 +132,109 @@
             localStorage.removeItem('token');
             window.location.href = '/login';
         }
+
+        // Load predictions
+        async function loadPredictions() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/predictions', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load predictions');
+                }
+
+                const predictions = await response.json();
+                const tbody = document.getElementById('predictionsTableBody');
+                tbody.innerHTML = '';
+
+                predictions.forEach(prediction => {
+                    const date = new Date(prediction.matchDate).toLocaleDateString();
+                    const row = `
+                        <tr>
+                            <td>${date}</td>
+                            <td>${prediction.leagueFlag}</td>
+                            <td>${prediction.homeTeam} vs ${prediction.awayTeam}</td>
+                            <td>${prediction.prediction}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" onclick="deletePrediction('${prediction._id}')">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            } catch (error) {
+                console.error('Error loading predictions:', error);
+            }
+        }
+
+        // Add prediction
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const token = localStorage.getItem('token');
+            const formData = {
+                matchDate: document.getElementById('matchDate').value,
+                leagueFlag: document.getElementById('leagueFlag').value,
+                homeTeam: document.getElementById('homeTeam').value,
+                awayTeam: document.getElementById('awayTeam').value,
+                prediction: document.getElementById('prediction').value
+            };
+
+            try {
+                const response = await fetch('/api/predictions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to add prediction');
+                }
+
+                // Reset form and reload predictions
+                document.getElementById('predictionForm').reset();
+                loadPredictions();
+            } catch (error) {
+                console.error('Error adding prediction:', error);
+            }
+        });
+
+        // Delete prediction
+        async function deletePrediction(id) {
+            if (!confirm('Are you sure you want to delete this prediction?')) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/predictions/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete prediction');
+                }
+
+                loadPredictions();
+            } catch (error) {
+                console.error('Error deleting prediction:', error);
+            }
+        }
+
+        // Load predictions when page loads
+        loadPredictions();
     </script>
     <script src="js/admin.js"></script>
 </body>
