@@ -4,8 +4,6 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const Admin = require('./Admin');
 
 const app = express();
 
@@ -26,26 +24,6 @@ mongoose.connect(process.env.MONGODB_URI, {
 })
 .then(() => {
     console.log('MongoDB Connected Successfully');
-    
-    // Create default admin if not exists
-    const createDefaultAdmin = async () => {
-        try {
-            const admin = await Admin.findOne({ username: 'admin' });
-            if (!admin) {
-                const hashedPassword = await bcrypt.hash('admin123', 10);
-                await Admin.create({
-                    username: 'admin',
-                    password: hashedPassword
-                });
-                console.log('Default admin created');
-            }
-        } catch (error) {
-            console.error('Error creating default admin:', error);
-        }
-    };
-
-    createDefaultAdmin();
-
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
@@ -58,6 +36,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 // Authentication middleware
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+console.log('Using JWT_SECRET:', JWT_SECRET ? 'Secret is set' : 'Using default');
 
 const auth = (req, res, next) => {
     try {
@@ -98,44 +77,7 @@ app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// Admin page (public access to the page, protected API endpoints)
-app.get('/admin', (req, res) => {
+// Admin route with authentication
+app.get('/admin', auth, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-// Protected API endpoints
-app.get('/api/admin', auth, (req, res) => {
-    res.json({ message: 'Admin access granted' });
-});
-
-app.post('/api/admin/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-        
-        // Find admin in database
-        const admin = await Admin.findOne({ username });
-        
-        if (!admin) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-
-        // Check password
-        const isValidPassword = await bcrypt.compare(password, admin.password);
-        
-        if (!isValidPassword) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-
-        // Create JWT token
-        const token = jwt.sign(
-            { id: admin._id },
-            JWT_SECRET,
-            { expiresIn: '24h' }
-        );
-
-        res.json({ token });
-    } catch (error) {
-        console.error('Admin login error:', error);
-        res.status(500).json({ message: 'Server error' });
-    }
 });
