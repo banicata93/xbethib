@@ -7,13 +7,21 @@ const Prediction = require('../models/prediction');
 const auth = (req, res, next) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
+        console.log('Received token:', token);
         
         if (!token) {
+            console.log('No token provided');
             return res.status(401).json({ message: 'Authentication required' });
         }
 
         try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+            const JWT_SECRET = process.env.JWT_SECRET;
+            if (!JWT_SECRET) {
+                console.error('JWT_SECRET is not set in environment variables');
+                return res.status(500).json({ message: 'Server configuration error' });
+            }
+
+            const decoded = jwt.verify(token, JWT_SECRET);
             console.log('Token verified:', decoded);
             req.user = decoded;
             next();
