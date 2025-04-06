@@ -68,30 +68,10 @@
                     const storedToken = localStorage.getItem('token');
                     console.log('Stored token:', storedToken);
                     
-                    // Test token before redirect
-                    console.log('Testing admin access...');
-                    const testResponse = await fetch('/admin', {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `Bearer ${storedToken}`
-                        },
-                        credentials: 'include'
-                    });
-                    
-                    console.log('Test admin access response:', testResponse.status);
-                    console.log('Test admin access headers:', testResponse.headers);
-                    
-                    if (testResponse.ok) {
-                        console.log('Admin access successful, redirecting...');
-                        // Add token to URL parameters
-                        window.location.href = `/admin?token=${encodeURIComponent(storedToken)}`;
-                    } else {
-                        const errorData = await testResponse.json();
-                        console.log('Admin access error:', errorData);
-                        document.getElementById('error-message').textContent = 'Admin access failed: ' + errorData.message;
-                        document.getElementById('error-message').style.display = 'block';
-                        localStorage.removeItem('token');
-                    }
+                    // Redirect directly to admin page with token
+                    console.log('Login successful, redirecting to admin...');
+                    window.location.href = `/admin?token=${encodeURIComponent(storedToken)}`;
+
                 } else {
                     document.getElementById('error-message').textContent = data.message || 'Login failed';
                     document.getElementById('error-message').style.display = 'block';
