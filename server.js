@@ -8,7 +8,10 @@ const jwt = require('jsonwebtoken');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: '*',
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.static('public'));
 
@@ -38,12 +41,18 @@ mongoose.connect(process.env.MONGODB_URI, {
 });
 
 // Authentication middleware
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    console.error('JWT_SECRET is not set in environment variables');
+    process.exit(1);
+}
+
 console.log('Using JWT_SECRET:', JWT_SECRET ? 'Secret is set' : 'Using default');
 
 const auth = (req, res, next) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
+        console.log('Received token:', token);
         
         if (!token) {
             console.log('No token provided');
@@ -82,5 +91,12 @@ app.get('/login', (req, res) => {
 
 // Admin route with authentication
 app.get('/admin', auth, (req, res) => {
+    console.log('Admin route accessed');
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).json({ message: 'Server error' });
 });
