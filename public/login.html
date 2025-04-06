@@ -62,13 +62,29 @@
                 const data = await response.json();
                 console.log('Login response data:', data);
                 
-                if (response.ok) {
-                    // Store the token
+                if (response.ok && data.token) {
+                    console.log('Received token:', data.token);
                     localStorage.setItem('token', data.token);
-                    // Redirect to admin
-                    window.location.href = '/admin';
+                    console.log('Stored token:', localStorage.getItem('token'));
+                    
+                    // Test token before redirect
+                    const testResponse = await fetch('/admin', {
+                        headers: {
+                            'Authorization': `Bearer ${data.token}`
+                        }
+                    });
+                    
+                    console.log('Test admin access response:', testResponse.status);
+                    
+                    if (testResponse.ok) {
+                        window.location.href = '/admin';
+                    } else {
+                        const errorData = await testResponse.json();
+                        document.getElementById('error-message').textContent = 'Admin access failed: ' + errorData.message;
+                        document.getElementById('error-message').style.display = 'block';
+                    }
                 } else {
-                    document.getElementById('error-message').textContent = data.message;
+                    document.getElementById('error-message').textContent = data.message || 'Login failed';
                     document.getElementById('error-message').style.display = 'block';
                 }
             } catch (error) {
