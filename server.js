@@ -5,10 +5,7 @@ const path = require('path');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-
-// Set up absolute path for models
-const modelsPath = path.join(__dirname, 'models');
-const Admin = require(path.join(modelsPath, 'Admin'));
+const Admin = require('./Admin');
 
 const app = express();
 
