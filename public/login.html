@@ -69,18 +69,24 @@
                     console.log('Stored token:', storedToken);
                     
                     // Test token before redirect
+                    console.log('Testing admin access...');
                     const testResponse = await fetch('/admin', {
+                        method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${storedToken}`
-                        }
+                        },
+                        credentials: 'include'
                     });
                     
                     console.log('Test admin access response:', testResponse.status);
+                    console.log('Test admin access headers:', testResponse.headers);
                     
                     if (testResponse.ok) {
+                        console.log('Admin access successful, redirecting...');
                         window.location.href = '/admin';
                     } else {
                         const errorData = await testResponse.json();
+                        console.log('Admin access error:', errorData);
                         document.getElementById('error-message').textContent = 'Admin access failed: ' + errorData.message;
                         document.getElementById('error-message').style.display = 'block';
                         localStorage.removeItem('token');
