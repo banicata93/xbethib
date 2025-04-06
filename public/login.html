@@ -41,6 +41,35 @@
     </div>
 
     <script>
+        // Check for existing token on page load
+        window.addEventListener('load', () => {
+            const token = localStorage.getItem('token');
+            console.log('Existing token:', token);
+            
+            if (token) {
+                console.log('Token exists in localStorage');
+                // Test token validity
+                fetch('/admin', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        console.log('Token is valid, redirecting to admin');
+                        window.location.href = '/admin';
+                    } else {
+                        console.log('Token is invalid, removing from localStorage');
+                        localStorage.removeItem('token');
+                    }
+                }).catch(error => {
+                    console.error('Error testing token:', error);
+                    localStorage.removeItem('token');
+                });
+            } else {
+                console.log('No token found in localStorage');
+            }
+        });
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -65,12 +94,13 @@
                 if (response.ok && data.token) {
                     console.log('Received token:', data.token);
                     localStorage.setItem('token', data.token);
-                    console.log('Stored token:', localStorage.getItem('token'));
+                    const storedToken = localStorage.getItem('token');
+                    console.log('Stored token:', storedToken);
                     
                     // Test token before redirect
                     const testResponse = await fetch('/admin', {
                         headers: {
-                            'Authorization': `Bearer ${data.token}`
+                            'Authorization': `Bearer ${storedToken}`
                         }
                     });
                     
@@ -82,6 +112,7 @@
                         const errorData = await testResponse.json();
                         document.getElementById('error-message').textContent = 'Admin access failed: ' + errorData.message;
                         document.getElementById('error-message').style.display = 'block';
+                        localStorage.removeItem('token');
                     }
                 } else {
                     document.getElementById('error-message').textContent = data.message || 'Login failed';
