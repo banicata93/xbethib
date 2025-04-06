@@ -88,6 +88,28 @@ const auth = (req, res, next) => {
 // Public routes
 app.use('/api/auth', require('./routes/auth'));
 
+// Създаваме публичен route за вземане на прогнози
+app.get('/api/predictions/public', async (req, res) => {
+    try {
+        const Prediction = require('./models/prediction');
+        // Намираме всички прогнози и ги сортираме по дата (най-новите първи)
+        const predictions = await Prediction.find().sort({ matchDate: -1 });
+        
+        const formattedPredictions = predictions.map(p => {
+            const prediction = p.toObject();
+            // Нормализираме датата в UTC
+            const date = new Date(prediction.matchDate);
+            prediction.matchDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+            return prediction;
+        });
+
+        res.json(formattedPredictions);
+    } catch (error) {
+        console.error('Error in GET /api/predictions/public:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Protected routes
 app.use('/api/predictions', auth, require('./routes/predictions'));
 
