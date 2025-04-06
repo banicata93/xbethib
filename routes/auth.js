@@ -29,10 +29,19 @@ router.post('/login', async (req, res) => {
         }
 
         // Create JWT token
+        const JWT_SECRET = process.env.JWT_SECRET;
+        if (!JWT_SECRET) {
+            console.error('JWT_SECRET is not set in environment variables');
+            return res.status(500).json({ message: 'Server configuration error' });
+        }
+
         const token = jwt.sign(
-            { id: admin._id },
-            process.env.JWT_SECRET || 'your-secret-key',
-            { expiresIn: '24h' }
+            { id: admin._id.toString() }, // Convert to string to avoid issues
+            JWT_SECRET,
+            { 
+                expiresIn: '24h',
+                algorithm: 'HS256' 
+            }
         );
 
         console.log('Login successful, token created');
