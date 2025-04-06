@@ -377,7 +377,13 @@ body {
     
     .predictions-container {
         margin: 1rem;
-        padding: 1.5rem;
+        padding: 1.2rem;
+        border-radius: 16px;
+    }
+    
+    .predictions-container h1 {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
     }
     
     .navbar {
@@ -385,31 +391,107 @@ body {
     }
     
     .navbar-brand img {
-        height: 50px;
+        height: 40px;
     }
     
     .navbar-brand {
-        font-size: 2rem;
+        font-size: 1.6rem;
+    }
+    
+    /* Подобрена таблица за мобилни устройства */
+    #predictions-table {
+        font-size: 0.9rem;
     }
     
     #predictions-table th,
     #predictions-table td {
-        padding: 1rem;
+        padding: 0.8rem 0.5rem;
+    }
+    
+    /* Промени в ширините на колоните за мобилни устройства */
+    #predictions-table th:nth-child(1) { /* Date */
+        width: 18%;
+    }
+    
+    #predictions-table th:nth-child(2) { /* Flag */
+        width: 10%;
+    }
+    
+    #predictions-table th:nth-child(3), /* Home Team */
+    #predictions-table th:nth-child(4) { /* Away Team */
+        width: 26%;
+    }
+    
+    #predictions-table th:nth-child(5) { /* Prediction */
+        width: 20%;
+    }
+    
+    /* По-малък размер на шрифта за мобилни устройства */
+    .team-flag {
+        font-size: 1.3em;
+    }
+    
+    /* Подобрени стилове за редовете с дати */
+    .date-separator td {
+        font-size: 0.8rem !important;
+        padding: 0.6rem !important;
     }
     
     .vertical-banner {
         display: none; /* Скриваме вертикалния банер на малки екрани */
     }
+    
+    /* Подобрена ширина на контейнера за по-добро използване на пространството */
+    .col-md-7 {
+        width: 100%;
+        padding: 0 0.5rem;
+    }
 }
 
 /* Responsive adjustments */
-@media (max-width: 1200px) {
+@media (max-width: 1200px) and (min-width: 769px) {
     #predictions-table td {
         padding: 1rem 0.5rem;
     }
     
     .team-flag {
         font-size: 1.5em;
+    }
+}
+
+/* Допълнителни настройки за много малки екрани */
+@media (max-width: 480px) {
+    .predictions-container {
+        padding: 1rem;
+        margin: 0.5rem;
+    }
+    
+    .predictions-container h1 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    #predictions-table {
+        font-size: 0.8rem;
+    }
+    
+    #predictions-table th,
+    #predictions-table td {
+        padding: 0.6rem 0.3rem;
+    }
+    
+    .team-flag {
+        font-size: 1.2em;
+    }
+    
+    /* Скриваме някои елементи на много малки екрани */
+    .sidebar {
+        display: none;
+    }
+    
+    .col-md-7 {
+        width: 100%;
+        padding: 0;
     }
 }
 
