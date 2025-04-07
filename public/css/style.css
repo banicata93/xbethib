@@ -550,3 +550,11 @@ body {
     font-weight: 500;
     color: rgba(255, 255, 255, 0.95) !important;
 }
+
+/* Стил за клетката с прогнозата */
+.prediction-cell {
+    color: #00ccff !important;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 5px rgba(0, 204, 255, 0.3);
+}
