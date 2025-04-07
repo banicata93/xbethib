@@ -1,44 +1,122 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded, calling loadPredictions()');
     console.log('Looking for element with ID "predictions-body":', document.getElementById('predictions-body'));
+    
+    // Инициализираме елементите за индикатор и грешка
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const errorMessage = document.getElementById('error-message');
+    const retryButton = document.getElementById('retry-button');
+    
+    if (retryButton) {
+        retryButton.addEventListener('click', () => {
+            // Скриваме съобщението за грешка
+            if (errorMessage) errorMessage.style.display = 'none';
+            // Показваме индикатора за зареждане
+            if (loadingIndicator) loadingIndicator.style.display = 'block';
+            // Опитваме да заредим прогнозите отново
+            loadPredictions();
+        });
+    }
+    
     loadPredictions();
 });
 
 async function loadPredictions() {
     console.log('loadPredictions function called');
+    
+    // Вземаме референции към елементите за индикатор и грешка
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const errorMessage = document.getElementById('error-message');
+    const predictionsTable = document.getElementById('predictions-table');
+    
+    // Показваме индикатора за зареждане
+    if (loadingIndicator) loadingIndicator.style.display = 'block';
+    // Скриваме съобщението за грешка
+    if (errorMessage) errorMessage.style.display = 'none';
+    // Скриваме таблицата докато зареждаме данните
+    if (predictionsTable) predictionsTable.style.display = 'none';
+    
     try {
-        console.log('Fetching predictions from public API endpoint');
-        const response = await fetch('/api/predictions/public');
+        // Добавяме текущото време за да избегнем кеширане
+        const timestamp = new Date().getTime();
+        
+        // Определяме базовия URL според текущия домейн
+        let baseUrl = '';
+        // Ако сме на домейна xbethub.com, използваме абсолютен URL към Render
+        if (window.location.hostname === 'xbethub.com' || window.location.hostname === 'www.xbethub.com') {
+            baseUrl = 'https://xbethub-tyiz.onrender.com';
+            console.log('Using absolute URL to Render for API calls');
+        }
+        
+        const apiUrl = `${baseUrl}/api/predictions/public?_=${timestamp}`;
+        console.log(`Fetching predictions from: ${apiUrl}`);
+        
+        // Добавяме пълни опции за заявката
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-cache'
+            },
+            cache: 'no-store'
+        });
+        
         console.log('API response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`API responded with status: ${response.status}`);
+        }
+        
         const predictions = await response.json();
         
         console.log('Received predictions:', predictions);
         
-        // Сортиране по дата (най-новите най-отгоре)
-        // Забележка: Сървърът вече връща сортирани прогнози, но за всеки случай сортираме и тук
-        predictions.sort((a, b) => {
-            const dateA = new Date(a.matchDate);
-            const dateB = new Date(b.matchDate);
-            return dateB.getTime() - dateA.getTime();
-        });
+        // Проверка дали predictions е масив
+        let predictionsArray = [];
+        if (!Array.isArray(predictions)) {
+            console.error('Predictions is not an array:', predictions);
+            if (predictions.message) {
+                console.error('API error message:', predictions.message);
+            }
+        } else {
+            predictionsArray = predictions;
+            // Сортиране по дата (най-новите най-отгоре)
+            predictionsArray.sort((a, b) => {
+                const dateA = new Date(a.matchDate);
+                const dateB = new Date(b.matchDate);
+                return dateB.getTime() - dateA.getTime();
+            });
+        }
         
         const tbody = document.getElementById('predictions-body');
         if (!tbody) {
             console.error('Predictions table body not found!');
+            // Показваме съобщение за грешка
+            if (errorMessage) {
+                errorMessage.style.display = 'block';
+                errorMessage.querySelector('p').textContent = 'Error: Predictions table not found!';
+            }
+            // Скриваме индикатора за зареждане
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
             return;
         }
         
         tbody.innerHTML = '';
         
-        if (predictions.length === 0) {
+        if (predictionsArray.length === 0) {
             console.log('No predictions found');
             tbody.innerHTML = '<tr><td colspan="5" class="text-center">No predictions available</td></tr>';
+            // Показваме таблицата, дори и празна
+            if (predictionsTable) predictionsTable.style.display = 'table';
+            // Скриваме индикатора за зареждане
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
             return;
         }
         
         let currentDate = '';
         
-        predictions.forEach(prediction => {
+        predictionsArray.forEach(prediction => {
             // Проверка за валидност на данните
             if (!prediction) {
                 console.error('Invalid prediction data:', prediction);
@@ -77,7 +155,22 @@ async function loadPredictions() {
             `;
             tbody.appendChild(row);
         });
+        
+        // Показваме таблицата след успешно зареждане
+        if (predictionsTable) predictionsTable.style.display = 'table';
+        // Скриваме индикатора за зареждане
+        if (loadingIndicator) loadingIndicator.style.display = 'none';
+        
     } catch (error) {
         console.error('Error loading predictions:', error);
+        
+        // Показваме съобщение за грешка
+        if (errorMessage) {
+            errorMessage.style.display = 'block';
+            errorMessage.querySelector('p').textContent = `Error loading predictions: ${error.message}`;
+        }
+        
+        // Скриваме индикатора за зареждане
+        if (loadingIndicator) loadingIndicator.style.display = 'none';
     }
 } 
