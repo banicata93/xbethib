@@ -129,8 +129,35 @@ app.get('/api/predictions/public', async (req, res) => {
 app.use('/api/predictions', auth, require('./routes/predictions'));
 
 // Serve static files
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get('/', async (req, res) => {
+    try {
+        // Зареждаме прогнозите от базата данни
+        const Prediction = require('./models/prediction');
+        const predictions = await Prediction.find().sort({ matchDate: -1 });
+        
+        // Форматираме прогнозите
+        const formattedPredictions = predictions.map(p => {
+            const prediction = p.toObject();
+            const date = new Date(prediction.matchDate);
+            prediction.matchDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+            return prediction;
+        });
+        
+        // Четем HTML файла
+        const fs = require('fs');
+        const indexPath = path.join(__dirname, 'public', 'index.html');
+        let htmlContent = fs.readFileSync(indexPath, 'utf8');
+        
+        // Вграждаме данните в HTML
+        const dataScript = `<script>window.PREDICTIONS_DATA = ${JSON.stringify(formattedPredictions)};</script>`;
+        htmlContent = htmlContent.replace('</head>', `${dataScript}\n</head>`);
+        
+        // Връщаме модифицирания HTML
+        res.send(htmlContent);
+    } catch (error) {
+        console.error('Error loading predictions for index page:', error);
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    }
 });
 
 app.get('/login', (req, res) => {
