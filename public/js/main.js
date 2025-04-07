@@ -71,9 +71,9 @@ async function loadPredictions() {
             row.innerHTML = `
                 <td>${formattedDate}</td>
                 <td><span class="team-flag">${prediction.leagueFlag || ''}</span></td>
-                <td>${prediction.homeTeam || ''}</td>
-                <td>${prediction.awayTeam || ''}</td>
-                <td>${prediction.prediction || ''}</td>
+                <td>${prediction.homeTeam || 'Отбор 1'}</td>
+                <td>${prediction.awayTeam || 'Отбор 2'}</td>
+                <td class="prediction-cell">${prediction.prediction || ''}</td>
             `;
             tbody.appendChild(row);
         });
