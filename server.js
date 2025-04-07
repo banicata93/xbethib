@@ -10,6 +10,8 @@ const app = express();
 // Middleware
 app.use(cors({
     origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     credentials: true
 }));
 app.use(express.json());
@@ -90,10 +92,22 @@ app.use('/api/auth', require('./routes/auth'));
 
 // Създаваме публичен route за вземане на прогнози
 app.get('/api/predictions/public', async (req, res) => {
+    console.log('Public predictions API called');
+    // Добавяме хедъри за CORS специално за този ендпойнт
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    
     try {
         const Prediction = require('./models/prediction');
+        console.log('Fetching predictions from database...');
         // Намираме всички прогнози и ги сортираме по дата (най-новите първи)
         const predictions = await Prediction.find().sort({ matchDate: -1 });
+        console.log(`Found ${predictions.length} predictions`);
+        
+        if (!predictions || predictions.length === 0) {
+            console.log('No predictions found');
+            return res.json([]);
+        }
         
         const formattedPredictions = predictions.map(p => {
             const prediction = p.toObject();
@@ -103,7 +117,8 @@ app.get('/api/predictions/public', async (req, res) => {
             return prediction;
         });
 
-        res.json(formattedPredictions);
+        console.log('Sending formatted predictions');
+        return res.json(formattedPredictions);
     } catch (error) {
         console.error('Error in GET /api/predictions/public:', error);
         res.status(500).json({ message: error.message });
