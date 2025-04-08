@@ -20,7 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Показваме индикатора за зареждане
             if (loadingIndicator) loadingIndicator.style.display = 'block';
             // Опитваме да заредим прогнозите отново
-            window.location.reload(); // Презареждаме страницата вместо само loadPredictions()
+            // Вместо да презареждаме страницата, просто извикваме loadPredictions()
+            setTimeout(() => {
+                loadPredictions();
+            }, 1000);
         });
     }
     
@@ -71,40 +74,17 @@ function loadPredictions() {
         console.log('New placeholder exists:', hasNewPlaceholder);
         console.log('Old placeholder exists:', hasOldPlaceholder);
         
-        // Вместо да презареждаме страницата, показваме тестови данни
-        if (predictionsBody) {
-            // Добавяме тестови данни директно в таблицата
-            predictionsBody.innerHTML = `
-                <tr class="date-separator">
-                    <td colspan="5">08/04 <span style="opacity: 0.8; margin-left: 5px;">April</span></td>
-                </tr>
-                <tr>
-                    <td>08/04</td>
-                    <td><span class="team-flag">🇬🇧</span></td>
-                    <td>Arsenal</td>
-                    <td>Chelsea</td>
-                    <td class="prediction-cell">BTTS & Over 2.5</td>
-                </tr>
-                <tr>
-                    <td>08/04</td>
-                    <td><span class="team-flag">🇪🇸</span></td>
-                    <td>Barcelona</td>
-                    <td>Real Madrid</td>
-                    <td class="prediction-cell">1X & Over 1.5</td>
-                </tr>
-            `;
-            
-            // Скриваме индикатора за зареждане
-            if (loadingIndicator) loadingIndicator.style.display = 'none';
-            
-            // Показваме съобщение за грешка с полезна информация
-            if (errorMessage) {
-                errorMessage.style.display = 'block';
-                errorMessage.querySelector('p').innerHTML = 'Показваме тестови данни. Сървърът не може да замени плейсхолдера в HTML.';
-            }
-            
-            return;
+        // Не правим нищо, просто показваме тестовите данни от HTML
+        // Скриваме индикатора за зареждане
+        if (loadingIndicator) loadingIndicator.style.display = 'none';
+        
+        // Показваме съобщение за грешка с полезна информация
+        if (errorMessage) {
+            errorMessage.style.display = 'block';
+            errorMessage.querySelector('p').innerHTML = 'Показваме тестови данни. Сървърът не може да замени плейсхолдера в HTML.';
         }
+        
+        return;
     }
     
     console.log('No predictions found in the table');
