@@ -17,19 +17,21 @@
         }
     </style>
     <script>
-        // Get token from URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const tokenFromUrl = urlParams.get('token');
-        
-        // Check for token in localStorage or URL
-        let token = localStorage.getItem('token') || tokenFromUrl;
-        console.log('Token found:', token ? 'Yes (hidden for security)' : 'No');
-        
-        if (!token) {
-            console.log('No token found, redirecting to login');
-            window.location.href = '/login';
-            return;
-        }
+        // Обвиваме кода в самоизпълняваща се функция, за да избегнем return извън функция
+        (function() {
+            // Get token from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenFromUrl = urlParams.get('token');
+            
+            // Check for token in localStorage or URL
+            let token = localStorage.getItem('token') || tokenFromUrl;
+            console.log('Token found:', token ? 'Yes (hidden for security)' : 'No');
+            
+            if (!token) {
+                console.log('No token found, redirecting to login');
+                window.location.href = '/login';
+                return;
+            }
 
         // Store token from URL to localStorage if it exists
         if (tokenFromUrl) {
@@ -39,6 +41,7 @@
             // Clean URL by removing token parameter
             window.history.replaceState({}, document.title, '/admin');
         }
+        })(); // Затваряме самоизпълняващата се функция
 
         // Verify token on page load
         fetch('/api/admin/verify', {
