@@ -566,6 +566,23 @@ body {
     }
 }
 
+/* Скриване на банер изображенията в мобилната версия */
+@media (max-width: 767px) {
+    .mobile-banners img {
+        display: none !important;
+    }
+    
+    /* Скриваме реда с банерите */
+    .mobile-banners .row {
+        display: none !important;
+    }
+    
+    /* Скриваме целия контейнер с мобилни банери */
+    .mobile-banners {
+        display: none !important;
+    }
+}
+
 /* Допълнителни настройки за много малки екрани */
 @media (max-width: 480px) {
     /* Допълнителни настройки за много малки екрани */
