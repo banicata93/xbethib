@@ -161,10 +161,21 @@ app.get('/', async (req, res) => {
         ];
         
         // Проверяваме дали има прогнози в базата данни
-        let predictions = await Prediction.find().sort({ matchDate: -1 });
-        
-        console.log(`Found ${predictions.length} predictions for index page`);
-        console.log('First prediction:', predictions.length > 0 ? JSON.stringify(predictions[0]) : 'None');
+        let predictions = [];
+        try {
+            predictions = await Prediction.find().sort({ matchDate: -1 });
+            console.log(`Found ${predictions.length} predictions for index page`);
+            if (predictions.length > 0) {
+                console.log('First prediction:', JSON.stringify(predictions[0]));
+                // Показваме всички полета на първата прогноза
+                console.log('First prediction fields:', Object.keys(predictions[0]));
+                // Проверяваме дали има поле matchDate
+                console.log('Has matchDate:', predictions[0].matchDate ? 'Yes' : 'No');
+                console.log('matchDate type:', predictions[0].matchDate ? typeof predictions[0].matchDate : 'N/A');
+            }
+        } catch (err) {
+            console.error('Error fetching predictions from MongoDB:', err);
+        }
         console.log('MongoDB connection string:', process.env.MONGODB_URI);
         
         // Проверяваме дали има проблем с MongoDB връзката
@@ -282,12 +293,24 @@ app.get('/', async (req, res) => {
         const startTag = '<!-- PREDICTIONS_START -->';
         const endTag = '<!-- PREDICTIONS_END -->';
         
+        // Принтираме първите няколко реда от генерирания HTML
+        console.log('Generated predictions HTML preview:', predictionsHtml.substring(0, 200));
+        
+        // Принтираме дължината на HTML и наличието на таговете
+        console.log('HTML content length:', htmlContent.length);
+        console.log('HTML contains start tag:', htmlContent.includes(startTag));
+        console.log('HTML contains end tag:', htmlContent.includes(endTag));
+        
+        // Проверяваме дали имаме и двата тага
         if (htmlContent.includes(startTag) && htmlContent.includes(endTag)) {
             console.log('Found new prediction tags, replacing content between them');
             
             // Намираме съдържанието между таговете
             const startIndex = htmlContent.indexOf(startTag) + startTag.length;
             const endIndex = htmlContent.indexOf(endTag);
+            
+            console.log('Start index:', startIndex);
+            console.log('End index:', endIndex);
             
             if (startIndex < endIndex) {
                 // Заменяме съдържанието между таговете
@@ -297,12 +320,30 @@ app.get('/', async (req, res) => {
                 // Създаваме новото съдържание
                 htmlContent = beforeContent + '\n' + predictionsHtml + '\n' + afterContent;
                 console.log('Successfully replaced content between prediction tags');
+                console.log('New HTML length:', htmlContent.length);
             } else {
                 console.log('Error: Start tag appears after end tag!');
             }
-        }
-        // Ако не намерим новия формат, опитваме старите методи
-        else {
+        } else {
+            console.log('Could not find both prediction tags, falling back to direct tbody replacement');
+            // Ако не можем да намерим таговете, опитваме да заменим целия tbody
+            const tbodyStart = '<tbody id="predictions-body">';
+            const tbodyEnd = '</tbody>';
+            
+            if (htmlContent.includes(tbodyStart) && htmlContent.includes(tbodyEnd)) {
+                const tbodyStartIndex = htmlContent.indexOf(tbodyStart) + tbodyStart.length;
+                const tbodyEndIndex = htmlContent.indexOf(tbodyEnd, tbodyStartIndex);
+                
+                if (tbodyStartIndex < tbodyEndIndex) {
+                    const beforeTbody = htmlContent.substring(0, tbodyStartIndex);
+                    const afterTbody = htmlContent.substring(tbodyEndIndex);
+                    
+                    htmlContent = beforeTbody + '\n' + predictionsHtml + '\n' + afterTbody;
+                    console.log('Successfully replaced tbody content');
+                }
+            }
+            
+            // Ако не намерим новия формат, опитваме старите методи
             console.log('New prediction tags not found, trying old methods');
             
             // Проверяваме за стария плейсхолдер
