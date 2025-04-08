@@ -369,25 +369,43 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .sidebar {
-        min-height: auto;
-        margin-bottom: 2rem;
-        border-radius: 24px;
+    /* Основни настройки за мобилни устройства */
+    body {
+        padding: 0;
+        overflow-x: hidden;
     }
     
+    /* Подобрена навигация за мобилни */
+    .navbar {
+        padding: 0.8rem 1rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.5rem;
+    }
+    
+    .navbar-brand img {
+        height: 30px;
+    }
+    
+    /* Подобрен sidebar за мобилни */
+    .sidebar {
+        min-height: auto;
+        margin-bottom: 1.5rem;
+        border-radius: 16px;
+        padding: 1.5rem;
+    }
+    
+    /* Подобрен контейнер за прогнози */
     .predictions-container {
-        margin: 1rem;
-        padding: 1.2rem;
+        margin: 0.8rem 0.5rem;
+        padding: 1rem;
         border-radius: 16px;
     }
     
     .predictions-container h1 {
-        font-size: 1.8rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .navbar {
-        padding: 1rem;
+        font-size: 1.6rem;
+        margin-bottom: 1rem;
     }
     
     .navbar-brand img {
@@ -437,8 +455,9 @@ body {
         padding: 0.6rem !important;
     }
     
+    /* Скриваме вертикалния банер на малки екрани */
     .vertical-banner {
-        display: none; /* Скриваме вертикалния банер на малки екрани */
+        display: none;
     }
     
     /* Подобрена ширина на контейнера за по-добро използване на пространството */
@@ -446,52 +465,150 @@ body {
         width: 100%;
         padding: 0 0.5rem;
     }
+    
+    /* Адаптиране на формите за мобилни устройства */
+    .form-control {
+        height: 44px; /* По-голяма височина за по-лесно докосване */
+        font-size: 1rem;
+    }
+    
+    /* Подобрено оформление на картите */
+    .card {
+        margin-bottom: 1rem;
+        border-radius: 16px;
+    }
+    
+    .card-header {
+        padding: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    /* Подобрения за админ панела */
+    #admin-dashboard .card-title {
+        font-size: 1.3rem;
+    }
+    
+    /* Подобрено оформление на таблицата в админ панела */
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
 }
 
-/* Responsive adjustments */
+/* Настройки за таблети и малки десктоп екрани */
 @media (max-width: 1200px) and (min-width: 769px) {
+    /* Подобрена навигация */
+    .navbar {
+        padding: 1rem 1.5rem;
+    }
+    
+    /* Подобрен sidebar */
+    .sidebar {
+        padding: 1.8rem;
+    }
+    
+    /* Подобрена таблица за прогнози */
     #predictions-table td {
         padding: 1rem 0.5rem;
     }
     
     .team-flag {
-        font-size: 1.5em;
+        font-size: 1.4em;
+    }
+    
+    /* Подобрено оформление на контейнера за прогнози */
+    .predictions-container {
+        padding: 2rem;
+        margin: 1.5rem 0;
+    }
+    
+    /* Подобрено оформление на бутоните */
+    .btn {
+        padding: 0.6rem 1.2rem;
     }
 }
 
 /* Допълнителни настройки за много малки екрани */
 @media (max-width: 480px) {
+    /* Основни настройки за много малки екрани */
+    .container-fluid {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    
+    /* Подобрена навигация */
+    .navbar {
+        padding: 0.6rem 0.8rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.3rem;
+    }
+    
+    .navbar-brand img {
+        height: 25px;
+    }
+    
+    /* Подобрен контейнер за прогнози */
     .predictions-container {
-        padding: 1rem;
-        margin: 0.5rem;
+        padding: 0.8rem;
+        margin: 0.5rem 0;
+        border-radius: 12px;
     }
     
     .predictions-container h1 {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
+        font-size: 1.4rem;
+        margin-bottom: 0.8rem;
     }
     
+    /* Подобрена таблица за прогнози */
     #predictions-table {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
     
     #predictions-table th,
     #predictions-table td {
-        padding: 0.6rem 0.3rem;
+        padding: 0.5rem 0.25rem;
     }
     
     .team-flag {
-        font-size: 1.2em;
+        font-size: 1.1em;
     }
     
-    /* Скриваме някои елементи на много малки екрани */
+    /* Скриваме sidebar на много малки екрани */
     .sidebar {
         display: none;
     }
     
+    /* Използваме цялата ширина на екрана */
     .col-md-7 {
         width: 100%;
         padding: 0;
+    }
+    
+    /* Подобрено оформление на бутоните */
+    .btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Подобрено оформление на формите */
+    .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    /* Подобрения за админ панела */
+    #admin-dashboard .card-title {
+        font-size: 1.2rem;
+    }
+    
+    /* Подобрено оформление на таблицата в админ панела */
+    .table-responsive table {
+        font-size: 0.75rem;
     }
 }
 
