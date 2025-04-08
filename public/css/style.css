@@ -134,9 +134,12 @@ body {
     overflow: hidden;
     border-collapse: separate;
     border-spacing: 0;
-    width: 100%;
-    table-layout: fixed;
+    width: 100% !important;
+    table-layout: auto;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    display: table !important;
+    word-break: normal;
+    word-wrap: normal;
 }
 
 /* Задаване на специфични ширини на колоните */
@@ -145,12 +148,14 @@ body {
 }
 
 #predictions-table th:nth-child(2) { /* Flag */
-    width: 8%;
+    width: 5%;
+    max-width: 40px;
 }
 
 #predictions-table th:nth-child(3), /* Home Team */
 #predictions-table th:nth-child(4) { /* Away Team */
-    width: 28%;
+    width: 35%;
+    min-width: 120px;
 }
 
 #predictions-table th:nth-child(5) { /* Prediction */
@@ -176,8 +181,7 @@ body {
     font-size: 0.95rem;  /* Намален размер на шрифта */
     white-space: nowrap;
     transition: all 0.3s ease;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible;
 }
 
 /* Стилове за клетките */
@@ -375,6 +379,14 @@ body {
         overflow-x: hidden;
     }
     
+    /* Изравняване на контейнерите */
+    .container-fluid {
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
     /* Подобрена навигация за мобилни */
     .navbar {
         padding: 0.8rem 1rem;
@@ -428,16 +440,18 @@ body {
     
     /* Промени в ширините на колоните за мобилни устройства */
     #predictions-table th:nth-child(1) { /* Date */
-        width: 18%;
+        width: 15%;
     }
     
     #predictions-table th:nth-child(2) { /* Flag */
-        width: 10%;
+        width: 3%;
+        max-width: 30px;
     }
     
     #predictions-table th:nth-child(3), /* Home Team */
     #predictions-table th:nth-child(4) { /* Away Team */
-        width: 26%;
+        width: 40%;
+        min-width: 140px;
     }
     
     #predictions-table th:nth-child(5) { /* Prediction */
@@ -495,6 +509,9 @@ body {
     .table-responsive {
         border-radius: 8px;
         overflow: hidden;
+        width: 100%;
+        padding: 0;
+        margin: 0 auto;
     }
 }
 
@@ -535,8 +552,8 @@ body {
 @media (max-width: 480px) {
     /* Основни настройки за много малки екрани */
     .container-fluid {
-        padding-left: 0.5rem;
-        padding-right: 0.5rem;
+        padding-left: 15px !important;
+        padding-right: 15px !important;
     }
     
     /* Подобрена навигация */
@@ -554,9 +571,11 @@ body {
     
     /* Подобрен контейнер за прогнози */
     .predictions-container {
-        padding: 0.8rem;
+        padding: 15px;
         margin: 0.5rem 0;
         border-radius: 12px;
+        width: 100% !important;
+        max-width: 100% !important;
     }
     
     .predictions-container h1 {
@@ -566,16 +585,21 @@ body {
     
     /* Подобрена таблица за прогнози */
     #predictions-table {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
+        width: 100% !important;
+        display: table !important;
+        table-layout: auto;
     }
     
     #predictions-table th,
     #predictions-table td {
         padding: 0.5rem 0.25rem;
+        white-space: nowrap;
+        overflow: visible;
     }
     
     .team-flag {
-        font-size: 1.1em;
+        font-size: 0.9em;
     }
     
     /* Скриваме sidebar на много малки екрани */
@@ -586,7 +610,7 @@ body {
     /* Използваме цялата ширина на екрана */
     .col-md-7 {
         width: 100%;
-        padding: 0;
+        padding: 0 15px;
     }
     
     /* Подобрено оформление на бутоните */
@@ -666,6 +690,9 @@ body {
 #predictions-table td:nth-child(4) {
     font-weight: 500;
     color: rgba(255, 255, 255, 0.95) !important;
+    white-space: nowrap;
+    overflow: visible;
+    max-width: none;
 }
 
 /* Стил за клетката с прогнозата */
@@ -676,12 +703,42 @@ body {
     text-shadow: 0 0 5px rgba(0, 204, 255, 0.3);
 }
 
+/* Центриране на елементите за езици */
+.text-center {
+    text-align: center !important;
+}
+
+/* Стил за езиковите елементи */
+.language-element {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 0 5px;
+    background: var(--gradient-primary);
+    color: var(--dark-overlay) !important;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-align: center;
+    line-height: 1.2;
+    vertical-align: middle;
+}
+
+/* Изравняване на редовете в таблицата */
+#predictions-table tr {
+    vertical-align: middle;
+}
+
+#predictions-table td {
+    vertical-align: middle;
+}
+
 /* Стилове за прогнозите */
 .prediction-cell {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: flex-start;
     gap: 0.3rem;
 }
 
