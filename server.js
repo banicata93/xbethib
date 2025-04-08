@@ -163,8 +163,8 @@ app.get('/', async (req, res) => {
         // Проверяваме дали има прогнози в базата данни
         let predictions = [];
         try {
-            // Зареждаме всички прогнози без сортиране по дата
-            predictions = await Prediction.find();
+            // Зареждаме прогнозите, сортирани по дата (най-новите първи)
+            predictions = await Prediction.find().sort({ matchDate: -1 });
             console.log(`Found ${predictions.length} predictions for index page`);
             
             if (predictions.length > 0) {
@@ -206,6 +206,19 @@ app.get('/', async (req, res) => {
         
         // Форматираме прогнозите
         let formattedPredictions = [];
+        
+        // Добавяме лог за дебъгване на прогнозите преди форматиране
+        console.log('Raw predictions before formatting:');
+        if (predictions && predictions.length > 0) {
+            predictions.forEach((p, idx) => {
+                console.log(`Prediction ${idx + 1}:`, {
+                    id: p._id,
+                    date: p.matchDate,
+                    teams: p.homeTeam + ' vs ' + p.awayTeam,
+                    prediction: p.prediction
+                });
+            });
+        }
         
         try {
             // Проверяваме дали прогнозите са от MongoDB или тестови данни
