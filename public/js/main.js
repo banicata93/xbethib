@@ -37,20 +37,41 @@ function loadPredictions() {
     const predictionsBody = document.getElementById('predictions-body');
     
     // Проверяваме дали има съдържание в таблицата
-    if (predictionsBody && predictionsBody.children.length > 0) {
-        console.log(`Found ${predictionsBody.children.length} predictions in the table`);
+    if (predictionsBody) {
+        // Проверяваме дали има деца, които не са само празни текстови възли
+        const hasRealContent = Array.from(predictionsBody.childNodes).some(node => {
+            // Проверяваме дали възелът е елемент или текст, който не е само интервали
+            return node.nodeType === 1 || (node.nodeType === 3 && node.textContent.trim() !== '');
+        });
         
-        // Скриваме индикатора за зареждане
-        if (loadingIndicator) loadingIndicator.style.display = 'none';
-        // Скриваме съобщението за грешка
-        if (errorMessage) errorMessage.style.display = 'none';
-        // Показваме таблицата
-        if (predictionsTable) predictionsTable.style.display = 'block';
-        
-        return; // Прекратяваме изпълнението, тъй като данните вече са заредени
+        if (hasRealContent) {
+            console.log(`Found content in the predictions table`);
+            
+            // Скриваме индикатора за зареждане
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+            // Скриваме съобщението за грешка
+            if (errorMessage) errorMessage.style.display = 'none';
+            // Показваме таблицата
+            if (predictionsTable) predictionsTable.style.display = 'block';
+            
+            return; // Прекратяваме изпълнението, тъй като данните вече са заредени
+        }
     }
     
-    // Ако няма съдържание в таблицата, показваме съобщение
+    // Ако няма съдържание в таблицата, проверяваме дали плейсхолдерът все още съществува
+    const htmlContent = document.documentElement.innerHTML;
+    if (htmlContent.includes('<!-- PREDICTIONS_PLACEHOLDER -->') || 
+        htmlContent.includes('<!-- Predictions will be loaded here -->')) {
+        // Плейсхолдерът все още съществува, което означава, че сървърът не е заменил данните
+        console.log('Placeholder still exists, server did not replace predictions');
+        
+        // Презареждаме страницата след 2 секунди
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
+        return;
+    }
+    
     console.log('No predictions found in the table');
     
     // Скриваме индикатора за зареждане
