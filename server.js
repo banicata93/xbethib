@@ -135,6 +135,8 @@ app.get('/', async (req, res) => {
         const Prediction = require('./models/prediction');
         const predictions = await Prediction.find().sort({ matchDate: -1 });
         
+        console.log(`Found ${predictions.length} predictions for index page`);
+        
         // Форматираме прогнозите
         const formattedPredictions = predictions.map(p => {
             const prediction = p.toObject();
@@ -148,9 +150,61 @@ app.get('/', async (req, res) => {
         const indexPath = path.join(__dirname, 'public', 'index.html');
         let htmlContent = fs.readFileSync(indexPath, 'utf8');
         
-        // Вграждаме данните в HTML
-        const dataScript = `<script>window.PREDICTIONS_DATA = ${JSON.stringify(formattedPredictions)};</script>`;
-        htmlContent = htmlContent.replace('</head>', `${dataScript}\n</head>`);
+        // Генерираме HTML за прогнозите
+        let predictionsHtml = '';
+        
+        // Сортираме прогнозите по дата
+        formattedPredictions.sort((a, b) => {
+            const dateA = new Date(a.matchDate);
+            const dateB = new Date(b.matchDate);
+            return dateB.getTime() - dateA.getTime();
+        });
+        
+        let currentDate = '';
+        
+        formattedPredictions.forEach(prediction => {
+            const date = new Date(prediction.matchDate);
+            const formattedDate = date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit'
+            });
+            
+            // Добавяме името на месеца
+            const monthName = date.toLocaleDateString('en-GB', { month: 'long' });
+            
+            const dateString = date.toISOString().split('T')[0];
+            if (currentDate !== dateString) {
+                currentDate = dateString;
+                predictionsHtml += `
+                    <tr class="date-separator">
+                        <td colspan="5">
+                            ${formattedDate} <span style="opacity: 0.8; margin-left: 5px;">${monthName}</span>
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            predictionsHtml += `
+                <tr>
+                    <td>${formattedDate}</td>
+                    <td><span class="team-flag">${prediction.leagueFlag || ''}</span></td>
+                    <td>${prediction.homeTeam || 'Отбор 1'}</td>
+                    <td>${prediction.awayTeam || 'Отбор 2'}</td>
+                    <td class="prediction-cell">${prediction.prediction || ''}</td>
+                </tr>
+            `;
+        });
+        
+        // Ако няма прогнози, показваме съобщение
+        if (formattedPredictions.length === 0) {
+            predictionsHtml = '<tr><td colspan="5" class="text-center">No predictions available</td></tr>';
+        }
+        
+        // Заменяме плейсхолдера в HTML с генерираните прогнози
+        htmlContent = htmlContent.replace('<!-- Predictions will be loaded here -->', predictionsHtml);
+        
+        // Скриваме индикатора за зареждане и съобщението за грешка
+        htmlContent = htmlContent.replace('<div id="loading-indicator" class="text-center mb-4">', '<div id="loading-indicator" class="text-center mb-4" style="display: none;">');
         
         // Връщаме модифицирания HTML
         res.send(htmlContent);
