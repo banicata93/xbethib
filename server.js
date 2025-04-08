@@ -163,15 +163,26 @@ app.get('/', async (req, res) => {
         // Проверяваме дали има прогнози в базата данни
         let predictions = [];
         try {
-            predictions = await Prediction.find().sort({ matchDate: -1 });
+            // Зареждаме всички прогнози без сортиране по дата
+            predictions = await Prediction.find();
             console.log(`Found ${predictions.length} predictions for index page`);
+            
             if (predictions.length > 0) {
-                console.log('First prediction:', JSON.stringify(predictions[0]));
-                // Показваме всички полета на първата прогноза
-                console.log('First prediction fields:', Object.keys(predictions[0]));
-                // Проверяваме дали има поле matchDate
-                console.log('Has matchDate:', predictions[0].matchDate ? 'Yes' : 'No');
-                console.log('matchDate type:', predictions[0].matchDate ? typeof predictions[0].matchDate : 'N/A');
+                // Показваме подробна информация за първата прогноза
+                const firstPrediction = predictions[0];
+                console.log('First prediction:', JSON.stringify(firstPrediction));
+                console.log('First prediction fields:', Object.keys(firstPrediction));
+                
+                // Проверяваме дали има поле matchDate и какъв е форматът му
+                console.log('Has matchDate:', firstPrediction.matchDate ? 'Yes' : 'No');
+                console.log('matchDate value:', firstPrediction.matchDate);
+                console.log('matchDate type:', firstPrediction.matchDate ? typeof firstPrediction.matchDate : 'N/A');
+                
+                // Проверяваме всички прогнози за техните дати
+                console.log('All predictions dates:');
+                predictions.forEach((p, index) => {
+                    console.log(`Prediction ${index + 1} date:`, p.matchDate);
+                });
             }
         } catch (err) {
             console.error('Error fetching predictions from MongoDB:', err);
@@ -203,8 +214,42 @@ app.get('/', async (req, res) => {
                 console.log('Processing MongoDB predictions');
                 formattedPredictions = predictions.map(p => {
                     const prediction = p.toObject();
-                    const date = new Date(prediction.matchDate);
-                    prediction.matchDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+                    
+                    // Обработваме датата в различни формати
+                    try {
+                        console.log(`Processing date: ${prediction.matchDate}`);
+                        
+                        // Проверяваме дали датата е във формат "DD/MM.YYYY"
+                        if (typeof prediction.matchDate === 'string' && prediction.matchDate.includes('.')) {
+                            // Пример: "08/04.2025" -> "08/04/2025"
+                            const fixedDateStr = prediction.matchDate.replace('.', '/');
+                            console.log(`Converting date format from ${prediction.matchDate} to ${fixedDateStr}`);
+                            
+                            // Разделяме датата на части
+                            const parts = fixedDateStr.split('/');
+                            if (parts.length === 3) {
+                                const day = parseInt(parts[0], 10);
+                                const month = parseInt(parts[1], 10) - 1; // Месеците в JavaScript са от 0 до 11
+                                const year = parseInt(parts[2], 10);
+                                
+                                console.log(`Parsed date parts: day=${day}, month=${month}, year=${year}`);
+                                prediction.matchDate = new Date(year, month, day);
+                            } else {
+                                console.log(`Could not parse date parts from ${fixedDateStr}`);
+                                prediction.matchDate = new Date(); // Използваме днешната дата като резервен вариант
+                            }
+                        } else {
+                            // Опитваме стандартно парсване
+                            const date = new Date(prediction.matchDate);
+                            prediction.matchDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+                        }
+                        
+                        console.log(`Processed date result: ${prediction.matchDate}`);
+                    } catch (dateErr) {
+                        console.error(`Error processing date ${prediction.matchDate}:`, dateErr);
+                        prediction.matchDate = new Date(); // Използваме днешната дата при грешка
+                    }
+                    
                     return prediction;
                 });
             } else {
@@ -212,8 +257,40 @@ app.get('/', async (req, res) => {
                 console.log('Processing test data predictions');
                 formattedPredictions = predictions.map(p => {
                     const prediction = {...p}; // Копираме обекта
-                    const date = new Date(prediction.matchDate);
-                    prediction.matchDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+                    
+                    // Същата логика за обработка на датите както при MongoDB данните
+                    try {
+                        console.log(`Processing test data date: ${prediction.matchDate}`);
+                        
+                        if (typeof prediction.matchDate === 'string' && prediction.matchDate.includes('.')) {
+                            // Пример: "08/04.2025" -> "08/04/2025"
+                            const fixedDateStr = prediction.matchDate.replace('.', '/');
+                            console.log(`Converting test date from ${prediction.matchDate} to ${fixedDateStr}`);
+                            
+                            const parts = fixedDateStr.split('/');
+                            if (parts.length === 3) {
+                                const day = parseInt(parts[0], 10);
+                                const month = parseInt(parts[1], 10) - 1;
+                                const year = parseInt(parts[2], 10);
+                                
+                                console.log(`Parsed test date parts: day=${day}, month=${month}, year=${year}`);
+                                prediction.matchDate = new Date(year, month, day);
+                            } else {
+                                console.log(`Could not parse test date parts from ${fixedDateStr}`);
+                                prediction.matchDate = new Date();
+                            }
+                        } else {
+                            // Опитваме стандартно парсване
+                            const date = new Date(prediction.matchDate);
+                            prediction.matchDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+                        }
+                        
+                        console.log(`Processed test date result: ${prediction.matchDate}`);
+                    } catch (dateErr) {
+                        console.error(`Error processing test date:`, dateErr);
+                        prediction.matchDate = new Date(); // Използваме днешната дата при грешка
+                    }
+                    
                     return prediction;
                 });
             }
