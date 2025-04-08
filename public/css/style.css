@@ -17,6 +17,8 @@ body {
     color: var(--text-color);
     font-family: 'Inter', 'Roboto', sans-serif;
     line-height: 1.6;
+    overflow-x: hidden;
+    max-width: 100vw;
 }
 
 /* Navbar Styles */
@@ -131,7 +133,7 @@ body {
 /* Table Styles */
 #predictions-table {
     border-radius: 16px;
-    overflow: hidden;
+    overflow: visible;
     border-collapse: separate;
     border-spacing: 0;
     width: 100% !important;
@@ -140,6 +142,8 @@ body {
     display: table !important;
     word-break: normal;
     word-wrap: normal;
+    margin: 0 auto;
+    font-size: 0.85rem;
 }
 
 /* Задаване на специфични ширини на колоните */
@@ -171,6 +175,7 @@ body {
     font-size: 0.85rem;  /* Намален размер на шрифта */
     text-transform: uppercase;
     border-bottom: 2px solid var(--primary-color);
+    text-align: center;
 }
 
 /* Table Cells */
@@ -589,6 +594,7 @@ body {
         width: 100% !important;
         display: table !important;
         table-layout: auto;
+        margin: 0 auto;
     }
     
     #predictions-table th,
@@ -596,6 +602,7 @@ body {
         padding: 0.5rem 0.25rem;
         white-space: nowrap;
         overflow: visible;
+        text-align: center;
     }
     
     .team-flag {
