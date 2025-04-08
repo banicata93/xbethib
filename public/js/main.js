@@ -38,63 +38,96 @@ function loadPredictions() {
     const errorMessage = document.getElementById('error-message');
     const predictionsTable = document.getElementById('predictions-table');
     const predictionsBody = document.getElementById('predictions-body');
+    const lastUpdated = document.getElementById('last-updated');
     
-    // Проверяваме дали има съдържание в таблицата
-    if (predictionsBody) {
-        // Проверяваме дали има деца, които не са само празни текстови възли
-        const hasRealContent = Array.from(predictionsBody.childNodes).some(node => {
-            // Проверяваме дали възелът е елемент или текст, който не е само интервали
-            return node.nodeType === 1 || (node.nodeType === 3 && node.textContent.trim() !== '');
-        });
-        
-        if (hasRealContent) {
-            console.log(`Found content in the predictions table`);
+    // Показваме индикатора за зареждане
+    if (loadingIndicator) loadingIndicator.style.display = 'block';
+    
+    // Скриваме съобщението за грешка
+    if (errorMessage) errorMessage.style.display = 'none';
+    
+    // Обновяваме времето на последно зареждане
+    if (lastUpdated) {
+        lastUpdated.textContent = new Date().toLocaleString();
+    }
+    
+    // Правим заявка към API за прогнозите
+    fetch('/api/predictions/public')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch predictions');
+            }
+            return response.json();
+        })
+        .then(predictions => {
+            console.log('Fetched predictions:', predictions);
             
             // Скриваме индикатора за зареждане
             if (loadingIndicator) loadingIndicator.style.display = 'none';
-            // Скриваме съобщението за грешка
-            if (errorMessage) errorMessage.style.display = 'none';
+            
+            // Проверяваме дали има прогнози
+            if (!predictions || predictions.length === 0) {
+                console.log('No predictions found');
+                if (errorMessage) {
+                    errorMessage.style.display = 'block';
+                    errorMessage.querySelector('p').textContent = 'No predictions available.';
+                }
+                return;
+            }
+            
             // Показваме таблицата
             if (predictionsTable) predictionsTable.style.display = 'block';
             
-            return; // Прекратяваме изпълнението, тъй като данните вече са заредени
-        }
-    }
-    
-    // Ако няма съдържание в таблицата, проверяваме дали плейсхолдерът все още съществува
-    const htmlContent = document.documentElement.innerHTML;
-    
-    // Проверяваме дали има плейсхолдер
-    const hasNewPlaceholder = htmlContent.includes('<!-- PREDICTIONS_PLACEHOLDER -->');
-    const hasOldPlaceholder = htmlContent.includes('<!-- Predictions will be loaded here -->');
-    
-    if (hasNewPlaceholder || hasOldPlaceholder) {
-        // Плейсхолдерът все още съществува, което означава, че сървърът не е заменил данните
-        console.log('Placeholder still exists, server did not replace predictions');
-        console.log('New placeholder exists:', hasNewPlaceholder);
-        console.log('Old placeholder exists:', hasOldPlaceholder);
-        
-        // Не правим нищо, просто показваме тестовите данни от HTML
-        // Скриваме индикатора за зареждане
-        if (loadingIndicator) loadingIndicator.style.display = 'none';
-        
-        // Показваме съобщение за грешка с полезна информация
-        if (errorMessage) {
-            errorMessage.style.display = 'block';
-            errorMessage.querySelector('p').innerHTML = 'Показваме тестови данни. Сървърът не може да замени плейсхолдера в HTML.';
-        }
-        
-        return;
-    }
-    
-    console.log('No predictions found in the table');
-    
-    // Скриваме индикатора за зареждане
-    if (loadingIndicator) loadingIndicator.style.display = 'none';
-    
-    // Показваме съобщение за грешка
-    if (errorMessage) {
-        errorMessage.style.display = 'block';
-        errorMessage.querySelector('p').textContent = 'No predictions data available.';
-    }
+            // Изчистваме съдържанието на таблицата
+            if (predictionsBody) {
+                predictionsBody.innerHTML = '';
+                
+                // Групираме прогнозите по дата
+                const groupedPredictions = {};
+                predictions.forEach(prediction => {
+                    const date = new Date(prediction.matchDate);
+                    const dateKey = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+                    
+                    if (!groupedPredictions[dateKey]) {
+                        groupedPredictions[dateKey] = [];
+                    }
+                    
+                    groupedPredictions[dateKey].push(prediction);
+                });
+                
+                // Добавяме прогнозите в таблицата
+                Object.keys(groupedPredictions).forEach(dateKey => {
+                    // Добавяме разделител за датата
+                    const dateSeparator = document.createElement('tr');
+                    dateSeparator.className = 'date-separator';
+                    dateSeparator.innerHTML = `<td colspan="5">${dateKey} <span style="opacity: 0.8; margin-left: 5px;">${new Date(groupedPredictions[dateKey][0].matchDate).toLocaleString('default', { month: 'long' })}</span></td>`;
+                    predictionsBody.appendChild(dateSeparator);
+                    
+                    // Добавяме прогнозите за тази дата
+                    groupedPredictions[dateKey].forEach(prediction => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${dateKey}</td>
+                            <td><span class="team-flag">${prediction.leagueFlag}</span></td>
+                            <td>${prediction.homeTeam}</td>
+                            <td>${prediction.awayTeam}</td>
+                            <td class="prediction-cell">${prediction.prediction}</td>
+                        `;
+                        predictionsBody.appendChild(row);
+                    });
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading predictions:', error);
+            
+            // Скриваме индикатора за зареждане
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+            
+            // Показваме съобщение за грешка
+            if (errorMessage) {
+                errorMessage.style.display = 'block';
+                errorMessage.querySelector('p').textContent = 'There was a problem loading predictions. Please try again later.';
+            }
+        });
 }
