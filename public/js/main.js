@@ -100,18 +100,23 @@ function loadPredictions() {
                     // Добавяме разделител за датата
                     const dateSeparator = document.createElement('tr');
                     dateSeparator.className = 'date-separator';
-                    dateSeparator.innerHTML = `<td colspan="5">${dateKey} <span style="opacity: 0.8; margin-left: 5px;">${new Date(groupedPredictions[dateKey][0].matchDate).toLocaleString('default', { month: 'long' })}</span></td>`;
+                    dateSeparator.innerHTML = `<td colspan="4">${dateKey} <span style="opacity: 0.8; margin-left: 5px;">${new Date(groupedPredictions[dateKey][0].matchDate).toLocaleString('default', { month: 'long' })}</span></td>`;
                     predictionsBody.appendChild(dateSeparator);
                     
                     // Добавяме прогнозите за тази дата
                     groupedPredictions[dateKey].forEach(prediction => {
+                        // Разделяме прогнозата на отделни тагове
+                        const predictionTags = prediction.prediction.split('&').map(tag => tag.trim());
+                        
+                        // Създаваме HTML за таговете
+                        const tagsHTML = predictionTags.map(tag => `<span class="prediction-tag">${tag}</span>`).join('');
+                        
                         const row = document.createElement('tr');
                         row.innerHTML = `
-                            <td>${dateKey}</td>
                             <td><span class="team-flag">${prediction.leagueFlag}</span></td>
                             <td>${prediction.homeTeam}</td>
                             <td>${prediction.awayTeam}</td>
-                            <td class="prediction-cell">${prediction.prediction}</td>
+                            <td class="prediction-cell">${tagsHTML}</td>
                         `;
                         predictionsBody.appendChild(row);
                     });
