@@ -264,7 +264,18 @@ app.get('/', async (req, res) => {
         }
         
         // Заменяме плейсхолдера в HTML с генерираните прогнози
-        htmlContent = htmlContent.replace('<!-- Predictions will be loaded here -->', predictionsHtml);
+        console.log('Generated predictions HTML length:', predictionsHtml.length);
+        console.log('Sample of predictions HTML:', predictionsHtml.substring(0, 100));
+        
+        // Проверяваме дали плейсхолдерът съществува в HTML
+        if (htmlContent.includes('<!-- Predictions will be loaded here -->')) {
+            htmlContent = htmlContent.replace('<!-- Predictions will be loaded here -->', predictionsHtml);
+            console.log('Placeholder found and replaced');
+        } else {
+            console.log('Placeholder not found, trying to insert at tbody');
+            // Ако не намерим плейсхолдера, опитваме да вмъкнем данните в tbody
+            htmlContent = htmlContent.replace('<tbody id="predictions-body">', '<tbody id="predictions-body">' + predictionsHtml);
+        }
         
         // Скриваме индикатора за зареждане и съобщението за грешка
         htmlContent = htmlContent.replace('<div id="loading-indicator" class="text-center mb-4">', '<div id="loading-indicator" class="text-center mb-4" style="display: none;">');
