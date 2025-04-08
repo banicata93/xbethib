@@ -131,6 +131,7 @@ app.use('/api/predictions', auth, require('./routes/predictions'));
 // Serve static files
 app.get('/', async (req, res) => {
     try {
+        console.log('Main page requested');
         // Зареждаме прогнозите от базата данни
         const Prediction = require('./models/prediction');
         
@@ -163,6 +164,7 @@ app.get('/', async (req, res) => {
         let predictions = await Prediction.find().sort({ matchDate: -1 });
         
         console.log(`Found ${predictions.length} predictions for index page`);
+        console.log('First prediction:', predictions.length > 0 ? JSON.stringify(predictions[0]) : 'None');
         console.log('MongoDB connection string:', process.env.MONGODB_URI);
         
         // Проверяваме дали има проблем с MongoDB връзката
@@ -187,6 +189,7 @@ app.get('/', async (req, res) => {
             // Проверяваме дали прогнозите са от MongoDB или тестови данни
             if (predictions[0] && typeof predictions[0].toObject === 'function') {
                 // MongoDB данни
+                console.log('Processing MongoDB predictions');
                 formattedPredictions = predictions.map(p => {
                     const prediction = p.toObject();
                     const date = new Date(prediction.matchDate);
@@ -195,6 +198,7 @@ app.get('/', async (req, res) => {
                 });
             } else {
                 // Тестови данни
+                console.log('Processing test data predictions');
                 formattedPredictions = predictions.map(p => {
                     const prediction = {...p}; // Копираме обекта
                     const date = new Date(prediction.matchDate);
@@ -203,6 +207,9 @@ app.get('/', async (req, res) => {
                 });
             }
             console.log('Formatted predictions:', formattedPredictions.length);
+            if (formattedPredictions.length > 0) {
+                console.log('Sample formatted prediction:', JSON.stringify(formattedPredictions[0]));
+            }
         } catch (err) {
             console.error('Error formatting predictions:', err);
             formattedPredictions = testData; // Използваме тестовите данни при грешка
@@ -269,15 +276,23 @@ app.get('/', async (req, res) => {
         
         // Проверяваме дали плейсхолдерът съществува в HTML
         if (htmlContent.includes('<!-- PREDICTIONS_PLACEHOLDER -->')) {
+            console.log('Found new placeholder, replacing it');
             htmlContent = htmlContent.replace('<!-- PREDICTIONS_PLACEHOLDER -->', predictionsHtml);
-            console.log('New placeholder found and replaced');
+            console.log('New placeholder replaced successfully');
         } else if (htmlContent.includes('<!-- Predictions will be loaded here -->')) {
+            console.log('Found old placeholder, replacing it');
             htmlContent = htmlContent.replace('<!-- Predictions will be loaded here -->', predictionsHtml);
-            console.log('Old placeholder found and replaced');
+            console.log('Old placeholder replaced successfully');
         } else {
             console.log('Placeholder not found, trying to insert at tbody');
             // Ако не намерим плейсхолдера, опитваме да вмъкнем данните в tbody
-            htmlContent = htmlContent.replace('<tbody id="predictions-body">', '<tbody id="predictions-body">' + predictionsHtml);
+            const tbodyPattern = '<tbody id="predictions-body">';
+            if (htmlContent.includes(tbodyPattern)) {
+                htmlContent = htmlContent.replace(tbodyPattern, tbodyPattern + predictionsHtml);
+                console.log('Inserted predictions into tbody');
+            } else {
+                console.log('Could not find tbody element either! HTML structure may have changed.');
+            }
         }
         
         // Скриваме индикатора за зареждане и съобщението за грешка
