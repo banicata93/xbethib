@@ -220,6 +220,10 @@ app.get('/', async (req, res) => {
         const indexPath = path.join(__dirname, 'public', 'index.html');
         let htmlContent = fs.readFileSync(indexPath, 'utf8');
         
+        console.log('Original HTML length:', htmlContent.length);
+        console.log('HTML contains new placeholder:', htmlContent.includes('<!-- PREDICTIONS_PLACEHOLDER -->'));
+        console.log('HTML contains old placeholder:', htmlContent.includes('<!-- Predictions will be loaded here -->'));
+        
         // Генерираме HTML за прогнозите
         let predictionsHtml = '';
         
@@ -274,24 +278,55 @@ app.get('/', async (req, res) => {
         console.log('Generated predictions HTML length:', predictionsHtml.length);
         console.log('Sample of predictions HTML:', predictionsHtml.substring(0, 100));
         
-        // Проверяваме дали плейсхолдерът съществува в HTML
-        if (htmlContent.includes('<!-- PREDICTIONS_PLACEHOLDER -->')) {
-            console.log('Found new placeholder, replacing it');
-            htmlContent = htmlContent.replace('<!-- PREDICTIONS_PLACEHOLDER -->', predictionsHtml);
-            console.log('New placeholder replaced successfully');
-        } else if (htmlContent.includes('<!-- Predictions will be loaded here -->')) {
-            console.log('Found old placeholder, replacing it');
-            htmlContent = htmlContent.replace('<!-- Predictions will be loaded here -->', predictionsHtml);
-            console.log('Old placeholder replaced successfully');
-        } else {
-            console.log('Placeholder not found, trying to insert at tbody');
-            // Ако не намерим плейсхолдера, опитваме да вмъкнем данните в tbody
-            const tbodyPattern = '<tbody id="predictions-body">';
-            if (htmlContent.includes(tbodyPattern)) {
-                htmlContent = htmlContent.replace(tbodyPattern, tbodyPattern + predictionsHtml);
-                console.log('Inserted predictions into tbody');
+        // Проверяваме за новия формат на плейсхолдера
+        const startTag = '<!-- PREDICTIONS_START -->';
+        const endTag = '<!-- PREDICTIONS_END -->';
+        
+        if (htmlContent.includes(startTag) && htmlContent.includes(endTag)) {
+            console.log('Found new prediction tags, replacing content between them');
+            
+            // Намираме съдържанието между таговете
+            const startIndex = htmlContent.indexOf(startTag) + startTag.length;
+            const endIndex = htmlContent.indexOf(endTag);
+            
+            if (startIndex < endIndex) {
+                // Заменяме съдържанието между таговете
+                const beforeContent = htmlContent.substring(0, startIndex);
+                const afterContent = htmlContent.substring(endIndex);
+                
+                // Създаваме новото съдържание
+                htmlContent = beforeContent + '\n' + predictionsHtml + '\n' + afterContent;
+                console.log('Successfully replaced content between prediction tags');
             } else {
-                console.log('Could not find tbody element either! HTML structure may have changed.');
+                console.log('Error: Start tag appears after end tag!');
+            }
+        }
+        // Ако не намерим новия формат, опитваме старите методи
+        else {
+            console.log('New prediction tags not found, trying old methods');
+            
+            // Проверяваме за стария плейсхолдер
+            if (htmlContent.includes('<!-- PREDICTIONS_PLACEHOLDER -->')) {
+                console.log('Found old placeholder, replacing it');
+                htmlContent = htmlContent.replace('<!-- PREDICTIONS_PLACEHOLDER -->', predictionsHtml);
+                console.log('Old placeholder replaced successfully');
+            } 
+            // Проверяваме за още по-стария плейсхолдер
+            else if (htmlContent.includes('<!-- Predictions will be loaded here -->')) {
+                console.log('Found very old placeholder, replacing it');
+                htmlContent = htmlContent.replace('<!-- Predictions will be loaded here -->', predictionsHtml);
+                console.log('Very old placeholder replaced successfully');
+            } 
+            // Ако нищо не работи, опитваме да вмъкнем в tbody
+            else {
+                console.log('No placeholders found, trying to insert at tbody');
+                const tbodyPattern = '<tbody id="predictions-body">';
+                if (htmlContent.includes(tbodyPattern)) {
+                    htmlContent = htmlContent.replace(tbodyPattern, tbodyPattern + predictionsHtml);
+                    console.log('Inserted predictions into tbody');
+                } else {
+                    console.log('Could not find any suitable place to insert predictions!');
+                }
             }
         }
         
