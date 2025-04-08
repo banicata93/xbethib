@@ -268,9 +268,12 @@ app.get('/', async (req, res) => {
         console.log('Sample of predictions HTML:', predictionsHtml.substring(0, 100));
         
         // Проверяваме дали плейсхолдерът съществува в HTML
-        if (htmlContent.includes('<!-- Predictions will be loaded here -->')) {
+        if (htmlContent.includes('<!-- PREDICTIONS_PLACEHOLDER -->')) {
+            htmlContent = htmlContent.replace('<!-- PREDICTIONS_PLACEHOLDER -->', predictionsHtml);
+            console.log('New placeholder found and replaced');
+        } else if (htmlContent.includes('<!-- Predictions will be loaded here -->')) {
             htmlContent = htmlContent.replace('<!-- Predictions will be loaded here -->', predictionsHtml);
-            console.log('Placeholder found and replaced');
+            console.log('Old placeholder found and replaced');
         } else {
             console.log('Placeholder not found, trying to insert at tbody');
             // Ако не намерим плейсхолдера, опитваме да вмъкнем данните в tbody
