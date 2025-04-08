@@ -17,7 +17,7 @@
         }
     </style>
     <script>
-        // Обвиваме кода в самоизпълняваща се функция, за да избегнем return извън функция
+        // Обвиваме целия код в самоизпълняваща се функция
         (function() {
             // Get token from URL parameters
             const urlParams = new URLSearchParams(window.location.search);
@@ -33,42 +33,42 @@
                 return;
             }
 
-        // Store token from URL to localStorage if it exists
-        if (tokenFromUrl) {
-            localStorage.setItem('token', tokenFromUrl);
-            token = tokenFromUrl;
-            console.log('Token saved to localStorage');
-            // Clean URL by removing token parameter
-            window.history.replaceState({}, document.title, '/admin');
-        }
-        })(); // Затваряме самоизпълняващата се функция
+            // Store token from URL to localStorage if it exists
+            if (tokenFromUrl) {
+                localStorage.setItem('token', tokenFromUrl);
+                token = tokenFromUrl;
+                console.log('Token saved to localStorage');
+                // Clean URL by removing token parameter
+                window.history.replaceState({}, document.title, '/admin');
+            }
 
-        // Verify token on page load
-        fetch('/api/admin/verify', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
-            credentials: 'include'
-        }).then(async response => {
-            console.log('Admin verification response:', response.status);
-            if (!response.ok) {
-                console.log('Admin verification failed, removing token');
+            // Verify token on page load
+            fetch('/api/admin/verify', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                credentials: 'include'
+            }).then(async response => {
+                console.log('Admin verification response:', response.status);
+                if (!response.ok) {
+                    console.log('Admin verification failed, removing token');
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                    return;
+                }
+            
+                // Successfully verified
+                const data = await response.json();
+                console.log('Admin verification successful:', data.success);
+                // Continue loading the admin dashboard
+                loadPredictions();
+            }).catch(error => {
+                console.error('Error verifying token:', error);
                 localStorage.removeItem('token');
                 window.location.href = '/login';
-                return;
-            }
-            
-            // Successfully verified
-            const data = await response.json();
-            console.log('Admin verification successful:', data.success);
-            // Continue loading the admin dashboard
-            loadPredictions();
-        }).catch(error => {
-            console.error('Error verifying token:', error);
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-        });
+            });
+        })(); // Затваряме самоизпълняващата се функция
     </script>
 </head>
 <body>
