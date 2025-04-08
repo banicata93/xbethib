@@ -460,16 +460,35 @@ body {
     }
     
     #predictions-table th:nth-child(2) { /* Flag */
-        width: 1%;
-        max-width: 10px;
-        min-width: 10px;
+        width: 2%;
+        max-width: 15px;
+        min-width: 15px;
         padding: 0;
     }
     
     #predictions-table th:nth-child(3), /* Home Team */
     #predictions-table th:nth-child(4) { /* Away Team */
-        width: 38%;
-        min-width: 80px;
+        width: 42%;
+        min-width: 110px;
+    }
+    
+    @media (max-width: 767px) {
+        #predictions-table th:nth-child(3),
+        #predictions-table th:nth-child(4) {
+            width: 48% !important;
+        }
+        
+        #predictions-table th:nth-child(1) {
+            width: 8% !important;
+            min-width: 30px !important;
+        }
+        
+        #predictions-table th:nth-child(5) {
+            width: 5% !important;
+            min-width: 30px !important;
+            max-width: 30px !important;
+            padding: 0 !important;
+        }
     }
     
     #predictions-table th:nth-child(5) { /* Prediction */
@@ -581,14 +600,92 @@ body {
     .mobile-banners {
         display: none !important;
     }
+    
+    /* Увеличаваме размера на таблицата за мобилни устройства */
+    .predictions-container {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        position: absolute !important;
+        left: 0 !important;
+        right: 0 !important;
+    }
+    
+    body {
+        overflow-x: hidden !important;
+    }
+    
+    .container-fluid {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+    }
+    
+    .row {
+        margin: 0 !important;
+        width: 100vw !important;
+    }
+    
+    .col-12 {
+        padding: 0 !important;
+        width: 100vw !important;
+    }
+    
+    .table-responsive {
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        width: 100vw !important;
+        overflow-x: hidden !important;
+    }
+    
+    #predictions-table {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        table-layout: fixed !important;
+    }
+    
+    /* Увеличаваме шрифта за по-добра четимост */
+    #predictions-table {
+        font-size: 0.75rem !important;
+    }
+    
+    /* Премахваме всякакви излишни пространства */
+    .navbar {
+        margin-bottom: 0 !important;
+    }
+    
+    /* Центрираме таблицата в целия екран */
+    .predictions-container {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        min-height: calc(100vh - 56px) !important; /* Височината на екрана минус височината на навигацията */
+    }
 }
 
 /* Допълнителни настройки за много малки екрани */
 @media (max-width: 480px) {
     /* Допълнителни настройки за много малки екрани */
     #predictions-table {
-        font-size: 0.6rem !important;
+        font-size: 0.7rem !important;
         letter-spacing: -0.01em;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        table-layout: fixed !important;
+    }
+    
+    /* Премахваме всякакви маржини и падинги от тялото */
+    body, html {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100vw !important;
+        overflow-x: hidden !important;
     }
     
     #predictions-table th,
@@ -597,15 +694,15 @@ body {
     }
     
     .prediction-tag {
-        font-size: 0.6rem !important;
-        padding: 0.18rem 0.35rem !important;
-        margin: 0.05rem !important;
+        font-size: 0.55rem !important;
+        padding: 0.12rem 0.25rem !important;
+        margin: 0.03rem !important;
         font-weight: 600 !important;
     }
     
     .team-flag {
-        font-size: 0.7em !important;
-        transform: scale(0.8) !important;
+        font-size: 0.9em !important;
+        transform: scale(1) !important;
     }
     
     /* Допълнително намаляване на шрифта за езиковите елементи */
@@ -649,8 +746,9 @@ body {
     }
     
     .predictions-container h1 {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
         margin-bottom: 0.6rem;
+        margin-top: 0.6rem;
         text-align: center;
         width: 100%;
     }
@@ -771,7 +869,7 @@ body {
 
 /* Подобрен стил за флаговете */
 .team-flag {
-    font-size: 1.3em;
+    font-size: 1.5em;
     filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
     transition: all 0.3s ease;
     display: inline-block;
@@ -795,6 +893,7 @@ body {
     font-weight: 700;
     letter-spacing: 0.5px;
     text-shadow: 0 0 5px rgba(0, 204, 255, 0.3);
+    padding: 0.1rem !important;
 }
 
 /* Центриране на елементите за езици */
@@ -829,11 +928,14 @@ body {
 /* Стилове за прогнозите */
 .prediction-cell {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: flex-start;
-    gap: 0.3rem;
+    justify-content: center;
+    gap: 0.05rem;
+    padding: 0 !important;
+    max-width: 30px;
+    overflow: hidden;
 }
 
 .prediction-tag {
@@ -849,13 +951,17 @@ body {
     transition: all 0.2s ease;
     border: 1px solid rgba(0, 255, 102, 0.3);
     white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 @media (max-width: 768px) {
     .prediction-tag {
-        font-size: 0.65rem;
-        padding: 0.3rem 0.5rem;
+        font-size: 0.4rem;
+        padding: 0.1rem 0.2rem;
         font-weight: 600;
+        border-width: 0.5px;
     }
     
     /* Унифициран шрифт за всички клетки */
@@ -872,7 +978,16 @@ body {
 /* Респонсив настройки за таговете */
 @media (max-width: 480px) {
     .prediction-tag {
-        font-size: 0.75rem;
-        padding: 0.3rem 0.6rem;
+        font-size: 0.35rem !important;
+        padding: 0.05rem 0.1rem !important;
+        margin: 0 !important;
+        line-height: 0.9 !important;
+        border-width: 0.5px !important;
+    }
+    
+    .prediction-cell {
+        padding: 0 !important;
+        gap: 0 !important;
+        flex-direction: column !important;
     }
 }
