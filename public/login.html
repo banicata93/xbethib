@@ -41,6 +41,21 @@
     </div>
 
     <script>
+        // Проверка за валиден достъп при зареждане на страницата
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const adminAccess = urlParams.get('admin-access');
+            
+            // Ако параметърът не е правилен, скриваме формата и показваме съобщение за грешка
+            if (adminAccess !== 'true') {
+                document.querySelector('.login-container').innerHTML = '<div class="alert alert-danger">Access denied</div>';
+                // Пренасочваме към началната страница след 2 секунди
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            }
+        })();
+        
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
