@@ -181,12 +181,32 @@ app.get('/', async (req, res) => {
         }
         
         // Форматираме прогнозите
-        const formattedPredictions = predictions.map(p => {
-            const prediction = p.toObject();
-            const date = new Date(prediction.matchDate);
-            prediction.matchDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-            return prediction;
-        });
+        let formattedPredictions = [];
+        
+        try {
+            // Проверяваме дали прогнозите са от MongoDB или тестови данни
+            if (predictions[0] && typeof predictions[0].toObject === 'function') {
+                // MongoDB данни
+                formattedPredictions = predictions.map(p => {
+                    const prediction = p.toObject();
+                    const date = new Date(prediction.matchDate);
+                    prediction.matchDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+                    return prediction;
+                });
+            } else {
+                // Тестови данни
+                formattedPredictions = predictions.map(p => {
+                    const prediction = {...p}; // Копираме обекта
+                    const date = new Date(prediction.matchDate);
+                    prediction.matchDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+                    return prediction;
+                });
+            }
+            console.log('Formatted predictions:', formattedPredictions.length);
+        } catch (err) {
+            console.error('Error formatting predictions:', err);
+            formattedPredictions = testData; // Използваме тестовите данни при грешка
+        }
         
         // Четем HTML файла
         const fs = require('fs');
