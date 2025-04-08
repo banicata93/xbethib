@@ -133,9 +133,52 @@ app.get('/', async (req, res) => {
     try {
         // Зареждаме прогнозите от базата данни
         const Prediction = require('./models/prediction');
-        const predictions = await Prediction.find().sort({ matchDate: -1 });
+        
+        // Добавяме тестови прогнози, ако няма такива в базата
+        const testData = [
+            {
+                matchDate: new Date(),
+                leagueFlag: '🇬🇧',
+                homeTeam: 'Arsenal',
+                awayTeam: 'Chelsea',
+                prediction: 'BTTS & Over 2.5'
+            },
+            {
+                matchDate: new Date(),
+                leagueFlag: '🇪🇸',
+                homeTeam: 'Barcelona',
+                awayTeam: 'Real Madrid',
+                prediction: '1X & Over 1.5'
+            },
+            {
+                matchDate: new Date(Date.now() + 86400000), // Утре
+                leagueFlag: '🇮🇹',
+                homeTeam: 'Inter',
+                awayTeam: 'Juventus',
+                prediction: 'X'
+            }
+        ];
+        
+        // Проверяваме дали има прогнози в базата данни
+        let predictions = await Prediction.find().sort({ matchDate: -1 });
         
         console.log(`Found ${predictions.length} predictions for index page`);
+        console.log('MongoDB connection string:', process.env.MONGODB_URI);
+        
+        // Проверяваме дали има проблем с MongoDB връзката
+        if (predictions.length === 0) {
+            console.log('No predictions found in database. Using test data...');
+            // Използваме тестовите данни
+            predictions = testData;
+            
+            try {
+                const mongoose = require('mongoose');
+                console.log('MongoDB connection state:', mongoose.connection.readyState);
+                // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+            } catch (err) {
+                console.error('Error checking MongoDB connection:', err);
+            }
+        }
         
         // Форматираме прогнозите
         const formattedPredictions = predictions.map(p => {

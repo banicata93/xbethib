@@ -6,6 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingIndicator = document.getElementById('loading-indicator');
     const errorMessage = document.getElementById('error-message');
     const retryButton = document.getElementById('retry-button');
+    const lastUpdated = document.getElementById('last-updated');
+    
+    // Актуализираме времето на последно зареждане
+    if (lastUpdated) {
+        lastUpdated.textContent = new Date().toLocaleString();
+    }
     
     if (retryButton) {
         retryButton.addEventListener('click', () => {
@@ -14,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Показваме индикатора за зареждане
             if (loadingIndicator) loadingIndicator.style.display = 'block';
             // Опитваме да заредим прогнозите отново
-            loadPredictions();
+            window.location.reload(); // Презареждаме страницата вместо само loadPredictions()
         });
     }
     
