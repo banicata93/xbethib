@@ -60,16 +60,51 @@ function loadPredictions() {
     
     // Ако няма съдържание в таблицата, проверяваме дали плейсхолдерът все още съществува
     const htmlContent = document.documentElement.innerHTML;
-    if (htmlContent.includes('<!-- PREDICTIONS_PLACEHOLDER -->') || 
-        htmlContent.includes('<!-- Predictions will be loaded here -->')) {
+    
+    // Проверяваме дали има плейсхолдер
+    const hasNewPlaceholder = htmlContent.includes('<!-- PREDICTIONS_PLACEHOLDER -->');
+    const hasOldPlaceholder = htmlContent.includes('<!-- Predictions will be loaded here -->');
+    
+    if (hasNewPlaceholder || hasOldPlaceholder) {
         // Плейсхолдерът все още съществува, което означава, че сървърът не е заменил данните
         console.log('Placeholder still exists, server did not replace predictions');
+        console.log('New placeholder exists:', hasNewPlaceholder);
+        console.log('Old placeholder exists:', hasOldPlaceholder);
         
-        // Презареждаме страницата след 2 секунди
-        setTimeout(() => {
-            window.location.reload();
-        }, 2000);
-        return;
+        // Вместо да презареждаме страницата, показваме тестови данни
+        if (predictionsBody) {
+            // Добавяме тестови данни директно в таблицата
+            predictionsBody.innerHTML = `
+                <tr class="date-separator">
+                    <td colspan="5">08/04 <span style="opacity: 0.8; margin-left: 5px;">April</span></td>
+                </tr>
+                <tr>
+                    <td>08/04</td>
+                    <td><span class="team-flag">🇬🇧</span></td>
+                    <td>Arsenal</td>
+                    <td>Chelsea</td>
+                    <td class="prediction-cell">BTTS & Over 2.5</td>
+                </tr>
+                <tr>
+                    <td>08/04</td>
+                    <td><span class="team-flag">🇪🇸</span></td>
+                    <td>Barcelona</td>
+                    <td>Real Madrid</td>
+                    <td class="prediction-cell">1X & Over 1.5</td>
+                </tr>
+            `;
+            
+            // Скриваме индикатора за зареждане
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+            
+            // Показваме съобщение за грешка с полезна информация
+            if (errorMessage) {
+                errorMessage.style.display = 'block';
+                errorMessage.querySelector('p').innerHTML = 'Показваме тестови данни. Сървърът не може да замени плейсхолдера в HTML.';
+            }
+            
+            return;
+        }
     }
     
     console.log('No predictions found in the table');
