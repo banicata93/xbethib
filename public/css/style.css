@@ -456,7 +456,7 @@ body {
     
     /* Промени в ширините на колоните за мобилни устройства */
     #predictions-table th:nth-child(1) { /* Date */
-        width: 10%;
+        width: 15%;
     }
     
     #predictions-table th:nth-child(2) { /* Flag */
@@ -468,8 +468,8 @@ body {
     
     #predictions-table th:nth-child(3), /* Home Team */
     #predictions-table th:nth-child(4) { /* Away Team */
-        width: 35%;
-        min-width: 35%;
+        width: 38%;
+        min-width: 80px;
     }
     
     #predictions-table th:nth-child(5) { /* Prediction */
@@ -566,106 +566,28 @@ body {
     }
 }
 
-/* Скриване на банер изображенията в мобилната версия */
-@media (max-width: 767px) {
-    .mobile-banners img {
-        display: none !important;
-    }
-    
-    /* Скриваме реда с банерите */
-    .mobile-banners .row {
-        display: none !important;
-    }
-    
-    /* Скриваме целия контейнер с мобилни банери */
-    .mobile-banners {
-        display: none !important;
-    }
-    
-    /* Максимално разширяване на таблицата за мобилни устройства */
-    body {
-        padding: 0 !important;
-        margin: 0 !important;
-        overflow-x: hidden !important;
-    }
-    
-    .predictions-container {
-        width: 100vw !important;
-        max-width: 100vw !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        box-sizing: border-box !important;
-    }
-    
-    .container-fluid {
-        padding: 0 !important;
-        margin: 0 !important;
-        max-width: 100vw !important;
-        width: 100vw !important;
-    }
-    
-    .row {
-        margin: 0 !important;
-        width: 100vw !important;
-    }
-    
-    .col-12 {
-        padding: 0 !important;
-        margin: 0 !important;
-        width: 100vw !important;
-        max-width: 100vw !important;
-    }
-    
-    .table-responsive {
-        margin: 0 !important;
-        padding: 0 !important;
-        border-radius: 0 !important;
-        width: 100vw !important;
-        max-width: 100vw !important;
-        overflow-x: hidden !important;
-    }
-    
-    #predictions-table {
-        width: 100vw !important;
-        max-width: 100vw !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
-        table-layout: fixed !important;
-    }
-    
-    /* Увеличаваме шрифта за по-добра четимост */
-    #predictions-table {
-        font-size: 0.75rem !important;
-    }
-}
-
 /* Допълнителни настройки за много малки екрани */
 @media (max-width: 480px) {
     /* Допълнителни настройки за много малки екрани */
     #predictions-table {
-        font-size: 0.7rem !important;
-        letter-spacing: 0;
-        width: 100vw !important;
-        max-width: 100vw !important;
-        table-layout: fixed !important;
-        border-spacing: 0 !important;
+        font-size: 0.6rem !important;
+        letter-spacing: -0.01em;
     }
     
-    /* Премахваме всякакви отстъпи и полета */
-    .navbar {
-        margin-bottom: 0 !important;
-        padding-bottom: 0.5rem !important;
-    }
-    
-    /* Премахваме всички излишни маржини */
-    .predictions-container > * {
-        margin-left: 0 !important;
-        margin-right: 0 !important;
+    /* Премахваме изображенията само за мобилната версия - допълнително подсигуряване */
+    .img-fluid.rounded[src="/images/tennisbettor.png"],
+    .img-fluid.rounded[src="/images/goleadorbaner2horizontal.png"] {
+        display: none !important;
+        height: 0 !important;
+        width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
     }
     
     #predictions-table th,
     #predictions-table td {
-        padding: 0.35rem 0.15rem !important;
+        padding: 0.2rem 0.1rem !important;
     }
     
     .prediction-tag {
@@ -721,12 +643,10 @@ body {
     }
     
     .predictions-container h1 {
-        font-size: 1.4rem;
-        margin-bottom: 0.5rem;
-        margin-top: 0.5rem;
+        font-size: 1.2rem;
+        margin-bottom: 0.6rem;
         text-align: center;
         width: 100%;
-        padding: 0 !important;
     }
     
     /* Подобрена таблица за прогнози */
@@ -935,6 +855,12 @@ body {
     /* Унифициран шрифт за всички клетки */
     #predictions-table td {
         font-size: 0.65rem;
+    }
+    
+    /* Премахваме изображенията само за мобилната версия */
+    .img-fluid.rounded[src="/images/tennisbettor.png"],
+    .img-fluid.rounded[src="/images/goleadorbaner2horizontal.png"] {
+        display: none !important;
     }
 }
 
