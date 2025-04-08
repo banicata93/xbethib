@@ -677,10 +677,12 @@ body {
 }
 
 /* Стилове за прогнозите */
-.prediction-tags {
+.prediction-cell {
     display: flex;
+    flex-direction: row;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 0.3rem;
 }
 
 .prediction-tag {
@@ -695,8 +697,7 @@ body {
     justify-content: center;
     transition: all 0.2s ease;
     border: 1px solid rgba(0, 255, 102, 0.3);
-    margin-right: 0.3rem;
-    margin-bottom: 0.3rem;
+    white-space: nowrap;
 }
 
 .prediction-tag:hover {
