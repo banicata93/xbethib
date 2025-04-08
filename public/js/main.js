@@ -6,12 +6,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingIndicator = document.getElementById('loading-indicator');
     const errorMessage = document.getElementById('error-message');
     const retryButton = document.getElementById('retry-button');
-    const lastUpdated = document.getElementById('last-updated');
     
-    // Актуализираме времето на последно зареждане
-    if (lastUpdated) {
-        lastUpdated.textContent = new Date().toLocaleString();
+    // Премахваме елемента за последно обновяване
+    const debugInfo = document.getElementById('debug-info');
+    if (debugInfo) {
+        debugInfo.style.display = 'none';
     }
+    
+    // Премахваме navbar-toggler-icon
+    const navbarTogglerIcon = document.querySelector('.navbar-toggler-icon');
+    if (navbarTogglerIcon) {
+        navbarTogglerIcon.style.display = 'none';
+    }
+    
+    // Стилизираме езиковите елементи
+    const languageElements = document.querySelectorAll('td');
+    languageElements.forEach(el => {
+        if (el.textContent === 'Fr' || el.textContent === 'En') {
+            el.classList.add('text-center');
+            el.innerHTML = `<span class="language-element">${el.textContent}</span>`;
+        }
+    });
     
     if (retryButton) {
         retryButton.addEventListener('click', () => {
@@ -46,10 +61,7 @@ function loadPredictions() {
     // Скриваме съобщението за грешка
     if (errorMessage) errorMessage.style.display = 'none';
     
-    // Обновяваме времето на последно зареждане
-    if (lastUpdated) {
-        lastUpdated.textContent = new Date().toLocaleString();
-    }
+    // Премахнато обновяване на времето
     
     // Правим заявка към API за прогнозите
     fetch('/api/predictions/public')
