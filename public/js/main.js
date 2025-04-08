@@ -108,7 +108,9 @@ function loadPredictions() {
                 });
                 
                 // Добавяме прогнозите в таблицата
-                Object.keys(groupedPredictions).forEach(dateKey => {
+                let isAdInserted = false; // Флаг за проверка дали рекламата е вече вмъкната
+                
+                Object.keys(groupedPredictions).forEach((dateKey, index) => {
                     // Добавяме разделител за датата
                     const dateSeparator = document.createElement('tr');
                     dateSeparator.className = 'date-separator';
@@ -132,6 +134,36 @@ function loadPredictions() {
                         `;
                         predictionsBody.appendChild(row);
                     });
+                    
+                    // Добавяме рекламата след първата дата и само на мобилни устройства
+                    if (index === 0 && !isAdInserted && window.innerWidth <= 768) {
+                        isAdInserted = true;
+                        
+                        // Създаваме ред за рекламата
+                        const adRow = document.createElement('tr');
+                        adRow.className = 'in-table-ad-row d-md-none';
+                        adRow.innerHTML = `
+                            <td colspan="4" class="p-0">
+                                <div class="in-table-ad">
+                                    <a href="https://www.goleadortips.com" target="_blank" class="in-table-ad-link">
+                                        <div class="in-table-ad-content">
+                                            <div class="in-table-ad-icon">
+                                                <i class="fas fa-futbol"></i>
+                                            </div>
+                                            <div class="in-table-ad-text">
+                                                <div class="in-table-ad-title">GoleadorTips</div>
+                                                <div class="in-table-ad-description">Expert Football Predictions</div>
+                                            </div>
+                                            <div class="in-table-ad-button">
+                                                <span>Visit Now</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </td>
+                        `;
+                        predictionsBody.appendChild(adRow);
+                    }
                 });
             }
         })
