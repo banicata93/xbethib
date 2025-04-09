@@ -119,7 +119,7 @@ async function loadAdminPredictions() {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${formattedDate}</td>
-                <td><span class="team-flag">${prediction.league?.flag?.replace('🏴󠁧󠁢󠁥󠁮󠁧󠁿', '🇬🇧') || ''}</span></td>
+                <td><span class="team-flag">${prediction.league?.flag || ''}</span></td>
                 <td>${prediction.homeTeam || ''}</td>
                 <td>${prediction.awayTeam || ''}</td>
                 <td>${prediction.prediction || ''}</td>
