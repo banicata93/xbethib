@@ -144,28 +144,7 @@ body {
     word-wrap: normal;
     margin: 0 auto;
     font-size: 0.85rem;
-}
-
-/* Задаване на специфични ширини на колоните */
-#predictions-table th:nth-child(1) { /* Date */
-    width: 15%;
-}
-
-#predictions-table th:nth-child(2) { /* Flag */
-    width: 1%;
-    max-width: 12px;
-    min-width: 10px;
-    padding: 0;
-}
-
-#predictions-table th:nth-child(3), /* Home Team */
-#predictions-table th:nth-child(4) { /* Away Team */
-    width: 35%;
-    min-width: 120px;
-}
-
-#predictions-table th:nth-child(5) { /* Prediction */
-    width: 21%;
+    color: white; /* Set text color to white */
 }
 
 /* Table Headers */
@@ -173,54 +152,23 @@ body {
     padding: 1rem;
     font-weight: 600;
     letter-spacing: 0.5px;
-    color: var(--primary-color);
-    font-size: 0.85rem;  /* Намален размер на шрифта */
-    text-transform: uppercase;
-    border-bottom: 2px solid var(--primary-color);
-    text-align: center;
+    color: white; /* Ensure header text is white */
+    background-color: var(--card-bg);
 }
 
 /* Table Cells */
 #predictions-table td {
-    padding: 1.2rem 0.75rem;
-    border-bottom: 1px solid rgba(0, 255, 102, 0.1);
-    color: var(--text-color);
-    font-size: 0.95rem;  /* Намален размер на шрифта */
-    white-space: nowrap;
-    transition: all 0.3s ease;
-    overflow: visible;
-}
-
-#predictions-table td:first-child {
-    padding: 0.2rem;
-    width: 1%;
-    max-width: 12px;
-}
-
-/* Стилове за клетките */
-#predictions-table td:nth-child(1) {
-    text-align: center;
-    white-space: nowrap;
-}
-
-#predictions-table td:nth-child(2) {
-    text-align: center;
-    padding: 0.5rem;
-}
-
-/* Стилове за отбори и прогноза */
-#predictions-table td:nth-child(3),
-#predictions-table td:nth-child(4),
-#predictions-table td:nth-child(5) {
     padding: 1rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: white; /* Ensure cell text is white */
+    background-color: var(--card-bg);
 }
 
+/* Flag Emoji Fix */
 .team-flag {
     font-size: 1.8em;
     margin-right: 5px;
+    color: white; /* Ensure flag emoji text is white */
+    font-family: system-ui, -apple-system, sans-serif; /* Use system font for better emoji display */
 }
 
 /* Admin Panel Styles */
@@ -492,30 +440,22 @@ body {
         display: none;
     }
     
-    /* Подобрена ширина на контейнера за по-добро използване на пространството */
+    /* Използваме цялата ширина на екрана */
     .col-md-7 {
         width: 100%;
         padding: 0 0.5rem;
     }
     
-    /* Адаптиране на формите за мобилни устройства */
-    .form-control {
-        height: 44px; /* По-голяма височина за по-лесно докосване */
-        font-size: 1rem;
+    /* Подобрено оформление на бутоните */
+    .btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
     }
     
-    /* Подобрено оформление на картите */
-    .card {
-        margin-bottom: 1rem;
-        border-radius: 16px;
-    }
-    
-    .card-header {
-        padding: 1rem;
-    }
-    
-    .card-body {
-        padding: 1rem;
+    /* Подобрено оформление на формите */
+    .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem;
     }
     
     /* Подобрения за админ панела */
