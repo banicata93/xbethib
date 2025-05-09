@@ -90,6 +90,9 @@ const auth = (req, res, next) => {
 // Public routes
 app.use('/api/auth', require('./routes/auth'));
 
+// Маршрути за бота за прогнози
+app.use('/api/botPredictions', require('./routes/botPredictions'));
+
 // Създаваме публичен route за вземане на прогнози
 app.get('/api/predictions/public', async (req, res) => {
     console.log('Public predictions API called');
