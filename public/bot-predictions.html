@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XBetHub - Бот Прогнози</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        .bot-prediction {
+            border-left: 4px solid #4CAF50;
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+        
+        .confidence-indicator {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-left: 10px;
+            color: white;
+        }
+        
+        .confidence-high {
+            background-color: #4CAF50;
+        }
+        
+        .confidence-medium {
+            background-color: #FFC107;
+        }
+        
+        .confidence-low {
+            background-color: #F44336;
+        }
+        
+        .prediction-source {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        
+        .tab.active {
+            border-color: #ddd;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            background-color: #f9f9f9;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="/">
+                <h1>XBetHub</h1>
+                <p>Спортни прогнози</p>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/">Начало</a></li>
+                <li><a href="/bot-predictions.html" class="active">Бот Прогнози</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="predictions-section">
+            <h2>Прогнози от Бота</h2>
+            <p>Тук можете да видите автоматично генерираните прогнози от нашия бот.</p>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="upcoming">Предстоящи</div>
+                <div class="tab" data-tab="past">Минали</div>
+                <div class="tab" data-tab="all">Всички</div>
+            </div>
+            
+            <div id="upcoming" class="tab-content active">
+                <div class="predictions-container" id="upcoming-predictions">
+                    <div class="loading">Зареждане на прогнози...</div>
+                </div>
+            </div>
+            
+            <div id="past" class="tab-content">
+                <div class="predictions-container" id="past-predictions">
+                    <div class="loading">Зареждане на прогнози...</div>
+                </div>
+            </div>
+            
+            <div id="all" class="tab-content">
+                <div class="predictions-container" id="all-predictions">
+                    <div class="loading">Зареждане на прогнози...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>За XBetHub</h3>
+                <p>Платформа за спортни прогнози с висока успеваемост.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Връзки</h3>
+                <ul>
+                    <li><a href="/">Начало</a></li>
+                    <li><a href="/bot-predictions.html">Бот Прогнози</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Контакти</h3>
+                <p>Email: info@xbethub.com</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 XBetHub. Всички права запазени.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Зареждане на прогнозите от бота
+            fetchBotPredictions();
+            
+            // Табове
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Активиране на таба
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Показване на съответното съдържание
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        });
+        
+        // Функция за зареждане на прогнозите от бота
+        function fetchBotPredictions() {
+            fetch('/api/botPredictions/public')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Грешка при зареждане на прогнозите');
+                    }
+                    return response.json();
+                })
+                .then(predictions => {
+                    // Сортиране на прогнозите по дата
+                    predictions.sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
+                    
+                    // Разделяне на прогнозите на предстоящи и минали
+                    const now = new Date();
+                    const upcomingPredictions = predictions.filter(p => new Date(p.matchDate) > now);
+                    const pastPredictions = predictions.filter(p => new Date(p.matchDate) <= now);
+                    
+                    // Показване на прогнозите
+                    displayPredictions('upcoming-predictions', upcomingPredictions);
+                    displayPredictions('past-predictions', pastPredictions);
+                    displayPredictions('all-predictions', predictions);
+                })
+                .catch(error => {
+                    console.error('Грешка:', error);
+                    document.querySelectorAll('.predictions-container').forEach(container => {
+                        container.innerHTML = `<div class="error">Грешка при зареждане на прогнозите: ${error.message}</div>`;
+                    });
+                });
+        }
+        
+        // Функция за показване на прогнозите
+        function displayPredictions(containerId, predictions) {
+            const container = document.getElementById(containerId);
+            
+            if (predictions.length === 0) {
+                container.innerHTML = '<div class="no-predictions">Няма налични прогнози</div>';
+                return;
+            }
+            
+            let html = '';
+            
+            predictions.forEach(prediction => {
+                const matchDate = new Date(prediction.matchDate);
+                const formattedDate = formatDate(matchDate);
+                const isPast = matchDate < new Date();
+                
+                // Определяне на класа за ниво на увереност
+                let confidenceClass = 'confidence-medium';
+                if (prediction.confidence >= 80) {
+                    confidenceClass = 'confidence-high';
+                } else if (prediction.confidence < 50) {
+                    confidenceClass = 'confidence-low';
+                }
+                
+                html += `
+                <div class="prediction-card bot-prediction ${isPast ? 'past' : ''}">
+                    <div class="prediction-header">
+                        <span class="league-flag">${prediction.leagueFlag || '🌍'}</span>
+                        <span class="match-date">${formattedDate}</span>
+                        <span class="confidence-indicator ${confidenceClass}">${prediction.confidence}%</span>
+                    </div>
+                    <div class="prediction-teams">
+                        <span class="home-team">${prediction.homeTeam}</span>
+                        <span class="vs">vs</span>
+                        <span class="away-team">${prediction.awayTeam}</span>
+                    </div>
+                    <div class="prediction-value">
+                        <span class="prediction-label">Прогноза:</span>
+                        <span class="prediction-text">${prediction.prediction}</span>
+                    </div>
+                    <div class="prediction-source">
+                        Източник: ${prediction.source || 'Бот'}
+                    </div>
+                </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Функция за форматиране на дата
+        function formatDate(date) {
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            };
+            return date.toLocaleDateString('bg-BG', options);
+        }
+    </script>
+</body>
+</html>
