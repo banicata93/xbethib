@@ -90,7 +90,7 @@ const auth = (req, res, next) => {
 // Public routes
 app.use('/api/auth', require('./routes/auth'));
 
-// Маршрути за бота за прогнози
+// Маршрут за импортиране на прогнози от бота
 app.use('/api/botPredictions', require('./routes/botPredictions'));
 
 // Създаваме публичен route за вземане на прогнози
