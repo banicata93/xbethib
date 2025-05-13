@@ -1,0 +1,20 @@
+[
+  {
+    "matchDate": "2025-05-20T19:30:00.000Z",
+    "leagueFlag": "🇧🇬",
+    "homeTeam": "Левски",
+    "awayTeam": "ЦСКА",
+    "prediction": "1X",
+    "confidence": 75,
+    "source": "TestBot"
+  },
+  {
+    "matchDate": "2025-05-21T18:00:00.000Z",
+    "leagueFlag": "🇧🇬",
+    "homeTeam": "Лудогорец",
+    "awayTeam": "Ботев Пловдив",
+    "prediction": "1",
+    "confidence": 85,
+    "source": "TestBot"
+  }
+]
