@@ -6,13 +6,16 @@ const Prediction = require('../models/prediction');
 router.get('/public', async (req, res) => {
     try {
         // Намираме всички прогнози и ги сортираме по дата (най-новите първи)
-        // Филтрираме прогнозите, за да покажем само тези, които са валидни
+        // Филтрираме прогнозите, за да покажем само тези, които са от бота или са специални прогнози
         const botPredictions = await Prediction.find({
             $or: [
-                // Показваме прогнози от бота
+                // Показваме прогнози от бота, независимо от техния формат
                 { source: 'FootballBot' },
-                // Или прогнози, които не са само "1"
-                { prediction: { $ne: '1' } }
+                // Или прогнози от други източници, които не са стандартни (1, X, 2)
+                { 
+                    source: { $ne: 'FootballBot' },
+                    prediction: { $nin: ['1', 'X', '2'] } 
+                }
             ]
         }).sort({ matchDate: -1 });
         
@@ -34,12 +37,12 @@ router.get('/public', async (req, res) => {
 // Специален маршрут за приемане на данни от бота (без автентикация)
 router.post('/bot-import', async (req, res) => {
     try {
-        console.log('Получени данни от бота:', req.body);
+        console.log('Получени данни от бота:', JSON.stringify(req.body).substring(0, 200) + '...');
         
         if (!Array.isArray(req.body) && !req.body.predictions) {
             return res.status(400).json({ 
-                message: 'Невалиден формат на данните',
-                received: req.body
+                message: 'Невалиден формат на данните. Очаква се масив или обект с поле "predictions"',
+                received: typeof req.body
             });
         }
         
@@ -49,25 +52,37 @@ router.post('/bot-import', async (req, res) => {
         if (!Array.isArray(predictionsData) || predictionsData.length === 0) {
             return res.status(400).json({ 
                 message: 'Няма прогнози за импортиране',
-                received: req.body
+                received: Array.isArray(req.body) ? 'празен масив' : 'обект без прогнози'
             });
         }
         
         const predictions = [];
+        const errors = [];
         
         for (const item of predictionsData) {
             const { matchDate, homeTeam, awayTeam, leagueFlag, prediction, confidence, source } = item;
             
             // Валидация на входящите данни
             if (!matchDate || !homeTeam || !awayTeam || !prediction) {
-                console.warn('Пропускане на невалиден запис:', item);
+                const missingFields = [];
+                if (!matchDate) missingFields.push('matchDate');
+                if (!homeTeam) missingFields.push('homeTeam');
+                if (!awayTeam) missingFields.push('awayTeam');
+                if (!prediction) missingFields.push('prediction');
+                
+                errors.push(`Липсващи задължителни полета: ${missingFields.join(', ')}`);
+                console.warn('Пропускане на невалиден запис:', JSON.stringify(item));
                 continue; // Пропускаме невалидните записи
             }
             
-            const date = new Date(matchDate);
-            
-            // Проверяваме дали прогнозата е валидна и не е само "1"
-            if (prediction && prediction !== "1" || (prediction === "1" && source === "FootballBot")) {
+            try {
+                const date = new Date(matchDate);
+                if (isNaN(date.getTime())) {
+                    errors.push(`Невалидна дата: ${matchDate}`);
+                    continue;
+                }
+                
+                // Всички прогнози от бота са валидни, независимо от типа
                 predictions.push({
                     matchDate: date,
                     homeTeam,
@@ -77,13 +92,17 @@ router.post('/bot-import', async (req, res) => {
                     confidence: confidence || 70,
                     source: source || 'FootballBot'
                 });
-            } else {
-                console.warn('Невалидна прогноза:', prediction, 'за мач:', homeTeam, '-', awayTeam);
+            } catch (err) {
+                errors.push(`Грешка при обработка на запис: ${err.message}`);
+                console.error('Грешка при обработка на запис:', err);
             }
         }
         
         if (predictions.length === 0) {
-            return res.status(400).json({ message: 'Няма валидни прогнози за импортиране' });
+            return res.status(400).json({ 
+                message: 'Няма валидни прогнози за импортиране', 
+                errors 
+            });
         }
         
         const savedPredictions = await Prediction.insertMany(predictions);
@@ -91,11 +110,28 @@ router.post('/bot-import', async (req, res) => {
         res.status(201).json({
             success: true,
             count: savedPredictions.length,
+            errors: errors.length > 0 ? errors : undefined,
             predictions: savedPredictions
         });
     } catch (error) {
         console.error('Грешка в POST /botPredictions/bot-import:', error);
         res.status(400).json({ success: false, message: error.message });
+    }
+});
+
+// Маршрут за изтриване на всички прогнози от бота (само за тестване)
+router.delete('/bot-clear', async (req, res) => {
+    try {
+        const result = await Prediction.deleteMany({ source: 'FootballBot' });
+        console.log(`Изтрити ${result.deletedCount} прогнози от бота`);
+        res.json({
+            success: true,
+            count: result.deletedCount,
+            message: `Изтрити ${result.deletedCount} прогнози от бота`
+        });
+    } catch (error) {
+        console.error('Грешка в DELETE /botPredictions/bot-clear:', error);
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 
