@@ -35,6 +35,16 @@
             margin-top: 5px;
         }
         
+        .prediction-tag small {
+            font-size: 0.8em;
+            opacity: 0.8;
+            font-weight: normal;
+        }
+        
+        .prediction-tag {
+            font-weight: bold;
+        }
+        
         .tabs {
             display: flex;
             margin-bottom: 20px;
@@ -257,12 +267,38 @@
                         confidenceClass = 'confidence-low';
                     }
                     
+                    // Форматиране на прогнозата за показване
+                    let formattedPrediction = prediction.prediction;
+                    
+                    // Ако прогнозата съдържа проценти или допълнителна информация,
+                    // извличаме основната прогноза и я показваме по-четимо
+                    if (formattedPrediction.includes('(') && formattedPrediction.includes('%')) {
+                        // Разделяме прогнозата на части, ако има разделител '|'
+                        const parts = formattedPrediction.split('|').map(part => part.trim());
+                        
+                        // Форматираме всяка част
+                        const formattedParts = parts.map(part => {
+                            // Извличаме основната прогноза (преди скобите)
+                            const mainPrediction = part.split('(')[0].trim();
+                            
+                            // Извличаме процента, ако има такъв
+                            const percentMatch = part.match(/\((\d+\.\d+)%\)/i);
+                            const percent = percentMatch ? percentMatch[1] : null;
+                            
+                            // Връщаме форматирана част
+                            return percent ? `${mainPrediction} <small>(${percent}%)</small>` : mainPrediction;
+                        });
+                        
+                        // Съединяваме частите отново
+                        formattedPrediction = formattedParts.join(' + ');
+                    }
+                    
                     html += `<tr>`;
                     html += `<td><span class="team-flag">${prediction.leagueFlag}</span></td>`;
                     html += `<td>${matchTime}</td>`;
                     html += `<td>${prediction.homeTeam} - ${prediction.awayTeam}</td>`;
                     html += `<td class="prediction-cell">`;
-                    html += `<span class="prediction-tag">${prediction.prediction}</span>`;
+                    html += `<span class="prediction-tag">${formattedPrediction}</span>`;
                     html += `</td>`;
                     html += `<td><span class="confidence-indicator ${confidenceClass}">${prediction.confidence}%</span></td>`;
                     html += `</tr>`;
