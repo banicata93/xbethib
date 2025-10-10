@@ -8,7 +8,7 @@ const predictionSchema = new mongoose.Schema({
     leagueFlag: {
         type: String,
         required: true,
-        maxlength: 8
+        maxlength: 16
     },
     homeTeam: {
         type: String,
