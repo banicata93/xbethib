@@ -143,22 +143,32 @@ function loadPredictions() {
                         predictionTags = ['N/A'];
                     }
                     
-                    // Създаваме HTML за таговете
-                    const tagsHTML = predictionTags.map(tag => {
-                        // Добавяме индикатор за увереност
-                        let confidenceHTML = '';
-                        if (prediction.confidence && prediction.confidence > 0) {
-                            let confidenceClass = 'confidence-medium';
-                            if (prediction.confidence >= 80) {
-                                confidenceClass = 'confidence-high';
-                            } else if (prediction.confidence < 60) {
-                                confidenceClass = 'confidence-low';
-                            }
-                            confidenceHTML = `<span class="confidence-indicator ${confidenceClass}">${prediction.confidence}%</span>`;
+                    // Форматираме прогнозите без проценти
+                    const formattedTags = predictionTags.map(tag => {
+                        // Премахваме процентите от прогнозата
+                        let formattedTag = tag;
+                        
+                        // Ако прогнозата съдържа проценти или допълнителна информация
+                        if (formattedTag.includes('(') || formattedTag.includes('%')) {
+                            // Разделяме прогнозата на части, ако има разделител '|'
+                            const parts = formattedTag.split('|').map(part => part.trim());
+                            
+                            // Форматираме всяка част
+                            const formattedParts = parts.map(part => {
+                                // Извличаме основната прогноза (преди скобите)
+                                return part.split('(')[0].trim();
+                            });
+                            
+                            // Съединяваме частите отново
+                            formattedTag = formattedParts.join(' ');
                         }
                         
-                        return `<span class="prediction-tag">${tag} ${confidenceHTML}</span>`;
-                    }).join('');
+                        // Не добавяме индикатор за увереност
+                        return `<span class="prediction-tag">${formattedTag}</span>`;
+                    });
+                    
+                    // Създаваме HTML за таговете
+                    const tagsHTML = formattedTags.join('');
                     
                     // Добавяме клас за източника на прогнозата
                     const sourceClass = prediction.source === 'FootballBot' ? 'bot-prediction' : '';
