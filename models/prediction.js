@@ -21,6 +21,17 @@ const predictionSchema = new mongoose.Schema({
     prediction: {
         type: String,
         required: true
+    },
+    result: {
+        type: String,
+        enum: ['pending', 'win', 'loss', 'void'],
+        default: 'pending'
+    },
+    odds: {
+        type: Number,
+        min: 1.01,
+        max: 100,
+        default: null
     }
 }, {
     timestamps: true
