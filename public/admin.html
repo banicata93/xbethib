@@ -9,11 +9,176 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <style>
-        .table-striped tbody tr:nth-of-type(odd) {
-            background-color: rgba(0, 123, 255, 0.05);
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --dark-bg: #2c3e50;
         }
-        .table th, .table td {
-            vertical-align: middle;
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Roboto', sans-serif;
+            min-height: 100vh;
+            color: #ffffff;
+        }
+        
+        .navbar {
+            background: var(--dark-bg) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            color: white !important;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .card-header {
+            background: var(--primary-color) !important;
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: var(--accent-color);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-danger {
+            background: var(--danger-color);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+            box-shadow: 0 3px 10px rgba(231, 76, 60, 0.3);
+        }
+        
+        .form-control {
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+        
+        .table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table thead th {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 15px;
+        }
+        
+        .table tbody td {
+            padding: 15px;
+            border: none;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        .container {
+            max-width: 1200px;
+        }
+        
+        .admin-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .form-text {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        
+        .btn-secondary {
+            background: var(--secondary-color);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: #2c3e50;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(44, 62, 80, 0.3);
+        }
+        
+        .prediction-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .navbar-nav .nav-link {
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            color: var(--accent-color) !important;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card {
+            animation: fadeIn 0.6s ease-out;
         }
     </style>
     <script>
@@ -107,29 +272,55 @@
                 </div>
                 <div class="card-body p-2 p-md-4">
                     <form id="predictionForm">
-                        <div class="row g-2 g-md-3">
+                        <div class="row g-3">
                             <div class="col-12 col-md-6 mb-3">
-                                <label for="matchDate" class="form-label">Match Date</label>
+                                <label for="matchDate" class="form-label">
+                                    <i class="bi bi-calendar-event me-2"></i>Match Date
+                                </label>
                                 <input type="date" class="form-control" id="matchDate" required>
                             </div>
                             <div class="col-12 col-md-6 mb-3">
-                                <label for="leagueFlag" class="form-label">League Flag (Emoji)</label>
-                                <input type="text" class="form-control" id="leagueFlag" required placeholder="🏴󠁧󠁢󠁥󠁮󠁿" maxlength="4">
+                                <label for="leagueFlag" class="form-label">
+                                    <i class="bi bi-flag me-2"></i>League Flag
+                                </label>
+                                <input type="text" class="form-control" id="leagueFlag" required placeholder="🇪🇺" maxlength="4">
+                                <div class="form-text">Enter country/league emoji (e.g., 🇪🇺, 🇬🇧, 🇪🇸)</div>
                             </div>
                             <div class="col-12 col-md-6 mb-3">
-                                <label for="homeTeam" class="form-label">Home Team</label>
-                                <input type="text" class="form-control" id="homeTeam" required>
+                                <label for="homeTeam" class="form-label">
+                                    <i class="bi bi-house-door me-2"></i>Home Team
+                                </label>
+                                <input type="text" class="form-control" id="homeTeam" required placeholder="Enter home team name">
                             </div>
                             <div class="col-12 col-md-6 mb-3">
-                                <label for="awayTeam" class="form-label">Away Team</label>
-                                <input type="text" class="form-control" id="awayTeam" required>
+                                <label for="awayTeam" class="form-label">
+                                    <i class="bi bi-airplane me-2"></i>Away Team
+                                </label>
+                                <input type="text" class="form-control" id="awayTeam" required placeholder="Enter away team name">
                             </div>
                             <div class="col-12 mb-3">
-                                <label for="prediction" class="form-label">Prediction</label>
-                                <input type="text" class="form-control" id="prediction" required>
+                                <label for="prediction" class="form-label">
+                                    <i class="bi bi-lightning me-2"></i>Prediction
+                                </label>
+                                <input type="text" class="form-control" id="prediction" required placeholder="e.g., BTTS, Over 2.5, 1X2">
+                                <div class="form-text">Enter your betting prediction (e.g., BTTS, Over 2.5, Home Win)</div>
+                            </div>
+                            <div class="col-12 col-md-6 mb-3">
+                                <label for="odds" class="form-label">
+                                    <i class="bi bi-graph-up me-2"></i>Odds (Optional)
+                                </label>
+                                <input type="number" class="form-control" id="odds" step="0.01" min="1.01" max="100" placeholder="e.g., 1.85">
+                                <div class="form-text">Enter betting odds (e.g., 1.85, 2.50)</div>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-lg w-100 w-md-auto">Add Prediction</button>
+                        <div class="d-flex justify-content-center gap-3 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="bi bi-plus-circle me-2"></i>Add Prediction
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-lg px-5" onclick="document.getElementById('predictionForm').reset()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Clear Form
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -146,8 +337,10 @@
                                 <tr>
                                     <th>Date</th>
                                     <th>Flag</th>
-                                    <th>Match</th>
+                                    <th>Home</th>
+                                    <th>Away</th>
                                     <th>Prediction</th>
+                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -202,11 +395,27 @@
                         <tr>
                             <td class="fw-bold">${date}</td>
                             <td style="font-size: 1.2rem;">${prediction.leagueFlag}</td>
-                            <td class="fw-bold">${prediction.homeTeam} <span class="text-muted">vs</span> ${prediction.awayTeam}</td>
+                            <td class="fw-bold">${prediction.homeTeam}</td>
+                            <td class="fw-bold">${prediction.awayTeam}</td>
                             <td class="text-primary fw-bold">${prediction.prediction}</td>
                             <td>
-                                <button class="btn btn-danger btn-sm" onclick="deletePrediction('${prediction._id}')">
-                                    <i class="bi bi-trash"></i> Delete
+                                ${getStatusBadge(prediction.result || 'pending')}
+                                ${prediction.odds ? `<br><small class="text-muted">Odds: ${prediction.odds}</small>` : ''}
+                            </td>
+                            <td>
+                                ${(prediction.result === 'pending' || !prediction.result) ? `
+                                    <button class="btn btn-success btn-sm me-1 mb-1" onclick="markResult('${prediction._id}', 'win')" title="Mark as Win">
+                                        <i class="bi bi-check-circle"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm me-1 mb-1" onclick="markResult('${prediction._id}', 'loss')" title="Mark as Loss">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                    <button class="btn btn-secondary btn-sm me-1 mb-1" onclick="markResult('${prediction._id}', 'void')" title="Mark as Void">
+                                        <i class="bi bi-slash-circle"></i>
+                                    </button>
+                                ` : ''}
+                                <button class="btn btn-outline-danger btn-sm mb-1" onclick="deletePrediction('${prediction._id}')" title="Delete">
+                                    <i class="bi bi-trash"></i>
                                 </button>
                             </td>
                         </tr>
@@ -222,12 +431,14 @@
         document.getElementById('predictionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const oddsValue = document.getElementById('odds').value;
             const formData = {
                 matchDate: document.getElementById('matchDate').value,
                 leagueFlag: document.getElementById('leagueFlag').value,
                 homeTeam: document.getElementById('homeTeam').value,
                 awayTeam: document.getElementById('awayTeam').value,
-                prediction: document.getElementById('prediction').value
+                prediction: document.getElementById('prediction').value,
+                odds: oddsValue ? parseFloat(oddsValue) : null
             };
 
             try {
@@ -299,6 +510,49 @@
             console.log('Logging out...');
             localStorage.removeItem('token');
             window.location.href = '/login';
+        }
+
+        // Маркиране на резултат
+        async function markResult(id, result) {
+            try {
+                const currentToken = localStorage.getItem('token');
+                if (!currentToken) {
+                    console.error('No token found');
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                const response = await fetch(`/api/predictions/${id}/result`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}`
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ result })
+                });
+
+                console.log('Mark result response:', response.status);
+                if (!response.ok) {
+                    throw new Error('Failed to update result');
+                }
+
+                loadPredictions();
+            } catch (error) {
+                console.error('Error updating result:', error);
+                alert('Failed to update result: ' + error.message);
+            }
+        }
+
+        // Helper функция за status badges
+        function getStatusBadge(result) {
+            const badges = {
+                'pending': '<span class="badge bg-warning text-dark">⏳ Pending</span>',
+                'win': '<span class="badge bg-success">✅ Won</span>',
+                'loss': '<span class="badge bg-danger">❌ Lost</span>',
+                'void': '<span class="badge bg-secondary">🚫 Void</span>'
+            };
+            return badges[result] || badges['pending'];
         }
 
         // Зареждаме прогнозите при зареждане на страницата, ако има валиден токен
