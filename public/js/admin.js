@@ -20,6 +20,7 @@ async function handleAddPrediction(e) {
     e.preventDefault();
     
     const matchDate = document.getElementById('matchDate').value;
+    const oddsValue = document.getElementById('odds').value;
     const formData = {
         matchDate: matchDate,
         homeTeam: document.getElementById('homeTeam').value,
@@ -28,7 +29,8 @@ async function handleAddPrediction(e) {
             name: 'League',
             flag: document.getElementById('leagueFlag').value.trim()
         },
-        prediction: document.getElementById('prediction').value
+        prediction: document.getElementById('prediction').value,
+        odds: oddsValue ? parseFloat(oddsValue) : null
     };
 
     try {
@@ -124,8 +126,23 @@ async function loadAdminPredictions() {
                 <td>${prediction.awayTeam || ''}</td>
                 <td>${prediction.prediction || ''}</td>
                 <td>
-                    <button class="btn btn-sm btn-danger btn-action" onclick="deletePrediction('${prediction._id}')">
-                        Delete
+                    ${getStatusBadge(prediction.result || 'pending')}
+                    ${prediction.odds ? `<br><small class="text-muted">Odds: ${prediction.odds}</small>` : ''}
+                </td>
+                <td>
+                    ${(prediction.result === 'pending' || !prediction.result) ? `
+                        <button class="btn btn-success btn-sm me-1 mb-1" onclick="markResult('${prediction._id}', 'win')" title="Mark as Win">
+                            <i class="bi bi-check-circle"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm me-1 mb-1" onclick="markResult('${prediction._id}', 'loss')" title="Mark as Loss">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                        <button class="btn btn-secondary btn-sm me-1 mb-1" onclick="markResult('${prediction._id}', 'void')" title="Mark as Void">
+                            <i class="bi bi-slash-circle"></i>
+                        </button>
+                    ` : ''}
+                    <button class="btn btn-outline-danger btn-sm mb-1" onclick="deletePrediction('${prediction._id}')" title="Delete">
+                        <i class="bi bi-trash"></i>
                     </button>
                 </td>
             `;
@@ -161,4 +178,42 @@ async function deletePrediction(id) {
         console.error('Error deleting prediction:', error);
         alert('Failed to delete prediction: ' + error.message);
     }
+}
+
+// Маркиране на резултат
+async function markResult(id, result) {
+    try {
+        const response = await fetch(`/api/predictions/${id}/result`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ result })
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            throw new Error('Failed to update result');
+        }
+
+        loadAdminPredictions();
+    } catch (error) {
+        console.error('Error updating result:', error);
+        alert('Failed to update result: ' + error.message);
+    }
+}
+
+// Helper функция за status badges
+function getStatusBadge(result) {
+    const badges = {
+        'pending': '<span class="badge bg-warning text-dark">⏳ Pending</span>',
+        'win': '<span class="badge bg-success">✅ Won</span>',
+        'loss': '<span class="badge bg-danger">❌ Lost</span>',
+        'void': '<span class="badge bg-secondary">🚫 Void</span>'
+    };
+    return badges[result] || badges['pending'];
 }
