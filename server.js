@@ -90,44 +90,6 @@ const auth = (req, res, next) => {
 // Public routes
 app.use('/api/auth', require('./routes/auth'));
 
-// Маршрут за импортиране на прогнози от бота
-app.use('/api/botPredictions', require('./routes/botPredictions'));
-
-// Създаваме публичен route за вземане на прогнози
-app.get('/api/predictions/public', async (req, res) => {
-    console.log('Public predictions API called');
-    // Добавяме хедъри за CORS специално за този ендпойнт
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    
-    try {
-        const Prediction = require('./models/prediction');
-        console.log('Fetching predictions from database...');
-        // Намираме всички прогнози и ги сортираме по дата (най-новите първи)
-        const predictions = await Prediction.find().sort({ matchDate: -1 });
-        console.log(`Found ${predictions.length} predictions`);
-        
-        if (!predictions || predictions.length === 0) {
-            console.log('No predictions found');
-            return res.json([]);
-        }
-        
-        const formattedPredictions = predictions.map(p => {
-            const prediction = p.toObject();
-            // Нормализираме датата в UTC
-            const date = new Date(prediction.matchDate);
-            prediction.matchDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-            return prediction;
-        });
-
-        console.log('Sending formatted predictions');
-        return res.json(formattedPredictions);
-    } catch (error) {
-        console.error('Error in GET /api/predictions/public:', error);
-        res.status(500).json({ message: error.message });
-    }
-});
-
 // Protected routes
 app.use('/api/predictions', auth, require('./routes/predictions'));
 
@@ -235,35 +197,21 @@ app.get('/', async (req, res) => {
                     try {
                         console.log(`Processing date: ${prediction.matchDate}`);
                         
-                        // Проверяваме дали датата е във формат "DD/MM.YYYY"
-                        if (typeof prediction.matchDate === 'string' && prediction.matchDate.includes('.')) {
-                            // Пример: "08/04.2025" -> "08/04/2025"
-                            const fixedDateStr = prediction.matchDate.replace('.', '/');
-                            console.log(`Converting date format from ${prediction.matchDate} to ${fixedDateStr}`);
-                            
-                            // Разделяме датата на части
-                            const parts = fixedDateStr.split('/');
-                            if (parts.length === 3) {
-                                const day = parseInt(parts[0], 10);
-                                const month = parseInt(parts[1], 10) - 1; // Месеците в JavaScript са от 0 до 11
-                                const year = parseInt(parts[2], 10);
-                                
-                                console.log(`Parsed date parts: day=${day}, month=${month}, year=${year}`);
-                                prediction.matchDate = new Date(year, month, day);
-                            } else {
-                                console.log(`Could not parse date parts from ${fixedDateStr}`);
-                                prediction.matchDate = new Date(); // Използваме днешната дата като резервен вариант
+                        // Опростена обработка на датата
+                        if (prediction.matchDate) {
+                            if (typeof prediction.matchDate === 'string') {
+                                // Ако е string, опитваме да го парснем като дата
+                                prediction.matchDate = new Date(prediction.matchDate);
                             }
+                            // Ако е Date обект, го оставяме както е
                         } else {
-                            // Опитваме стандартно парсване
-                            const date = new Date(prediction.matchDate);
-                            prediction.matchDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+                            prediction.matchDate = new Date(); // Днешна дата като fallback
                         }
                         
                         console.log(`Processed date result: ${prediction.matchDate}`);
                     } catch (dateErr) {
                         console.error(`Error processing date ${prediction.matchDate}:`, dateErr);
-                        prediction.matchDate = new Date(); // Използваме днешната дата при грешка
+                        prediction.matchDate = new Date(); // Днешна дата при грешка
                     }
                     
                     return prediction;
@@ -278,27 +226,15 @@ app.get('/', async (req, res) => {
                     try {
                         console.log(`Processing test data date: ${prediction.matchDate}`);
                         
-                        if (typeof prediction.matchDate === 'string' && prediction.matchDate.includes('.')) {
-                            // Пример: "08/04.2025" -> "08/04/2025"
-                            const fixedDateStr = prediction.matchDate.replace('.', '/');
-                            console.log(`Converting test date from ${prediction.matchDate} to ${fixedDateStr}`);
-                            
-                            const parts = fixedDateStr.split('/');
-                            if (parts.length === 3) {
-                                const day = parseInt(parts[0], 10);
-                                const month = parseInt(parts[1], 10) - 1;
-                                const year = parseInt(parts[2], 10);
-                                
-                                console.log(`Parsed test date parts: day=${day}, month=${month}, year=${year}`);
-                                prediction.matchDate = new Date(year, month, day);
-                            } else {
-                                console.log(`Could not parse test date parts from ${fixedDateStr}`);
-                                prediction.matchDate = new Date();
+                        // Опростена обработка на датата
+                        if (prediction.matchDate) {
+                            if (typeof prediction.matchDate === 'string') {
+                                // Ако е string, опитваме да го парснем като дата
+                                prediction.matchDate = new Date(prediction.matchDate);
                             }
+                            // Ако е Date обект, го оставяме както е
                         } else {
-                            // Опитваме стандартно парсване
-                            const date = new Date(prediction.matchDate);
-                            prediction.matchDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+                            prediction.matchDate = new Date(); // Днешна дата като fallback
                         }
                         
                         console.log(`Processed test date result: ${prediction.matchDate}`);
@@ -316,17 +252,25 @@ app.get('/', async (req, res) => {
             }
         } catch (err) {
             console.error('Error formatting predictions:', err);
-            formattedPredictions = testData; // Използваме тестовите данни при грешка
+            formattedPredictions = [];
+            console.log('Using empty predictions array due to formatting error');
         }
         
         // Четем HTML файла
         const fs = require('fs');
-        const indexPath = path.join(__dirname, 'public', 'index.html');
+        const indexPath = path.join(__dirname, 'views', 'index.html');
         let htmlContent = fs.readFileSync(indexPath, 'utf8');
+        
+        // Дефинираме таговете за замяна
+        const startTag = '<!-- PREDICTIONS_START -->';
+        const endTag = '<!-- PREDICTIONS_END -->';
         
         console.log('Original HTML length:', htmlContent.length);
         console.log('HTML contains new placeholder:', htmlContent.includes('<!-- PREDICTIONS_PLACEHOLDER -->'));
         console.log('HTML contains old placeholder:', htmlContent.includes('<!-- Predictions will be loaded here -->'));
+        console.log('HTML contains start tag:', htmlContent.includes(startTag));
+        console.log('HTML contains end tag:', htmlContent.includes(endTag));
+        console.log('HTML contains tbody:', htmlContent.includes('<tbody id="predictions-body">'));
         
         // Генерираме HTML за прогнозите
         let predictionsHtml = '';
@@ -355,7 +299,7 @@ app.get('/', async (req, res) => {
                 currentDate = dateString;
                 predictionsHtml += `
                     <tr class="date-separator">
-                        <td colspan="5">
+                        <td colspan="4">
                             ${formattedDate} <span style="opacity: 0.8; margin-left: 5px;">${monthName}</span>
                         </td>
                     </tr>
@@ -364,7 +308,6 @@ app.get('/', async (req, res) => {
             
             predictionsHtml += `
                 <tr>
-                    <td>${formattedDate}</td>
                     <td><span class="team-flag">${prediction.leagueFlag || ''}</span></td>
                     <td>${prediction.homeTeam || 'Отбор 1'}</td>
                     <td>${prediction.awayTeam || 'Отбор 2'}</td>
@@ -375,93 +318,29 @@ app.get('/', async (req, res) => {
         
         // Ако няма прогнози, показваме съобщение
         if (formattedPredictions.length === 0) {
-            predictionsHtml = '<tr><td colspan="5" class="text-center">No predictions available</td></tr>';
+            predictionsHtml = '<tr><td colspan="4" class="text-center">No predictions available</td></tr>';
         }
         
-        // Заменяме плейсхолдера в HTML с генерираните прогнози
-        console.log('Generated predictions HTML length:', predictionsHtml.length);
-        console.log('Sample of predictions HTML:', predictionsHtml.substring(0, 100));
+        console.log('=== DEBUGGING PREDICTIONS HTML ===');
+        console.log('formattedPredictions.length:', formattedPredictions.length);
+        console.log('predictionsHtml length:', predictionsHtml.length);
+        console.log('predictionsHtml content:', predictionsHtml);
         
-        // Проверяваме за новия формат на плейсхолдера
-        const startTag = '<!-- PREDICTIONS_START -->';
-        const endTag = '<!-- PREDICTIONS_END -->';
+        if (formattedPredictions.length > 0) {
+            console.log('First prediction:', formattedPredictions[0]);
+        }
         
-        // Принтираме първите няколко реда от генерирания HTML
-        console.log('Generated predictions HTML preview:', predictionsHtml.substring(0, 200));
+        // Заменяме съдържанието между таговете
+        const startIndex = htmlContent.indexOf(startTag);
+        const endIndex = htmlContent.indexOf(endTag);
         
-        // Принтираме дължината на HTML и наличието на таговете
-        console.log('HTML content length:', htmlContent.length);
-        console.log('HTML contains start tag:', htmlContent.includes(startTag));
-        console.log('HTML contains end tag:', htmlContent.includes(endTag));
-        
-        // Проверяваме дали имаме и двата тага
-        if (htmlContent.includes(startTag) && htmlContent.includes(endTag)) {
-            console.log('Found new prediction tags, replacing content between them');
-            
-            // Намираме съдържанието между таговете
-            const startIndex = htmlContent.indexOf(startTag) + startTag.length;
-            const endIndex = htmlContent.indexOf(endTag);
-            
-            console.log('Start index:', startIndex);
-            console.log('End index:', endIndex);
-            
-            if (startIndex < endIndex) {
-                // Заменяме съдържанието между таговете
-                const beforeContent = htmlContent.substring(0, startIndex);
-                const afterContent = htmlContent.substring(endIndex);
-                
-                // Създаваме новото съдържание
-                htmlContent = beforeContent + '\n' + predictionsHtml + '\n' + afterContent;
-                console.log('Successfully replaced content between prediction tags');
-                console.log('New HTML length:', htmlContent.length);
-            } else {
-                console.log('Error: Start tag appears after end tag!');
-            }
+        if (startIndex !== -1 && endIndex !== -1 && startIndex < endIndex) {
+            const beforeStart = htmlContent.substring(0, startIndex + startTag.length);
+            const afterEnd = htmlContent.substring(endIndex);
+            htmlContent = beforeStart + '\n' + predictionsHtml + '\n                                ' + afterEnd;
+            console.log('Successfully replaced predictions!');
         } else {
-            console.log('Could not find both prediction tags, falling back to direct tbody replacement');
-            // Ако не можем да намерим таговете, опитваме да заменим целия tbody
-            const tbodyStart = '<tbody id="predictions-body">';
-            const tbodyEnd = '</tbody>';
-            
-            if (htmlContent.includes(tbodyStart) && htmlContent.includes(tbodyEnd)) {
-                const tbodyStartIndex = htmlContent.indexOf(tbodyStart) + tbodyStart.length;
-                const tbodyEndIndex = htmlContent.indexOf(tbodyEnd, tbodyStartIndex);
-                
-                if (tbodyStartIndex < tbodyEndIndex) {
-                    const beforeTbody = htmlContent.substring(0, tbodyStartIndex);
-                    const afterTbody = htmlContent.substring(tbodyEndIndex);
-                    
-                    htmlContent = beforeTbody + '\n' + predictionsHtml + '\n' + afterTbody;
-                    console.log('Successfully replaced tbody content');
-                }
-            }
-            
-            // Ако не намерим новия формат, опитваме старите методи
-            console.log('New prediction tags not found, trying old methods');
-            
-            // Проверяваме за стария плейсхолдер
-            if (htmlContent.includes('<!-- PREDICTIONS_PLACEHOLDER -->')) {
-                console.log('Found old placeholder, replacing it');
-                htmlContent = htmlContent.replace('<!-- PREDICTIONS_PLACEHOLDER -->', predictionsHtml);
-                console.log('Old placeholder replaced successfully');
-            } 
-            // Проверяваме за още по-стария плейсхолдер
-            else if (htmlContent.includes('<!-- Predictions will be loaded here -->')) {
-                console.log('Found very old placeholder, replacing it');
-                htmlContent = htmlContent.replace('<!-- Predictions will be loaded here -->', predictionsHtml);
-                console.log('Very old placeholder replaced successfully');
-            } 
-            // Ако нищо не работи, опитваме да вмъкнем в tbody
-            else {
-                console.log('No placeholders found, trying to insert at tbody');
-                const tbodyPattern = '<tbody id="predictions-body">';
-                if (htmlContent.includes(tbodyPattern)) {
-                    htmlContent = htmlContent.replace(tbodyPattern, tbodyPattern + predictionsHtml);
-                    console.log('Inserted predictions into tbody');
-                } else {
-                    console.log('Could not find any suitable place to insert predictions!');
-                }
-            }
+            console.log('Could not find prediction tags!');
         }
         
         // Скриваме индикатора за зареждане и съобщението за грешка
@@ -471,7 +350,7 @@ app.get('/', async (req, res) => {
         res.send(htmlContent);
     } catch (error) {
         console.error('Error loading predictions for index page:', error);
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
