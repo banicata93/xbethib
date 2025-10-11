@@ -912,33 +912,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* Стилове за брояча на онлайн потребители */
-.online-users-counter {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(25, 25, 35, 0.95);
-    border-top: 1px solid rgba(0, 204, 255, 0.3);
-    padding: 6px 0;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.85rem;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(5px);
-    z-index: 1000;
-    transition: all 0.3s ease;
-    font-family: 'Inter', sans-serif;
-}
-
-.online-users-counter:hover {
-    background: rgba(25, 25, 35, 1);
-    border-color: rgba(0, 204, 255, 0.7);
-}
-
 /* Стил за прогнозите от бота */
 .bot-prediction {
     position: relative;
@@ -983,41 +956,6 @@ body {
 
 .confidence-low {
     background-color: #F44336;
-}
-
-.counter-icon {
-    margin-right: 8px;
-    color: #00ccff;
-    display: flex;
-    align-items: center;
-}
-
-.counter-number {
-    font-weight: 600;
-    margin: 0 5px;
-    color: #00ccff;
-    font-size: 1rem;
-}
-
-.counter-text {
-    opacity: 0.8;
-    font-size: 0.8rem;
-}
-
-/* Респонсивни стилове за брояча */
-@media (max-width: 768px) {
-    .online-users-counter {
-        padding: 5px 0;
-        font-size: 0.75rem;
-    }
-    
-    .counter-number {
-        font-size: 0.9rem;
-    }
-    
-    .counter-text {
-        font-size: 0.7rem;
-    }
 }
 
 /* Респонсив настройки за таговете */
