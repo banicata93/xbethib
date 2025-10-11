@@ -141,6 +141,9 @@ async function loadAdminPredictions() {
                             <i class="bi bi-slash-circle"></i>
                         </button>
                     ` : ''}
+                    <button class="btn btn-warning btn-sm me-1 mb-1" onclick="editPrediction('${prediction._id}')" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                    </button>
                     <button class="btn btn-outline-danger btn-sm mb-1" onclick="deletePrediction('${prediction._id}')" title="Delete">
                         <i class="bi bi-trash"></i>
                     </button>
@@ -216,4 +219,174 @@ function getStatusBadge(result) {
         'void': '<span class="badge bg-secondary">🚫 Void</span>'
     };
     return badges[result] || badges['pending'];
+}
+
+// Редактиране на прогноза
+async function editPrediction(id) {
+    try {
+        // Зареждаме данните на прогнозата
+        const response = await fetch('/api/predictions', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to load prediction');
+        }
+        
+        const predictions = await response.json();
+        const prediction = predictions.find(p => p._id === id);
+        
+        if (!prediction) {
+            throw new Error('Prediction not found');
+        }
+        
+        // Показваме модалния прозорец за редактиране
+        showEditModal(prediction);
+    } catch (error) {
+        console.error('Error loading prediction for edit:', error);
+        alert('Failed to load prediction: ' + error.message);
+    }
+}
+
+// Показване на модален прозорец за редактиране
+function showEditModal(prediction) {
+    // Проверяваме дали модалът вече съществува
+    let modal = document.getElementById('editPredictionModal');
+    
+    if (!modal) {
+        // Създаваме модалния прозорец
+        const modalHTML = `
+            <div class="modal fade" id="editPredictionModal" tabindex="-1" aria-labelledby="editPredictionModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editPredictionModalLabel">Edit Prediction</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="editPredictionForm">
+                                <input type="hidden" id="editPredictionId">
+                                
+                                <div class="mb-3">
+                                    <label for="editMatchDate" class="form-label">Match Date</label>
+                                    <input type="date" class="form-control" id="editMatchDate" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="editLeagueFlag" class="form-label">League Flag</label>
+                                    <input type="text" class="form-control" id="editLeagueFlag" placeholder="🇬🇧" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="editHomeTeam" class="form-label">Home Team</label>
+                                    <input type="text" class="form-control" id="editHomeTeam" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="editAwayTeam" class="form-label">Away Team</label>
+                                    <input type="text" class="form-control" id="editAwayTeam" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="editPrediction" class="form-label">Prediction</label>
+                                    <input type="text" class="form-control" id="editPrediction" placeholder="1X2, BTTS, Over/Under" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="editOdds" class="form-label">Odds (Optional)</label>
+                                    <input type="number" step="0.01" class="form-control" id="editOdds" placeholder="1.50">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="editResult" class="form-label">Result</label>
+                                    <select class="form-control" id="editResult">
+                                        <option value="pending">Pending</option>
+                                        <option value="win">Win</option>
+                                        <option value="loss">Loss</option>
+                                        <option value="void">Void</option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" onclick="saveEditedPrediction()">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        modal = document.getElementById('editPredictionModal');
+    }
+    
+    // Попълваме формата с данните на прогнозата
+    document.getElementById('editPredictionId').value = prediction._id;
+    
+    // Форматираме датата за input type="date"
+    const date = new Date(prediction.matchDate);
+    const formattedDate = date.toISOString().split('T')[0];
+    document.getElementById('editMatchDate').value = formattedDate;
+    
+    document.getElementById('editLeagueFlag').value = prediction.league?.flag || prediction.leagueFlag || '';
+    document.getElementById('editHomeTeam').value = prediction.homeTeam || '';
+    document.getElementById('editAwayTeam').value = prediction.awayTeam || '';
+    document.getElementById('editPrediction').value = prediction.prediction || '';
+    document.getElementById('editOdds').value = prediction.odds || '';
+    document.getElementById('editResult').value = prediction.result || 'pending';
+    
+    // Показваме модала
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+}
+
+// Запазване на редактираната прогноза
+async function saveEditedPrediction() {
+    try {
+        const id = document.getElementById('editPredictionId').value;
+        const matchDate = document.getElementById('editMatchDate').value;
+        const oddsValue = document.getElementById('editOdds').value;
+        
+        const formData = {
+            matchDate: matchDate,
+            homeTeam: document.getElementById('editHomeTeam').value,
+            awayTeam: document.getElementById('editAwayTeam').value,
+            league: {
+                name: 'League',
+                flag: document.getElementById('editLeagueFlag').value.trim()
+            },
+            leagueFlag: document.getElementById('editLeagueFlag').value.trim(),
+            prediction: document.getElementById('editPrediction').value,
+            odds: oddsValue ? parseFloat(oddsValue) : null,
+            result: document.getElementById('editResult').value
+        };
+        
+        const response = await fetch(`/api/predictions/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to update prediction');
+        }
+        
+        // Затваряме модала
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editPredictionModal'));
+        modal.hide();
+        
+        // Презареждаме прогнозите
+        await loadAdminPredictions();
+        
+        alert('Prediction updated successfully!');
+    } catch (error) {
+        console.error('Error updating prediction:', error);
+        alert('Failed to update prediction: ' + error.message);
+    }
 }
