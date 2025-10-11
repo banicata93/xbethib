@@ -90,6 +90,77 @@ const auth = (req, res, next) => {
 // Public routes
 app.use('/api/auth', require('./routes/auth'));
 
+// Public statistics endpoint
+app.get('/api/stats', async (req, res) => {
+    try {
+        const Prediction = require('./models/prediction');
+        
+        // Общ брой прогнози
+        const total = await Prediction.countDocuments();
+        
+        // Брой по статус
+        const wins = await Prediction.countDocuments({ result: 'win' });
+        const losses = await Prediction.countDocuments({ result: 'loss' });
+        const pending = await Prediction.countDocuments({ result: 'pending' });
+        const voids = await Prediction.countDocuments({ result: 'void' });
+        
+        // Win rate (само завършени прогнози)
+        const completed = wins + losses;
+        const winRate = completed > 0 ? ((wins / completed) * 100).toFixed(1) : 0;
+        
+        // Последните 10 прогнози за streak
+        const recentPredictions = await Prediction.find({ 
+            result: { $in: ['win', 'loss'] } 
+        })
+        .sort({ matchDate: -1 })
+        .limit(10)
+        .select('result');
+        
+        // Изчисляване на текуща серия
+        let currentStreak = 0;
+        let streakType = null;
+        
+        for (const pred of recentPredictions) {
+            if (streakType === null) {
+                streakType = pred.result;
+                currentStreak = 1;
+            } else if (pred.result === streakType) {
+                currentStreak++;
+            } else {
+                break;
+            }
+        }
+        
+        // Средни коефициенти
+        const avgOddsResult = await Prediction.aggregate([
+            { $match: { odds: { $ne: null } } },
+            { $group: { _id: null, avgOdds: { $avg: '$odds' } } }
+        ]);
+        
+        const avgOdds = avgOddsResult.length > 0 
+            ? avgOddsResult[0].avgOdds.toFixed(2) 
+            : 0;
+        
+        res.json({
+            total,
+            wins,
+            losses,
+            pending,
+            voids,
+            completed,
+            winRate: parseFloat(winRate),
+            streak: {
+                count: currentStreak,
+                type: streakType
+            },
+            avgOdds: parseFloat(avgOdds)
+        });
+    } catch (error) {
+        console.error('Error fetching stats:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Protected routes
 app.use('/api/predictions', auth, require('./routes/predictions'));
 
@@ -100,160 +171,63 @@ app.get('/', async (req, res) => {
         // Зареждаме прогнозите от базата данни
         const Prediction = require('./models/prediction');
         
-        // Добавяме тестови прогнози, ако няма такива в базата
-        const testData = [
-            {
-                matchDate: new Date(),
-                leagueFlag: '🇬🇧',
-                homeTeam: 'Arsenal',
-                awayTeam: 'Chelsea',
-                prediction: 'BTTS & Over 2.5'
-            },
-            {
-                matchDate: new Date(),
-                leagueFlag: '🇪🇸',
-                homeTeam: 'Barcelona',
-                awayTeam: 'Real Madrid',
-                prediction: '1X & Over 1.5'
-            },
-            {
-                matchDate: new Date(Date.now() + 86400000), // Утре
-                leagueFlag: '🇮🇹',
-                homeTeam: 'Inter',
-                awayTeam: 'Juventus',
-                prediction: 'X'
-            }
-        ];
-        
-        // Проверяваме дали има прогнози в базата данни
+        // Зареждаме прогнозите от базата данни
         let predictions = [];
         try {
-            // Зареждаме прогнозите, сортирани по дата (най-новите първи)
             predictions = await Prediction.find().sort({ matchDate: -1 });
-            console.log(`Found ${predictions.length} predictions for index page`);
-            
-            if (predictions.length > 0) {
-                // Показваме подробна информация за първата прогноза
-                const firstPrediction = predictions[0];
-                console.log('First prediction:', JSON.stringify(firstPrediction));
-                console.log('First prediction fields:', Object.keys(firstPrediction));
-                
-                // Проверяваме дали има поле matchDate и какъв е форматът му
-                console.log('Has matchDate:', firstPrediction.matchDate ? 'Yes' : 'No');
-                console.log('matchDate value:', firstPrediction.matchDate);
-                console.log('matchDate type:', firstPrediction.matchDate ? typeof firstPrediction.matchDate : 'N/A');
-                
-                // Проверяваме всички прогнози за техните дати
-                console.log('All predictions dates:');
-                predictions.forEach((p, index) => {
-                    console.log(`Prediction ${index + 1} date:`, p.matchDate);
-                });
-            }
+            console.log(`Loaded ${predictions.length} predictions`);
         } catch (err) {
-            console.error('Error fetching predictions from MongoDB:', err);
-        }
-        console.log('MongoDB connection string:', process.env.MONGODB_URI);
-        
-        // Проверяваме дали има проблем с MongoDB връзката
-        if (predictions.length === 0) {
-            console.log('No predictions found in database. Using test data...');
-            // Използваме тестовите данни
-            predictions = testData;
-            
-            try {
-                const mongoose = require('mongoose');
-                console.log('MongoDB connection state:', mongoose.connection.readyState);
-                // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
-            } catch (err) {
-                console.error('Error checking MongoDB connection:', err);
-            }
+            console.error('Error fetching predictions:', err);
         }
         
         // Форматираме прогнозите
         let formattedPredictions = [];
         
-        // Добавяме лог за дебъгване на прогнозите преди форматиране
-        console.log('Raw predictions before formatting:');
-        if (predictions && predictions.length > 0) {
-            predictions.forEach((p, idx) => {
-                console.log(`Prediction ${idx + 1}:`, {
-                    id: p._id,
-                    date: p.matchDate,
-                    teams: p.homeTeam + ' vs ' + p.awayTeam,
-                    prediction: p.prediction
-                });
-            });
-        }
-        
         try {
-            // Проверяваме дали прогнозите са от MongoDB или тестови данни
+            // Проверяваме дали прогнозите са от MongoDB
             if (predictions[0] && typeof predictions[0].toObject === 'function') {
-                // MongoDB данни
-                console.log('Processing MongoDB predictions');
                 formattedPredictions = predictions.map(p => {
                     const prediction = p.toObject();
                     
-                    // Обработваме датата в различни формати
+                    // Обработваме датата
                     try {
-                        console.log(`Processing date: ${prediction.matchDate}`);
-                        
-                        // Опростена обработка на датата
                         if (prediction.matchDate) {
                             if (typeof prediction.matchDate === 'string') {
-                                // Ако е string, опитваме да го парснем като дата
                                 prediction.matchDate = new Date(prediction.matchDate);
                             }
-                            // Ако е Date обект, го оставяме както е
                         } else {
-                            prediction.matchDate = new Date(); // Днешна дата като fallback
+                            prediction.matchDate = new Date();
                         }
-                        
-                        console.log(`Processed date result: ${prediction.matchDate}`);
                     } catch (dateErr) {
-                        console.error(`Error processing date ${prediction.matchDate}:`, dateErr);
-                        prediction.matchDate = new Date(); // Днешна дата при грешка
+                        console.error('Error processing date:', dateErr);
+                        prediction.matchDate = new Date();
                     }
                     
                     return prediction;
                 });
             } else {
-                // Тестови данни
-                console.log('Processing test data predictions');
                 formattedPredictions = predictions.map(p => {
-                    const prediction = {...p}; // Копираме обекта
+                    const prediction = {...p};
                     
-                    // Същата логика за обработка на датите както при MongoDB данните
                     try {
-                        console.log(`Processing test data date: ${prediction.matchDate}`);
-                        
-                        // Опростена обработка на датата
                         if (prediction.matchDate) {
                             if (typeof prediction.matchDate === 'string') {
-                                // Ако е string, опитваме да го парснем като дата
                                 prediction.matchDate = new Date(prediction.matchDate);
                             }
-                            // Ако е Date обект, го оставяме както е
                         } else {
-                            prediction.matchDate = new Date(); // Днешна дата като fallback
+                            prediction.matchDate = new Date();
                         }
-                        
-                        console.log(`Processed test date result: ${prediction.matchDate}`);
                     } catch (dateErr) {
-                        console.error(`Error processing test date:`, dateErr);
-                        prediction.matchDate = new Date(); // Използваме днешната дата при грешка
+                        console.error('Error processing date:', dateErr);
+                        prediction.matchDate = new Date();
                     }
                     
                     return prediction;
                 });
             }
-            console.log('Formatted predictions:', formattedPredictions.length);
-            if (formattedPredictions.length > 0) {
-                console.log('Sample formatted prediction:', JSON.stringify(formattedPredictions[0]));
-            }
         } catch (err) {
             console.error('Error formatting predictions:', err);
             formattedPredictions = [];
-            console.log('Using empty predictions array due to formatting error');
         }
         
         // Четем HTML файла
@@ -264,13 +238,6 @@ app.get('/', async (req, res) => {
         // Дефинираме таговете за замяна
         const startTag = '<!-- PREDICTIONS_START -->';
         const endTag = '<!-- PREDICTIONS_END -->';
-        
-        console.log('Original HTML length:', htmlContent.length);
-        console.log('HTML contains new placeholder:', htmlContent.includes('<!-- PREDICTIONS_PLACEHOLDER -->'));
-        console.log('HTML contains old placeholder:', htmlContent.includes('<!-- Predictions will be loaded here -->'));
-        console.log('HTML contains start tag:', htmlContent.includes(startTag));
-        console.log('HTML contains end tag:', htmlContent.includes(endTag));
-        console.log('HTML contains tbody:', htmlContent.includes('<tbody id="predictions-body">'));
         
         // Генерираме HTML за прогнозите
         let predictionsHtml = '';
@@ -321,15 +288,6 @@ app.get('/', async (req, res) => {
             predictionsHtml = '<tr><td colspan="4" class="text-center">No predictions available</td></tr>';
         }
         
-        console.log('=== DEBUGGING PREDICTIONS HTML ===');
-        console.log('formattedPredictions.length:', formattedPredictions.length);
-        console.log('predictionsHtml length:', predictionsHtml.length);
-        console.log('predictionsHtml content:', predictionsHtml);
-        
-        if (formattedPredictions.length > 0) {
-            console.log('First prediction:', formattedPredictions[0]);
-        }
-        
         // Заменяме съдържанието между таговете
         const startIndex = htmlContent.indexOf(startTag);
         const endIndex = htmlContent.indexOf(endTag);
@@ -338,9 +296,6 @@ app.get('/', async (req, res) => {
             const beforeStart = htmlContent.substring(0, startIndex + startTag.length);
             const afterEnd = htmlContent.substring(endIndex);
             htmlContent = beforeStart + '\n' + predictionsHtml + '\n                                ' + afterEnd;
-            console.log('Successfully replaced predictions!');
-        } else {
-            console.log('Could not find prediction tags!');
         }
         
         // Скриваме индикатора за зареждане и съобщението за грешка
