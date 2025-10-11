@@ -131,4 +131,32 @@ router.delete('/:id', auth, async (req, res) => {
     }
 });
 
+// Update prediction result (protected route)
+router.patch('/:id/result', auth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { result } = req.body;
+        
+        // Валидация
+        if (!['pending', 'win', 'loss', 'void'].includes(result)) {
+            return res.status(400).json({ message: 'Invalid result value' });
+        }
+        
+        const prediction = await Prediction.findByIdAndUpdate(
+            id,
+            { result },
+            { new: true }
+        );
+        
+        if (!prediction) {
+            return res.status(404).json({ message: 'Prediction not found' });
+        }
+        
+        res.json(prediction);
+    } catch (error) {
+        console.error('Error updating result:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 module.exports = router;
