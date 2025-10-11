@@ -85,6 +85,36 @@
                     <div id="debug-info" class="small text-muted mb-2">
                     </div>
                     
+                    <!-- Stats Banner -->
+                    <div class="stats-banner">
+                        <div class="row text-center g-2">
+                            <div class="col-6 col-md-3">
+                                <div class="stat-item">
+                                    <h3 id="winRate" class="stat-value mb-0">--</h3>
+                                    <p class="stat-label mb-0">Win Rate</p>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="stat-item">
+                                    <h3 id="totalWins" class="stat-value mb-0">--</h3>
+                                    <p class="stat-label mb-0">Wins</p>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="stat-item">
+                                    <h3 id="totalLosses" class="stat-value mb-0">--</h3>
+                                    <p class="stat-label mb-0">Losses</p>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="stat-item">
+                                    <h3 id="currentStreak" class="stat-value mb-0">--</h3>
+                                    <p class="stat-label mb-0">Streak</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="table-responsive rounded">
                         <table class="table table-hover mb-0" id="predictions-table">
                             <thead>
@@ -155,8 +185,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="js/stats.js"></script>
     <script src="js/main.js"></script>
-    <script src="js/mobile-preview.js"></script>
     <script src="js/online-counter.js"></script>
 </body>
 </html> 
