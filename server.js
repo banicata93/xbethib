@@ -95,21 +95,43 @@ app.get('/api/stats', async (req, res) => {
     try {
         const Prediction = require('./models/prediction');
         
-        // Общ брой прогнози
-        const total = await Prediction.countDocuments();
+        // Изчисляваме времето преди 24 часа
+        const yesterday = new Date();
+        yesterday.setHours(yesterday.getHours() - 24);
         
-        // Брой по статус
-        const wins = await Prediction.countDocuments({ result: 'win' });
-        const losses = await Prediction.countDocuments({ result: 'loss' });
-        const pending = await Prediction.countDocuments({ result: 'pending' });
-        const voids = await Prediction.countDocuments({ result: 'void' });
+        // Филтър за последните 24 часа
+        const last24HoursFilter = {
+            matchDate: { $gte: yesterday }
+        };
         
-        // Win rate (само завършени прогнози)
+        // Общ брой прогнози за последните 24ч
+        const total = await Prediction.countDocuments(last24HoursFilter);
+        
+        // Брой по статус (само за последните 24ч)
+        const wins = await Prediction.countDocuments({ 
+            ...last24HoursFilter,
+            result: 'win' 
+        });
+        const losses = await Prediction.countDocuments({ 
+            ...last24HoursFilter,
+            result: 'loss' 
+        });
+        const pending = await Prediction.countDocuments({ 
+            ...last24HoursFilter,
+            result: 'pending' 
+        });
+        const voids = await Prediction.countDocuments({ 
+            ...last24HoursFilter,
+            result: 'void' 
+        });
+        
+        // Win rate (само завършени прогнози за последните 24ч)
         const completed = wins + losses;
         const winRate = completed > 0 ? ((wins / completed) * 100).toFixed(1) : 0;
         
-        // Последните 10 прогнози за streak
+        // Последните 10 прогнози за streak (само за последните 24ч)
         const recentPredictions = await Prediction.find({ 
+            ...last24HoursFilter,
             result: { $in: ['win', 'loss'] } 
         })
         .sort({ matchDate: -1 })
@@ -131,9 +153,12 @@ app.get('/api/stats', async (req, res) => {
             }
         }
         
-        // Средни коефициенти
+        // Средни коефициенти (само за последните 24ч)
         const avgOddsResult = await Prediction.aggregate([
-            { $match: { odds: { $ne: null } } },
+            { $match: { 
+                matchDate: { $gte: yesterday },
+                odds: { $ne: null } 
+            }},
             { $group: { _id: null, avgOdds: { $avg: '$odds' } } }
         ]);
         
@@ -153,7 +178,8 @@ app.get('/api/stats', async (req, res) => {
                 count: currentStreak,
                 type: streakType
             },
-            avgOdds: parseFloat(avgOdds)
+            avgOdds: parseFloat(avgOdds),
+            period: 'last24hours'
         });
     } catch (error) {
         console.error('Error fetching stats:', error);
