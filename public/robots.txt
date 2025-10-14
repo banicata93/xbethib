@@ -1,0 +1,13 @@
+# robots.txt for XBetHub
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://xbethub.com/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
