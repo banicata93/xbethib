@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const trackVisit = require('./middleware/analytics');
 
 const app = express();
 
@@ -16,6 +17,9 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.static('public'));
+
+// Analytics tracking middleware
+app.use(trackVisit);
 
 // Log all requests
 app.use((req, res, next) => {
@@ -189,6 +193,9 @@ app.get('/api/stats', async (req, res) => {
 
 // Protected routes
 app.use('/api/predictions', auth, require('./routes/predictions'));
+
+// Analytics routes (protected)
+app.use('/api/analytics', auth, require('./routes/analytics'));
 
 // Serve static files
 app.get('/', async (req, res) => {
