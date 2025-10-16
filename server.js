@@ -197,6 +197,9 @@ app.use('/api/predictions', auth, require('./routes/predictions'));
 // Analytics routes (protected)
 app.use('/api/analytics', auth, require('./routes/analytics'));
 
+// Bot analysis routes (protected)
+app.use('/api/bot-analysis', auth, require('./routes/botAnalysis'));
+
 // Serve static files
 app.get('/', async (req, res) => {
     try {
