@@ -465,12 +465,14 @@ body {
     
     /* Подобрена таблица за мобилни устройства */
     #predictions-table {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
+        line-height: 1.4;
     }
     
     #predictions-table th,
     #predictions-table td {
-        padding: 0.8rem 0.5rem;
+        padding: 0.75rem 0.5rem;
+        line-height: 1.4;
     }
     
     /* Промени в ширините на колоните за мобилни устройства */
@@ -502,8 +504,9 @@ body {
     
     /* Подобрени стилове за редовете с дати */
     .date-separator td {
-        font-size: 0.8rem !important;
-        padding: 0.6rem !important;
+        font-size: 0.85rem !important;
+        padding: 0.75rem !important;
+        line-height: 1.4 !important;
     }
     
     /* Скриваме вертикалния банер на малки екрани */
@@ -600,8 +603,8 @@ body {
 @media (max-width: 480px) {
     /* Допълнителни настройки за много малки екрани */
     #predictions-table {
-        font-size: 0.6rem !important;
-        letter-spacing: -0.01em;
+        font-size: 0.75rem !important;
+        letter-spacing: 0.01em;
     }
     
     /* Премахваме изображенията само за мобилната версия - допълнително подсигуряване */
@@ -617,14 +620,16 @@ body {
     
     #predictions-table th,
     #predictions-table td {
-        padding: 0.2rem 0.1rem !important;
+        padding: 0.5rem 0.3rem !important;
+        line-height: 1.3 !important;
     }
     
     .prediction-tag {
-        font-size: 0.6rem !important;
-        padding: 0.18rem 0.35rem !important;
-        margin: 0.05rem !important;
+        font-size: 0.65rem !important;
+        padding: 0.3rem 0.5rem !important;
+        margin: 0.15rem !important;
         font-weight: 600 !important;
+        line-height: 1.2 !important;
     }
     
     .team-flag {
@@ -684,24 +689,25 @@ body {
     
     /* Подобрена таблица за прогнози */
     #predictions-table {
-        font-size: 0.65rem;
+        font-size: 0.8rem;
         width: 100% !important;
         display: table !important;
         table-layout: auto;
         margin: 0 auto;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0;
         box-sizing: border-box;
-        letter-spacing: -0.01em;
+        letter-spacing: 0.02em;
     }
     
     #predictions-table th,
     #predictions-table td {
-        padding: 0.3rem 0.15rem;
+        padding: 0.6rem 0.4rem;
         white-space: nowrap;
         overflow: visible;
         text-align: center;
         vertical-align: middle;
-        line-height: 1.1;
+        line-height: 1.4;
     }
     
     #predictions-table td:first-child {
@@ -923,15 +929,103 @@ body {
 }
 
 @media (max-width: 768px) {
-    .prediction-tag {
-        font-size: 0.65rem;
-        padding: 0.3rem 0.5rem;
-        font-weight: 600;
+    /* Нормална таблица с по-голям spacing */
+    #predictions-table {
+        font-size: 0.85rem;
+        border-collapse: separate;
+        border-spacing: 0 8px;
     }
     
-    /* Унифициран шрифт за всички клетки */
+    #predictions-table th,
     #predictions-table td {
+        padding: 0.8rem 0.5rem;
+        line-height: 1.5;
+        vertical-align: middle;
+    }
+    
+    /* Компактни header-и за мобилни */
+    #predictions-table th {
         font-size: 0.65rem;
+        padding: 0.6rem 0.3rem;
+        line-height: 1.2;
+        font-weight: 700;
+        letter-spacing: 0;
+        white-space: normal;
+        word-wrap: break-word;
+    }
+    
+    /* По-малки колони за отборите, повече за прогнозата */
+    #predictions-table th:nth-child(1),
+    #predictions-table td:nth-child(1) {
+        width: 8%;
+        padding: 0.5rem 0.2rem;
+    }
+    
+    #predictions-table th:nth-child(2),
+    #predictions-table td:nth-child(2) {
+        width: 28%;
+        text-align: left;
+        padding-left: 0.3rem;
+    }
+    
+    #predictions-table th:nth-child(3),
+    #predictions-table td:nth-child(3) {
+        width: 28%;
+        text-align: left;
+        padding-left: 0.3rem;
+    }
+    
+    #predictions-table th:nth-child(4),
+    #predictions-table td:nth-child(4) {
+        width: 36%;
+        padding: 0.8rem 0.4rem;
+    }
+    
+    /* Съкращения за header-ите само визуално */
+    #predictions-table th:nth-child(2)::after {
+        content: 'Home';
+        display: block;
+        font-size: 0.65rem;
+    }
+    
+    #predictions-table th:nth-child(2) {
+        font-size: 0;
+    }
+    
+    #predictions-table th:nth-child(3)::after {
+        content: 'Away';
+        display: block;
+        font-size: 0.65rem;
+    }
+    
+    #predictions-table th:nth-child(3) {
+        font-size: 0;
+    }
+    
+    #predictions-table th:nth-child(4)::after {
+        content: 'Bet';
+        display: block;
+        font-size: 0.65rem;
+    }
+    
+    #predictions-table th:nth-child(4) {
+        font-size: 0;
+    }
+    
+    .prediction-tag {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.6rem;
+        font-weight: 600;
+        line-height: 1.2;
+        margin: 0.15rem;
+        display: inline-block;
+    }
+    
+    /* По-малък шрифт за имената на отборите */
+    #predictions-table td:nth-child(2),
+    #predictions-table td:nth-child(3) {
+        font-size: 0.8rem;
+        line-height: 1.4;
     }
     
     /* Премахваме изображенията само за мобилната версия */
@@ -1236,5 +1330,300 @@ body {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* ========================================
+   ДОПЪЛНИТЕЛНИ МОБИЛНИ ПОДОБРЕНИЯ
+   ======================================== */
+
+/* Подобрен navbar toggler за по-лесно докосване */
+@media (max-width: 768px) {
+    .navbar-toggler {
+        padding: 0.5rem 0.75rem;
+        font-size: 1.5rem;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .navbar-toggler:focus {
+        box-shadow: 0 0 0 0.25rem rgba(0, 255, 102, 0.25);
+    }
+    
+    /* Подобрени touch targets за линкове */
+    .nav-link {
+        padding: 0.75rem 1rem !important;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Подобрено оформление на мобилните банери */
+    .mobile-banners {
+        padding: 0 0.5rem;
+    }
+    
+    .mobile-banners .col-6 {
+        padding: 0.25rem;
+    }
+    
+    .mobile-banners img {
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        transition: transform 0.2s ease;
+    }
+    
+    .mobile-banners img:active {
+        transform: scale(0.95);
+    }
+    
+    /* Подобрена Goleador Premium реклама */
+    .goleador-premium-ad {
+        margin: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .premium-ad-content {
+        padding: 1rem;
+    }
+    
+    .premium-ad-icon {
+        flex: 0 0 45px;
+        height: 45px;
+        font-size: 1.3rem;
+    }
+    
+    .premium-ad-title {
+        font-size: 1.05rem;
+    }
+    
+    .premium-ad-description {
+        font-size: 0.8rem;
+    }
+    
+    .premium-ad-button {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Подобрено оформление на таблицата */
+    .table-responsive {
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Подобрени редове в таблицата */
+    #predictions-table tr:not(.date-separator) {
+        transition: background-color 0.2s ease;
+    }
+    
+    #predictions-table tr:not(.date-separator):active {
+        background-color: rgba(0, 255, 102, 0.08);
+    }
+    
+    /* Подобрени prediction tags */
+    .prediction-tag {
+        font-size: 0.7rem;
+        padding: 0.35rem 0.6rem;
+        margin: 0.15rem;
+        border: 1.5px solid rgba(0, 255, 102, 0.4);
+        font-weight: 700;
+    }
+    
+    /* Подобрено оформление на date separator */
+    .date-separator td {
+        font-size: 0.85rem !important;
+        padding: 0.75rem !important;
+        font-weight: 700;
+    }
+    
+    /* Подобрена статистика */
+    .stats-banner {
+        border-radius: 12px;
+        margin: 0.5rem;
+    }
+    
+    .stat-item {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+    }
+    
+    .stat-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+}
+
+/* Специални подобрения за много малки екрани (iPhone SE, малки Android) */
+@media (max-width: 375px) {
+    .predictions-container {
+        padding: 0.5rem;
+        margin: 0.25rem;
+        border-radius: 10px;
+    }
+    
+    .predictions-container h1 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    #predictions-table {
+        font-size: 0.72rem !important;
+        letter-spacing: 0.01em;
+    }
+    
+    #predictions-table th,
+    #predictions-table td {
+        padding: 0.45rem 0.25rem !important;
+        line-height: 1.35 !important;
+    }
+    
+    .prediction-tag {
+        font-size: 0.65rem;
+        padding: 0.3rem 0.5rem;
+        margin: 0.15rem;
+        line-height: 1.2;
+    }
+    
+    .team-flag {
+        font-size: 0.65em !important;
+    }
+    
+    .stat-value {
+        font-size: 1.3rem;
+    }
+    
+    .stat-label {
+        font-size: 0.6rem;
+    }
+    
+    .premium-ad-title {
+        font-size: 0.95rem;
+    }
+    
+    .premium-ad-description {
+        font-size: 0.75rem;
+    }
+    
+    .premium-ad-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Подобрения за landscape режим на мобилни устройства */
+@media (max-width: 768px) and (orientation: landscape) {
+    .predictions-container {
+        padding: 1rem;
+    }
+    
+    .predictions-container h1 {
+        font-size: 1.4rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .stats-banner {
+        padding: 0.75rem;
+    }
+    
+    .stat-value {
+        font-size: 1.4rem;
+    }
+    
+    .stat-label {
+        font-size: 0.65rem;
+    }
+    
+    #predictions-table {
+        font-size: 0.8rem !important;
+    }
+}
+
+/* Подобрения за touch интеракции */
+@media (hover: none) and (pointer: coarse) {
+    /* Това е touch устройство */
+    
+    /* По-големи touch targets */
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    /* Премахваме hover ефекти които не работят на touch */
+    #predictions-table tr:hover {
+        transform: none;
+    }
+    
+    .prediction-tag:hover {
+        transform: none;
+    }
+    
+    /* Добавяме active states вместо hover */
+    .btn:active {
+        transform: scale(0.95);
+    }
+    
+    .prediction-tag:active {
+        transform: scale(0.95);
+        background: rgba(0, 255, 102, 0.3);
+    }
+    
+    a:active {
+        opacity: 0.7;
+    }
+}
+
+/* Подобрения за тъмен режим (ако устройството използва dark mode) */
+@media (prefers-color-scheme: dark) {
+    /* Вашият сайт вече е тъмен, но можем да добавим допълнителни подобрения */
+    body {
+        background-color: #0a0a0a;
+    }
+    
+    .predictions-container {
+        background: rgba(17, 24, 39, 0.95);
+    }
+}
+
+/* Подобрения за висока контрастност (accessibility) */
+@media (prefers-contrast: high) {
+    .prediction-tag {
+        border-width: 2px;
+    }
+    
+    .btn {
+        border: 2px solid currentColor;
+    }
+    
+    #predictions-table th {
+        border-bottom-width: 3px;
+    }
+}
+
+/* Подобрения за намалена анимация (accessibility) */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .stats-banner {
+        animation: none;
     }
 }
