@@ -534,19 +534,16 @@ body {
         font-size: 1.1em;
     }
     
-    /* Подобрени стилове за клетките с отбори */
+    /* Унифицирани стилове за всички колони с данни */
     #predictions-table td:nth-child(2),
-    #predictions-table td:nth-child(3) {
+    #predictions-table td:nth-child(3),
+    #predictions-table td:nth-child(4) {
         font-size: 0.85rem;
         padding: 0.6rem 0.4rem;
         white-space: normal;
         word-wrap: break-word;
-        line-height: 1.3;
-    }
-    
-    /* Подобрена колона с прогнози */
-    #predictions-table td:nth-child(4) {
-        padding: 0.6rem 0.4rem;
+        line-height: 1.4;
+        font-weight: 500;
     }
     
     /* Подобрени стилове за редовете с дати */
@@ -716,12 +713,14 @@ body {
         min-width: 65px !important;
     }
     
-    /* По-малък шрифт за имената на отборите */
+    /* Унифициран шрифт за всички колони с данни на малки екрани */
     #predictions-table td:nth-child(2),
-    #predictions-table td:nth-child(3) {
+    #predictions-table td:nth-child(3),
+    #predictions-table td:nth-child(4) {
         font-size: 0.75rem !important;
         padding: 0.5rem 0.3rem !important;
-        line-height: 1.25 !important;
+        line-height: 1.3 !important;
+        font-weight: 500 !important;
     }
     /* Основни настройки за много малки екрани */
     .container-fluid {
@@ -1064,6 +1063,8 @@ body {
         padding: 0.6rem 0.4rem;
         white-space: normal;
         word-wrap: break-word;
+        font-size: 0.82rem;
+        line-height: 1.4;
     }
     
     /* Съкращения за header-ите само визуално */
@@ -1106,14 +1107,16 @@ body {
         display: inline-block;
     }
     
-    /* По-малък шрифт за имената на отборите */
+    /* Унифициран шрифт за всички колони с данни */
     #predictions-table td:nth-child(2),
-    #predictions-table td:nth-child(3) {
-        font-size: 0.8rem;
-        line-height: 1.35;
+    #predictions-table td:nth-child(3),
+    #predictions-table td:nth-child(4) {
+        font-size: 0.82rem;
+        line-height: 1.4;
         white-space: normal;
         word-wrap: break-word;
         overflow-wrap: break-word;
+        font-weight: 500;
     }
     
     /* Подобрена визуализация на датите */
@@ -1537,11 +1540,13 @@ body {
     
     /* Подобрени prediction tags */
     .prediction-tag {
-        font-size: 0.7rem;
-        padding: 0.35rem 0.6rem;
-        margin: 0.15rem;
+        font-size: 0.72rem;
+        padding: 0.4rem 0.65rem;
+        margin: 0.2rem;
         border: 1.5px solid rgba(0, 255, 102, 0.4);
-        font-weight: 700;
+        font-weight: 600;
+        line-height: 1.3;
+        display: inline-block;
     }
     
     /* Подобрено оформление на date separator */
@@ -1601,15 +1606,16 @@ body {
     
     #predictions-table th,
     #predictions-table td {
-        padding: 0.45rem 0.25rem !important;
+        padding: 0.5rem 0.3rem !important;
         line-height: 1.35 !important;
     }
     
     .prediction-tag {
-        font-size: 0.65rem;
-        padding: 0.3rem 0.5rem;
+        font-size: 0.68rem;
+        padding: 0.35rem 0.55rem;
         margin: 0.15rem;
-        line-height: 1.2;
+        line-height: 1.25;
+        font-weight: 600;
     }
     
     .team-flag {
