@@ -185,10 +185,43 @@ body {
     padding: 1.2rem 0.75rem;
     border-bottom: 1px solid rgba(0, 255, 102, 0.1);
     color: var(--text-color);
-    font-size: 0.95rem;  /* Намален размер на шрифта */
+    font-size: 0.95rem;
     white-space: nowrap;
     transition: all 0.3s ease;
     overflow: visible;
+    font-family: 'Inter', 'Roboto', sans-serif;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* Style prediction cells to match team and flag styling */
+#predictions-table td:nth-child(4),  /* Prediction column */
+#predictions-table td.prediction-cell {
+    font-family: 'Inter', 'Roboto', sans-serif;
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+    text-shadow: 0 0 5px rgba(0, 255, 102, 0.3);
+}
+
+/* Ensure team cells have consistent styling */
+#predictions-table td.team-cell {
+    font-family: 'Inter', 'Roboto', sans-serif;
+    font-weight: 500;
+    color: var(--text-color);
+    white-space: nowrap;
+}
+
+/* Style for the prediction value to make it stand out */
+.prediction-value {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(0, 255, 102, 0.1);
+    border: 1px solid var(--primary-color);
 }
 
 #predictions-table td:first-child {
