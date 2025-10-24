@@ -1,0 +1,42 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "functions/**/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/auth/login",
+      "dest": "/functions/auth.js"
+    },
+    {
+      "src": "/api/predictions(.*)",
+      "dest": "/functions/predictions.js"
+    },
+    {
+      "src": "/api/stats",
+      "dest": "/functions/stats.js"
+    },
+    {
+      "src": "/api/analytics(.*)",
+      "dest": "/functions/analytics.js"
+    },
+    {
+      "src": "/api/botAnalysis(.*)",
+      "dest": "/functions/botAnalysis.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/server.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
