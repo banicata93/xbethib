@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 require('dotenv').config();
 const Admin = require('./models/admin');
 
@@ -18,8 +18,10 @@ async function createAdmin() {
             process.exit(0);
         }
 
+        // Hash password using crypto
+        const hashedPassword = crypto.createHash('sha256').update('admin123' + process.env.JWT_SECRET).digest('hex');
+
         // Create admin user
-        const hashedPassword = await bcrypt.hash('admin123', 10);
         const admin = new Admin({
             username: 'admin',
             password: hashedPassword
