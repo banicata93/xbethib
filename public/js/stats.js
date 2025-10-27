@@ -4,9 +4,16 @@ async function loadStats() {
         const response = await fetch('/api/stats');
         const stats = await response.json();
         
-        document.getElementById('winRate').textContent = stats.winRate + '%';
-        document.getElementById('totalWins').textContent = '✅ ' + stats.wins;
-        document.getElementById('totalLosses').textContent = '❌ ' + stats.losses;
+        // Update stats display
+        document.getElementById('total-predictions').textContent = stats.count || 0;
+        document.getElementById('win-rate').textContent = `${stats.winRate || 0}%`;
+        document.getElementById('total-wins').textContent = stats.wins || 0;
+        
+        // Update header win rate if element exists
+        const headerWinRate = document.querySelector('.stats-text strong');
+        if (headerWinRate && stats.winRate) {
+            headerWinRate.textContent = `${stats.winRate}%`;
+        }
         
         if (stats.streak.count > 0) {
             const streakIcon = stats.streak.type === 'win' ? '🔥' : '❄️';

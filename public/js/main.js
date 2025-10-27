@@ -5,7 +5,19 @@ async function loadPredictions() {
     const predictionsBody = document.getElementById('predictions-body');
     
     try {
-        loadingIndicator.style.display = 'block';
+        // Show loading spinner
+        predictionsBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading predictions...</p>
+                </td>
+            </tr>
+        `;
+        
+        loadingIndicator.style.display = 'none';
         errorMessage.style.display = 'none';
         
         const response = await fetch('/api/predictions');

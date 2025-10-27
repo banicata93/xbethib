@@ -326,10 +326,14 @@ body {
     white-space: nowrap;
 }
 
-/* Date header row */
+/* Date header row - sticky for better UX */
 .date-header-row {
     background: linear-gradient(135deg, rgba(0, 255, 102, 0.15), rgba(0, 204, 255, 0.1));
     border-top: 2px solid var(--primary-color);
+    position: sticky;
+    top: 70px;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Mobile ad row in table */
@@ -340,6 +344,39 @@ body {
 .mobile-ad-row td {
     border: none !important;
     padding: 0 !important;
+}
+
+.mobile-ad-row .goleador-premium-ad {
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
+/* Hover effect on table rows */
+#predictions-table tbody tr:not(.date-header-row):not(.mobile-ad-row):hover {
+    background: rgba(0, 255, 102, 0.05);
+    transform: translateX(3px);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+/* Improved odds badge styling */
+.odds-badge {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #1a1a1a;
+    padding: 0.25rem 0.6rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
+    box-shadow: 0 2px 6px rgba(255, 215, 0, 0.4);
+    border: 1px solid rgba(255, 215, 0, 0.6);
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+
+.odds-badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 3px 10px rgba(255, 215, 0, 0.6);
 }
 
 .date-header {
