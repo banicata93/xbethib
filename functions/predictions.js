@@ -75,7 +75,11 @@ module.exports = async (req, res) => {
         await connectToDatabase();
 
         const { method } = req;
-        const { id } = req.query;
+        
+        // Extract ID from URL path (e.g., /api/predictions/123 or /api/predictions/123/result)
+        const urlParts = req.url.split('/').filter(p => p);
+        const predictionsIndex = urlParts.indexOf('predictions');
+        const id = predictionsIndex >= 0 && urlParts[predictionsIndex + 1] ? urlParts[predictionsIndex + 1] : req.query.id;
 
         switch (method) {
             case 'GET':
