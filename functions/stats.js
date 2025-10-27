@@ -43,19 +43,28 @@ module.exports = async (req, res) => {
 
         if (req.method === 'GET') {
             try {
-                // Изчисляваме времето преди 24 часа
+                // OVERALL STATS (всички прогнози)
+                const totalAll = await Prediction.countDocuments();
+                
+                const winsAll = await Prediction.countDocuments({ result: 'win' });
+                const lossesAll = await Prediction.countDocuments({ result: 'loss' });
+                const pendingAll = await Prediction.countDocuments({ result: 'pending' });
+                const voidsAll = await Prediction.countDocuments({ result: 'void' });
+                
+                // Overall Win Rate (от всички завършени прогнози)
+                const completedAll = winsAll + lossesAll;
+                const winRateAll = completedAll > 0 ? ((winsAll / completedAll) * 100).toFixed(1) : 0;
+
+                // LAST 24 HOURS STATS
                 const yesterday = new Date();
                 yesterday.setHours(yesterday.getHours() - 24);
 
-                // Филтър за последните 24 часа
                 const last24HoursFilter = {
                     matchDate: { $gte: yesterday }
                 };
 
-                // Общ брой прогнози за последните 24ч
                 const total = await Prediction.countDocuments(last24HoursFilter);
 
-                // Брой по статус (само за последните 24ч)
                 const wins = await Prediction.countDocuments({
                     ...last24HoursFilter,
                     result: 'win'
@@ -73,7 +82,7 @@ module.exports = async (req, res) => {
                     result: 'void'
                 });
 
-                // Win rate (само завършени прогнози за последните 24ч)
+                // Win rate за последните 24ч
                 const completed = wins + losses;
                 const winRate = completed > 0 ? ((wins / completed) * 100).toFixed(1) : 0;
 
@@ -115,19 +124,39 @@ module.exports = async (req, res) => {
                     : 0;
 
                 res.json({
-                    total,
-                    wins,
-                    losses,
-                    pending,
-                    voids,
-                    completed,
-                    winRate: parseFloat(winRate),
+                    // Overall stats (всички прогнози)
+                    overall: {
+                        total: totalAll,
+                        wins: winsAll,
+                        losses: lossesAll,
+                        pending: pendingAll,
+                        voids: voidsAll,
+                        completed: completedAll,
+                        winRate: parseFloat(winRateAll)
+                    },
+                    // Last 24 hours stats
+                    last24hours: {
+                        total,
+                        wins,
+                        losses,
+                        pending,
+                        voids,
+                        completed,
+                        winRate: parseFloat(winRate)
+                    },
+                    // Legacy fields (за обратна съвместимост)
+                    total: totalAll,
+                    wins: winsAll,
+                    losses: lossesAll,
+                    pending: pendingAll,
+                    voids: voidsAll,
+                    completed: completedAll,
+                    winRate: parseFloat(winRateAll),
                     streak: {
                         count: currentStreak,
                         type: streakType
                     },
-                    avgOdds: parseFloat(avgOdds),
-                    period: 'last24hours'
+                    avgOdds: parseFloat(avgOdds)
                 });
             } catch (error) {
                 console.error('Error fetching stats:', error);
