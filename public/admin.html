@@ -207,32 +207,9 @@
                 window.history.replaceState({}, document.title, '/admin');
             }
 
-            // Verify token on page load
-            fetch('/api/admin/verify', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                credentials: 'include'
-            }).then(async response => {
-                console.log('Admin verification response:', response.status);
-                if (!response.ok) {
-                    console.log('Admin verification failed, removing token');
-                    localStorage.removeItem('token');
-                    window.location.href = '/login';
-                    return;
-                }
-            
-                // Successfully verified
-                const data = await response.json();
-                console.log('Admin verification successful:', data.success);
-                // Continue loading the admin dashboard
-                loadPredictions();
-            }).catch(error => {
-                console.error('Error verifying token:', error);
-                localStorage.removeItem('token');
-                window.location.href = '/login';
-            });
+            // Token verification is handled by admin.js
+            // No need for separate verification endpoint
+            console.log('Admin page loaded with token');
         })(); // Затваряме самоизпълняващата се функция
     </script>
 </head>
