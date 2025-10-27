@@ -79,6 +79,99 @@ module.exports = async (req, res) => {
         const endpoint = urlParts[urlParts.length - 1] || 'overview';
 
         switch (method) {
+            case 'POST':
+                // Public tracking endpoints (no auth required)
+                if (endpoint === 'track') {
+                    try {
+                        const {
+                            path,
+                            fullUrl,
+                            referrer,
+                            sessionId,
+                            device,
+                            browser,
+                            os,
+                            screenResolution,
+                            language,
+                            userAgent
+                        } = req.body;
+                        
+                        // Check if this is a unique visit (first visit today from this IP/session)
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        
+                        const existingVisit = await Analytics.findOne({
+                            sessionId,
+                            timestamp: { $gte: today }
+                        });
+                        
+                        const analyticsEntry = new Analytics({
+                            path,
+                            fullUrl,
+                            referrer,
+                            sessionId,
+                            device,
+                            browser,
+                            os,
+                            screenResolution,
+                            language,
+                            userAgent,
+                            isUnique: !existingVisit,
+                            timestamp: new Date()
+                        });
+                        
+                        await analyticsEntry.save();
+                        
+                        return res.status(201).json({ success: true });
+                    } catch (error) {
+                        console.error('Error tracking analytics:', error);
+                        return res.status(500).json({ message: 'Server error' });
+                    }
+                }
+                
+                if (endpoint === 'duration') {
+                    try {
+                        const { path, sessionId, duration } = req.body;
+                        
+                        // Update the most recent entry for this session and path
+                        await Analytics.findOneAndUpdate(
+                            { sessionId, path },
+                            { duration },
+                            { sort: { timestamp: -1 } }
+                        );
+                        
+                        return res.status(200).json({ success: true });
+                    } catch (error) {
+                        console.error('Error updating duration:', error);
+                        return res.status(500).json({ message: 'Server error' });
+                    }
+                }
+                
+                if (endpoint === 'ad-click') {
+                    try {
+                        const { adUrl, path, sessionId } = req.body;
+                        
+                        // Track ad click
+                        const analyticsEntry = new Analytics({
+                            path: path + ' (ad-click)',
+                            fullUrl: adUrl,
+                            referrer: 'Ad Click',
+                            sessionId,
+                            device: 'unknown',
+                            timestamp: new Date()
+                        });
+                        
+                        await analyticsEntry.save();
+                        
+                        return res.status(201).json({ success: true });
+                    } catch (error) {
+                        console.error('Error tracking ad click:', error);
+                        return res.status(500).json({ message: 'Server error' });
+                    }
+                }
+                
+                return res.status(404).json({ message: 'Not found' });
+                
             case 'GET':
                 return auth(req, res, async () => {
                     try {
