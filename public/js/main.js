@@ -109,10 +109,10 @@ async function loadPredictions() {
 // Helper function to get status badge
 function getStatusBadge(result) {
     const badges = {
-        'pending': '<span class="status-badge status-pending">Pending</span>',
-        'win': '<span class="status-badge status-win">Won</span>',
-        'loss': '<span class="status-badge status-loss">Lost</span>',
-        'void': '<span class="status-badge status-void">Void</span>'
+        'pending': '<span class="status-badge status-pending">⏳</span>',
+        'win': '<span class="status-badge status-win">✅</span>',
+        'loss': '<span class="status-badge status-loss">❌</span>',
+        'void': '<span class="status-badge status-void">⛔</span>'
     };
     return badges[result] || badges['pending'];
 }

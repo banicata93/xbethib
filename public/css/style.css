@@ -1139,10 +1139,10 @@ body {
     
     /* Mobile status badges - smaller and more compact */
     .status-badge {
-        font-size: 0.6rem;
-        padding: 0.2rem 0.4rem;
-        white-space: nowrap;
-        letter-spacing: 0;
+        font-size: 1rem;
+        padding: 0.2rem 0.3rem;
+        min-width: 28px;
+        height: 28px;
     }
     
     /* Date header for mobile */
@@ -1766,15 +1766,17 @@ body {
 
 /* Status Badge Styles */
 .status-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.3rem 0.4rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    line-height: 1;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
+    min-width: 32px;
+    height: 32px;
 }
 
 .status-pending {
