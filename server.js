@@ -59,16 +59,8 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    // Проверяваме дали има специален параметър за достъп
-    const adminAccess = req.query['admin-access'];
-
-    // Ако параметърът не е правилен, пренасочваме към началната страница
-    if (adminAccess !== 'true') {
-        console.log('Unauthorized login attempt without correct access parameter');
-        return res.status(403).send('Access denied');
-    }
-
-    // Ако параметърът е правилен, показваме логин страницата
+    // Serve login page - URL itself is security through obscurity
+    console.log('Login page requested');
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 

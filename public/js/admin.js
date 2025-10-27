@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const predictionForm = document.getElementById('predictionForm');
     
     if (!token) {
-        window.location.href = '/login?admin-access=true';
+        window.location.href = '/login';
         return;
     }
 
