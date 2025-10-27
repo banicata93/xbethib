@@ -33,36 +33,40 @@ async function loadPredictions() {
             return;
         }
         
-        // Group predictions by date
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        // Show all predictions (sorted by date, newest first)
+        predictions.sort((a, b) => new Date(b.matchDate) - new Date(a.matchDate));
         
         predictions.forEach(prediction => {
-            const matchDate = new Date(prediction.matchDate);
-            const isToday = matchDate >= today;
+            const row = document.createElement('tr');
             
-            // Only show today's and future predictions
-            if (isToday) {
-                const row = document.createElement('tr');
-                
-                // Get status badge
-                const statusBadge = getStatusBadge(prediction.result || 'pending');
-                
-                row.innerHTML = `
-                    <td class="league-cell">
-                        <span class="team-flag">${prediction.leagueFlag || '⚽'}</span>
-                    </td>
-                    <td class="team-name">${prediction.homeTeam}</td>
-                    <td class="team-name">${prediction.awayTeam}</td>
-                    <td class="prediction-cell">
-                        <span class="prediction-badge">${prediction.prediction}</span>
-                        ${prediction.odds ? `<span class="odds-badge">@${prediction.odds}</span>` : ''}
-                    </td>
-                    <td class="status-cell">${statusBadge}</td>
-                `;
-                
-                predictionsBody.appendChild(row);
-            }
+            // Get status badge
+            const statusBadge = getStatusBadge(prediction.result || 'pending');
+            
+            // Format date
+            const matchDate = new Date(prediction.matchDate);
+            const dateStr = matchDate.toLocaleDateString('bg-BG', { 
+                day: '2-digit', 
+                month: '2-digit',
+                year: 'numeric'
+            });
+            
+            row.innerHTML = `
+                <td class="league-cell">
+                    <span class="team-flag">${prediction.leagueFlag || '⚽'}</span>
+                </td>
+                <td class="team-name">
+                    ${prediction.homeTeam}
+                    <br><small class="text-muted">${dateStr}</small>
+                </td>
+                <td class="team-name">${prediction.awayTeam}</td>
+                <td class="prediction-cell">
+                    <span class="prediction-badge">${prediction.prediction}</span>
+                    ${prediction.odds ? `<span class="odds-badge">@${prediction.odds}</span>` : ''}
+                </td>
+                <td class="status-cell">${statusBadge}</td>
+            `;
+            
+            predictionsBody.appendChild(row);
         });
         
         // If no predictions for today
