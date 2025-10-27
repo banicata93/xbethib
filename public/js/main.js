@@ -33,40 +33,59 @@ async function loadPredictions() {
             return;
         }
         
-        // Show all predictions (sorted by date, newest first)
+        // Group predictions by date
         predictions.sort((a, b) => new Date(b.matchDate) - new Date(a.matchDate));
         
+        // Group by date
+        const groupedByDate = {};
         predictions.forEach(prediction => {
-            const row = document.createElement('tr');
-            
-            // Get status badge
-            const statusBadge = getStatusBadge(prediction.result || 'pending');
-            
-            // Format date
             const matchDate = new Date(prediction.matchDate);
-            const dateStr = matchDate.toLocaleDateString('bg-BG', { 
+            const dateKey = matchDate.toLocaleDateString('bg-BG', { 
                 day: '2-digit', 
                 month: '2-digit',
                 year: 'numeric'
             });
             
-            row.innerHTML = `
-                <td class="league-cell">
-                    <span class="team-flag">${prediction.leagueFlag || '⚽'}</span>
+            if (!groupedByDate[dateKey]) {
+                groupedByDate[dateKey] = [];
+            }
+            groupedByDate[dateKey].push(prediction);
+        });
+        
+        // Render grouped predictions
+        Object.keys(groupedByDate).forEach(dateKey => {
+            // Add date header row
+            const dateHeaderRow = document.createElement('tr');
+            dateHeaderRow.className = 'date-header-row';
+            dateHeaderRow.innerHTML = `
+                <td colspan="5" class="date-header">
+                    <strong>📅 ${dateKey}</strong>
                 </td>
-                <td class="team-name">
-                    ${prediction.homeTeam}
-                    <br><small class="text-muted">${dateStr}</small>
-                </td>
-                <td class="team-name">${prediction.awayTeam}</td>
-                <td class="prediction-cell">
-                    <span class="prediction-badge">${prediction.prediction}</span>
-                    ${prediction.odds ? `<span class="odds-badge">@${prediction.odds}</span>` : ''}
-                </td>
-                <td class="status-cell">${statusBadge}</td>
             `;
+            predictionsBody.appendChild(dateHeaderRow);
             
-            predictionsBody.appendChild(row);
+            // Add predictions for this date
+            groupedByDate[dateKey].forEach(prediction => {
+                const row = document.createElement('tr');
+                
+                // Get status badge
+                const statusBadge = getStatusBadge(prediction.result || 'pending');
+                
+                row.innerHTML = `
+                    <td class="league-cell">
+                        <span class="team-flag">${prediction.leagueFlag || '⚽'}</span>
+                    </td>
+                    <td class="team-name">${prediction.homeTeam}</td>
+                    <td class="team-name">${prediction.awayTeam}</td>
+                    <td class="prediction-cell">
+                        <span class="prediction-badge">${prediction.prediction}</span>
+                        ${prediction.odds ? `<span class="odds-badge">@${prediction.odds}</span>` : ''}
+                    </td>
+                    <td class="status-cell">${statusBadge}</td>
+                `;
+                
+                predictionsBody.appendChild(row);
+            });
         });
         
         // If no predictions for today
