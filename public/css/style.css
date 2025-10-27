@@ -243,6 +243,16 @@ body {
     border-top: 2px solid var(--primary-color);
 }
 
+/* Mobile ad row in table */
+.mobile-ad-row {
+    background: transparent;
+}
+
+.mobile-ad-row td {
+    border: none !important;
+    padding: 0 !important;
+}
+
 .date-header {
     padding: 1rem !important;
     text-align: center !important;

@@ -53,7 +53,8 @@ async function loadPredictions() {
         });
         
         // Render grouped predictions
-        Object.keys(groupedByDate).forEach(dateKey => {
+        const dateKeys = Object.keys(groupedByDate);
+        dateKeys.forEach((dateKey, index) => {
             // Add date header row
             const dateHeaderRow = document.createElement('tr');
             dateHeaderRow.className = 'date-header-row';
@@ -86,6 +87,33 @@ async function loadPredictions() {
                 
                 predictionsBody.appendChild(row);
             });
+            
+            // Add mobile ad after all predictions (only on mobile and after last date group)
+            if (index === dateKeys.length - 1 && window.innerWidth < 768) {
+                const adRow = document.createElement('tr');
+                adRow.className = 'd-md-none mobile-ad-row';
+                adRow.innerHTML = `
+                    <td colspan="5" class="p-0">
+                        <div class="goleador-premium-ad mt-3 mb-2">
+                            <a href="https://www.goleadortips.com" target="_blank" class="premium-ad-link">
+                                <div class="premium-ad-content">
+                                    <div class="premium-ad-icon">
+                                        <i class="fas fa-trophy"></i>
+                                    </div>
+                                    <div class="premium-ad-text">
+                                        <div class="premium-ad-title">GoleadorTips Premium</div>
+                                        <div class="premium-ad-description">Get exclusive football predictions</div>
+                                    </div>
+                                    <div class="premium-ad-button">
+                                        <span>Join Now</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </td>
+                `;
+                predictionsBody.appendChild(adRow);
+            }
         });
         
         // If no predictions for today
