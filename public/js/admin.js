@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const predictionForm = document.getElementById('predictionForm');
     
     if (!token) {
-        window.location.href = '/login';
+        window.location.href = '/login?admin-access=true';
         return;
     }
 
@@ -55,7 +55,7 @@ async function handleAddPrediction(e) {
     } catch (error) {
         console.error('Error adding prediction:', error);
         if (error.message === 'Invalid token') {
-            window.location.href = '/login';
+            window.location.href = '/login?admin-access=true';
         } else {
             alert('Failed to add prediction: ' + error.message);
         }
@@ -72,7 +72,7 @@ async function loadAdminPredictions() {
 
         if (!response.ok) {
             if (response.status === 401) {
-                window.location.href = '/login';
+                window.location.href = '/login?admin-access=true';
                 return;
             }
             throw new Error('Failed to load predictions');
@@ -170,7 +170,7 @@ async function deletePrediction(id) {
 
         if (!response.ok) {
             if (response.status === 401) {
-                window.location.href = '/login';
+                window.location.href = '/login?admin-access=true';
                 return;
             }
             throw new Error('Failed to delete prediction');
@@ -197,7 +197,7 @@ async function markResult(id, result) {
 
         if (!response.ok) {
             if (response.status === 401) {
-                window.location.href = '/login';
+                window.location.href = '/login?admin-access=true';
                 return;
             }
             throw new Error('Failed to update result');

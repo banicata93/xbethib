@@ -24,7 +24,99 @@ body {
     padding: 0;
 }
 
-/* Navbar Styles */
+/* Modern Navbar Styles */
+.modern-navbar {
+    background: linear-gradient(135deg, rgba(0, 20, 40, 0.98), rgba(0, 40, 80, 0.98));
+    backdrop-filter: blur(15px);
+    box-shadow: 0 4px 30px rgba(0, 255, 102, 0.15);
+    border-bottom: 1px solid rgba(0, 255, 102, 0.2);
+    padding: 0.75rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Brand Container */
+.brand-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.brand-container:hover {
+    transform: translateY(-2px);
+}
+
+.brand-logo {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 255, 102, 0.3);
+    transition: all 0.3s ease;
+}
+
+.brand-logo:hover {
+    box-shadow: 0 6px 20px rgba(0, 255, 102, 0.5);
+    transform: scale(1.05);
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.brand-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #00ff66, #00ccff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+.brand-tagline {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Nav Stats */
+.nav-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    background: linear-gradient(135deg, rgba(0, 255, 102, 0.15), rgba(0, 204, 255, 0.15));
+    border-radius: 25px;
+    border: 1px solid rgba(0, 255, 102, 0.3);
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+}
+
+.nav-stats:hover {
+    background: linear-gradient(135deg, rgba(0, 255, 102, 0.25), rgba(0, 204, 255, 0.25));
+    border-color: rgba(0, 255, 102, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 255, 102, 0.2);
+}
+
+.nav-stats i {
+    color: #ffd700;
+    font-size: 1.1rem;
+}
+
+.stats-text strong {
+    color: #00ff66;
+    font-weight: 700;
+}
+
+/* Old navbar styles for compatibility */
 .navbar {
     background: var(--dark-overlay);
     padding: 1.25rem 2rem;
