@@ -79,13 +79,22 @@
                 
                 if (response.ok && data.token) {
                     console.log('Received token:', data.token);
-                    localStorage.setItem('token', data.token);
-                    const storedToken = localStorage.getItem('token');
-                    console.log('Stored token:', storedToken);
                     
-                    // Redirect to admin page
-                    console.log('Login successful, redirecting to admin...');
-                    window.location.href = '/admin';
+                    // Store in both localStorage and sessionStorage for redundancy
+                    localStorage.setItem('token', data.token);
+                    sessionStorage.setItem('token', data.token);
+                    
+                    // Verify storage
+                    const storedToken = localStorage.getItem('token');
+                    const sessionToken = sessionStorage.getItem('token');
+                    console.log('Stored in localStorage:', storedToken);
+                    console.log('Stored in sessionStorage:', sessionToken);
+                    
+                    // Small delay to ensure storage is complete
+                    setTimeout(() => {
+                        console.log('Redirecting to admin...');
+                        window.location.replace('/admin');
+                    }, 100);
 
                 } else {
                     document.getElementById('error-message').textContent = data.message || 'Login failed';

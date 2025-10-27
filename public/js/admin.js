@@ -1,15 +1,21 @@
 let token = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Get token from localStorage AFTER page load
-    token = localStorage.getItem('token');
-    console.log('Token from localStorage:', token);
+    // Get token from localStorage or sessionStorage
+    token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    
+    console.log('Checking for token...');
+    console.log('localStorage token:', localStorage.getItem('token'));
+    console.log('sessionStorage token:', sessionStorage.getItem('token'));
+    console.log('Final token:', token);
     
     const predictionForm = document.getElementById('predictionForm');
     
     if (!token) {
         console.log('No token found, redirecting to login');
-        window.location.href = '/login';
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 500);
         return;
     }
 
