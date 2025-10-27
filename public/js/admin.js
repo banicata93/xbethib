@@ -225,7 +225,7 @@ window.updateResult = async function(id, result) {
 // Helper функция за status badges
 function getStatusBadge(result) {
     const badges = {
-        'pending': '<span class="badge bg-warning text-dark">⏳ Pending</span>',
+        'pending': '<span class="badge bg-warning text-dark">Pending</span>',
         'win': '<span class="badge bg-success">✅ Won</span>',
         'loss': '<span class="badge bg-danger">❌ Lost</span>',
         'void': '<span class="badge bg-secondary">🚫 Void</span>'

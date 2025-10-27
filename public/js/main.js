@@ -156,7 +156,7 @@ async function loadPredictions() {
 // Helper function to get status badge
 function getStatusBadge(result) {
     const badges = {
-        'pending': '<span class="status-badge status-pending">⏳</span>',
+        'pending': '<span class="status-badge status-pending"></span>',
         'win': '<span class="status-badge status-win">✅</span>',
         'loss': '<span class="status-badge status-loss">❌</span>',
         'void': '<span class="status-badge status-void">⛔</span>'
