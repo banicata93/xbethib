@@ -77,8 +77,15 @@ async function loadPredictions() {
             `;
             predictionsBody.appendChild(dateHeaderRow);
             
+            // Sort predictions by league flag (country) within each date
+            const sortedPredictions = groupedByDate[dateKey].sort((a, b) => {
+                const flagA = (a.leagueFlag || '').toLowerCase();
+                const flagB = (b.leagueFlag || '').toLowerCase();
+                return flagA.localeCompare(flagB);
+            });
+            
             // Add predictions for this date
-            groupedByDate[dateKey].forEach(prediction => {
+            sortedPredictions.forEach(prediction => {
                 const row = document.createElement('tr');
                 
                 // Get status badge
