@@ -1,12 +1,16 @@
 // Функция за зареждане на обща статистика
 async function loadAnalyticsOverview(period = 7) {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        console.log('Loading analytics overview with period:', period);
+        
         const response = await fetch(`/api/analytics/overview?period=${period}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
+        
+        console.log('Overview response status:', response.status);
         
         if (!response.ok) {
             throw new Error('Failed to fetch analytics');
@@ -147,14 +151,19 @@ function displayTopPages(topPages) {
 // Функция за зареждане на статистика в реално време
 async function loadRealtimeStats() {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        console.log('Loading realtime stats...');
         const response = await fetch('/api/analytics/realtime', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
         
+        console.log('Realtime response status:', response.status);
+        
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Realtime error:', errorText);
             throw new Error('Failed to fetch realtime stats');
         }
         
@@ -196,14 +205,20 @@ function displayRealtimeStats(data) {
 // Функция за зареждане на referrer статистика
 async function loadReferrerStats(period = 7) {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        console.log('Loading referrer stats with period:', period);
+        
         const response = await fetch(`/api/analytics/referrers?period=${period}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
         
+        console.log('Referrer response status:', response.status);
+        
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Referrer error:', errorText);
             throw new Error('Failed to fetch referrer stats');
         }
         

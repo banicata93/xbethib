@@ -126,28 +126,13 @@
     <script>
         // Проверка за автентикация
         (function() {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             if (!token) {
-                window.location.href = '/login?admin-access=true';
+                console.log('No token found, redirecting to login');
+                window.location.href = '/login.html';
                 return;
             }
-
-            // Verify token
-            fetch('/api/admin/verify', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            }).then(response => {
-                if (!response.ok) {
-                    localStorage.removeItem('token');
-                    window.location.href = '/login?admin-access=true';
-                }
-            }).catch(error => {
-                console.error('Error verifying token:', error);
-                localStorage.removeItem('token');
-                window.location.href = '/login?admin-access=true';
-            });
+            console.log('Token found, loading analytics...');
         })();
     </script>
 </head>
