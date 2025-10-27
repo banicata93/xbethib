@@ -156,12 +156,12 @@ async function loadPredictions() {
 // Helper function to get status badge
 function getStatusBadge(result) {
     const badges = {
-        'pending': '<span class="status-badge status-pending"></span>',
+        'pending': '',  // Празно - нищо не се показва
         'win': '<span class="status-badge status-win">✅</span>',
         'loss': '<span class="status-badge status-loss">❌</span>',
         'void': '<span class="status-badge status-void">⛔</span>'
     };
-    return badges[result] || badges['pending'];
+    return badges[result] || '';
 }
 
 // Retry button functionality

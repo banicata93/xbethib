@@ -159,6 +159,31 @@
             <p class="lead text-muted">Paste JSON от AI и импортирай прогнози за секунди</p>
         </div>
 
+        <!-- Delete by Date Card -->
+        <div class="import-card">
+            <h3 class="mb-3">
+                <i class="bi bi-trash"></i> Delete Predictions by Date
+            </h3>
+            <p class="text-muted mb-3">Изтрий всички прогнози за конкретна дата:</p>
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label text-white">Избери дата:</label>
+                    <input type="date" id="deleteDate" class="form-control" style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 255, 102, 0.3); color: #fff;">
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button class="btn btn-danger w-100" onclick="deleteByDate()">
+                        <i class="bi bi-trash3"></i> Delete All Predictions for This Date
+                    </button>
+                </div>
+            </div>
+            
+            <div id="deleteResultBox" class="result-box mt-3" style="display: none;">
+                <h5 id="deleteResultTitle"></h5>
+                <p id="deleteResultMessage"></p>
+            </div>
+        </div>
+
         <!-- Import Card -->
         <div class="import-card">
             <h3 class="mb-3">
@@ -450,6 +475,58 @@
 
             // Scroll to result
             resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        async function deleteByDate() {
+            const dateInput = document.getElementById('deleteDate');
+            const selectedDate = dateInput.value;
+
+            if (!selectedDate) {
+                showDeleteResult('error', 'Грешка', 'Моля, избери дата');
+                return;
+            }
+
+            // Confirm deletion
+            const confirmMsg = `Сигурен ли си, че искаш да изтриеш ВСИЧКИ прогнози за ${selectedDate}?\n\nТова действие не може да бъде отменено!`;
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/predictions/delete-by-date?date=${selectedDate}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showDeleteResult('success', 'Успешно изтриване!', `Изтрити ${result.deletedCount} прогнози за ${selectedDate}`);
+                    dateInput.value = '';
+                } else {
+                    showDeleteResult('error', 'Грешка', result.message || 'Неуспешно изтриване');
+                }
+            } catch (error) {
+                showDeleteResult('error', 'Грешка при заявката', error.message);
+            }
+        }
+
+        function showDeleteResult(type, title, message) {
+            const deleteResultBox = document.getElementById('deleteResultBox');
+            const deleteResultTitle = document.getElementById('deleteResultTitle');
+            const deleteResultMessage = document.getElementById('deleteResultMessage');
+
+            deleteResultBox.className = `result-box mt-3 ${type}`;
+            deleteResultTitle.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : 'x-circle'}"></i> ${title}`;
+            deleteResultMessage.textContent = message;
+            deleteResultBox.style.display = 'block';
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                deleteResultBox.style.display = 'none';
+            }, 5000);
         }
 
         function logout() {

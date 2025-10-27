@@ -222,12 +222,47 @@ module.exports = async (req, res) => {
             case 'DELETE':
                 return auth(req, res, async () => {
                     try {
-                        const prediction = await Prediction.findByIdAndDelete(id);
-                        if (!prediction) {
-                            return res.status(404).json({ message: 'Prediction not found' });
+                        // Check if this is a delete-by-date request
+                        if (req.url.includes('/delete-by-date')) {
+                            const urlParams = new URLSearchParams(req.url.split('?')[1]);
+                            const date = urlParams.get('date');
+
+                            if (!date) {
+                                return res.status(400).json({ message: 'Date parameter is required' });
+                            }
+
+                            // Parse the date and create date range for the entire day
+                            const startDate = new Date(date);
+                            startDate.setHours(0, 0, 0, 0);
+                            
+                            const endDate = new Date(date);
+                            endDate.setHours(23, 59, 59, 999);
+
+                            // Delete all predictions for this date
+                            const result = await Prediction.deleteMany({
+                                matchDate: {
+                                    $gte: startDate,
+                                    $lte: endDate
+                                }
+                            });
+
+                            return res.json({
+                                message: `Deleted ${result.deletedCount} predictions for ${date}`,
+                                deletedCount: result.deletedCount,
+                                date: date
+                            });
+                        } else {
+                            // Single prediction delete by ID
+                            const prediction = await Prediction.findByIdAndDelete(id);
+
+                            if (!prediction) {
+                                return res.status(404).json({ message: 'Prediction not found' });
+                            }
+
+                            res.json({ message: 'Prediction deleted successfully' });
                         }
-                        res.json({ message: 'Prediction deleted' });
                     } catch (error) {
+                        console.error('Error deleting prediction(s):', error);
                         res.status(500).json({ message: error.message });
                     }
                 });
