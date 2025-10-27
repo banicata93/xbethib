@@ -169,7 +169,7 @@ async function loadAdminPredictions() {
     }
 }
 
-async function deletePrediction(id) {
+window.deletePrediction = async function(id) {
     if (!confirm('Are you sure you want to delete this prediction?')) return;
 
     try {
@@ -196,7 +196,7 @@ async function deletePrediction(id) {
 }
 
 // Маркиране на резултат
-async function markResult(id, result) {
+window.updateResult = async function(id, result) {
     try {
         const response = await fetch(`/api/predictions/${id}/result`, {
             method: 'PATCH',
@@ -234,7 +234,7 @@ function getStatusBadge(result) {
 }
 
 // Редактиране на прогноза
-async function editPrediction(id) {
+window.editPrediction = async function(id) {
     try {
         // Зареждаме данните на прогнозата
         const response = await fetch('/api/predictions', {
@@ -356,8 +356,9 @@ function showEditModal(prediction) {
 }
 
 // Запазване на редактираната прогноза
-async function saveEditedPrediction() {
+window.saveEditedPrediction = async function() {
     try {
+        console.log('Saving edited prediction...');
         const id = document.getElementById('editPredictionId').value;
         const matchDate = document.getElementById('editMatchDate').value;
         const oddsValue = document.getElementById('editOdds').value;
@@ -376,6 +377,8 @@ async function saveEditedPrediction() {
             result: document.getElementById('editResult').value
         };
         
+        console.log('Form data:', formData);
+        
         const response = await fetch(`/api/predictions/${id}`, {
             method: 'PUT',
             headers: {
@@ -386,12 +389,17 @@ async function saveEditedPrediction() {
         });
         
         if (!response.ok) {
-            throw new Error('Failed to update prediction');
+            const error = await response.json();
+            console.error('Update failed:', error);
+            throw new Error(error.message || 'Failed to update prediction');
         }
+        
+        console.log('Update successful');
+        alert('Prediction updated successfully!');
         
         // Затваряме модала
         const modal = bootstrap.Modal.getInstance(document.getElementById('editPredictionModal'));
-        modal.hide();
+        if (modal) modal.hide();
         
         // Презареждаме прогнозите
         await loadAdminPredictions();
