@@ -88,8 +88,8 @@ async function loadPredictions() {
                 predictionsBody.appendChild(row);
             });
             
-            // Add mobile ad after all predictions (only on mobile and after last date group)
-            if (index === dateKeys.length - 1 && window.innerWidth < 768) {
+            // Add mobile ad after first date group (newest date) on mobile
+            if (index === 0 && window.innerWidth < 768) {
                 const adRow = document.createElement('tr');
                 adRow.className = 'd-md-none mobile-ad-row';
                 adRow.innerHTML = `
