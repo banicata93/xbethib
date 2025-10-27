@@ -119,41 +119,83 @@ module.exports = async (req, res) => {
             case 'POST':
                 return auth(req, res, async () => {
                     try {
-                        console.log('Received prediction data:', req.body);
-                        const { matchDate, homeTeam, awayTeam, leagueFlag, prediction, odds, result } = req.body;
+                        // Check if this is a bulk import
+                        if (req.body.predictions && Array.isArray(req.body.predictions)) {
+                            // Bulk import
+                            const predictions = req.body.predictions;
+                            const results = {
+                                success: [],
+                                failed: []
+                            };
 
-                        // Валидация на входящите данни
-                        if (!matchDate || !homeTeam || !awayTeam || !leagueFlag || !prediction) {
-                            return res.status(400).json({
-                                message: 'All fields are required',
-                                received: req.body
+                            for (const predData of predictions) {
+                                try {
+                                    const { matchDate, homeTeam, awayTeam, leagueFlag, prediction, odds, result } = predData;
+
+                                    // Валидация
+                                    if (!matchDate || !homeTeam || !awayTeam || !prediction) {
+                                        results.failed.push({
+                                            data: predData,
+                                            error: 'Missing required fields'
+                                        });
+                                        continue;
+                                    }
+
+                                    // Парсване на датата
+                                    const date = new Date(matchDate);
+
+                                    const newPrediction = new Prediction({
+                                        matchDate: date,
+                                        homeTeam,
+                                        awayTeam,
+                                        leagueFlag: leagueFlag || '⚽',
+                                        prediction,
+                                        odds: odds || null,
+                                        result: result || 'pending'
+                                    });
+
+                                    const savedPrediction = await newPrediction.save();
+                                    results.success.push(savedPrediction);
+                                } catch (error) {
+                                    results.failed.push({
+                                        data: predData,
+                                        error: error.message
+                                    });
+                                }
+                            }
+
+                            return res.status(201).json({
+                                message: `Imported ${results.success.length} predictions, ${results.failed.length} failed`,
+                                success: results.success.length,
+                                failed: results.failed.length,
+                                failedItems: results.failed
                             });
+                        } else {
+                            // Single prediction
+                            const { matchDate, homeTeam, awayTeam, leagueFlag, prediction, odds, result } = req.body;
+
+                            // Валидация
+                            if (!matchDate || !homeTeam || !awayTeam || !prediction) {
+                                return res.status(400).json({ message: 'Missing required fields' });
+                            }
+
+                            // Парсване на датата
+                            const date = new Date(matchDate);
+
+                            const newPrediction = new Prediction({
+                                matchDate: date,
+                                homeTeam,
+                                awayTeam,
+                                leagueFlag,
+                                prediction,
+                                odds,
+                                result
+                            });
+
+                            const savedPrediction = await newPrediction.save();
+                            console.log('Saved prediction:', savedPrediction);
+                            res.status(201).json(savedPrediction);
                         }
-
-                        const date = new Date(matchDate);
-                        console.log('Creating prediction:', {
-                            date: date.toISOString(),
-                            homeTeam,
-                            awayTeam,
-                            leagueFlag,
-                            prediction,
-                            odds,
-                            result
-                        });
-
-                        const newPrediction = new Prediction({
-                            matchDate: date,
-                            homeTeam,
-                            awayTeam,
-                            leagueFlag,
-                            prediction,
-                            odds,
-                            result
-                        });
-
-                        const savedPrediction = await newPrediction.save();
-                        console.log('Saved prediction:', savedPrediction);
-                        res.status(201).json(savedPrediction);
                     } catch (error) {
                         console.error('Error in POST /predictions:', error);
                         res.status(400).json({ message: error.message });
