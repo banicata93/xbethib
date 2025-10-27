@@ -1,13 +1,19 @@
-let token = localStorage.getItem('token');
+let token = null;
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Get token from localStorage AFTER page load
+    token = localStorage.getItem('token');
+    console.log('Token from localStorage:', token);
+    
     const predictionForm = document.getElementById('predictionForm');
     
     if (!token) {
+        console.log('No token found, redirecting to login');
         window.location.href = '/login';
         return;
     }
 
+    console.log('Token found, loading admin panel');
     // Load predictions when page loads
     loadAdminPredictions();
     
