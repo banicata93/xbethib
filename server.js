@@ -80,6 +80,11 @@ app.get('/bot-analysis', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'bot-analysis.html'));
 });
 
+// Bulk import page
+app.get('/bulk-import', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'bulk-import.html'));
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error('Error:', err);
