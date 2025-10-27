@@ -98,9 +98,9 @@
                     const storedToken = localStorage.getItem('token');
                     console.log('Stored token:', storedToken);
                     
-                    // Redirect directly to admin page with token
+                    // Redirect to admin page
                     console.log('Login successful, redirecting to admin...');
-                    window.location.href = `/admin?token=${encodeURIComponent(storedToken)}`;
+                    window.location.href = '/admin';
 
                 } else {
                     document.getElementById('error-message').textContent = data.message || 'Login failed';
