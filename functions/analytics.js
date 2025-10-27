@@ -75,8 +75,13 @@ module.exports = async (req, res) => {
         await connectToDatabase();
 
         const { method } = req;
-        const urlParts = req.url.split('/');
-        const endpoint = urlParts[urlParts.length - 1] || 'overview';
+        
+        // Extract endpoint from URL path (e.g., /api/analytics/overview or /api/analytics/track)
+        const urlParts = req.url.split('/').filter(p => p && p !== 'api' && p !== 'analytics');
+        // Remove query string if present
+        const endpoint = urlParts[0] ? urlParts[0].split('?')[0] : 'overview';
+        
+        console.log('Analytics endpoint:', endpoint, 'Method:', method);
 
         switch (method) {
             case 'POST':
