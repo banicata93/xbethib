@@ -2079,3 +2079,320 @@ body {
         animation: none;
     }
 }
+/* Match of the Day Styles */
+.match-of-the-day {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 0;
+    margin-bottom: 2rem;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+    position: relative;
+    animation: fadeIn 0.6s ease-out;
+}
+
+.match-of-the-day::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+}
+
+.motd-header {
+    padding: 1.5rem;
+    text-align: center;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+}
+
+.motd-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.motd-badge i {
+    font-size: 1.3rem;
+    color: #ffd700;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.motd-content {
+    padding: 2rem;
+    position: relative;
+}
+
+.motd-teams {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.motd-team {
+    flex: 1;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.motd-team:hover {
+    transform: translateY(-5px);
+}
+
+.team-logo-container {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1rem;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    position: relative;
+}
+
+.team-logo-container::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    background: linear-gradient(135deg, #00ff66, #00ccff);
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.motd-team:hover .team-logo-container::after {
+    opacity: 1;
+}
+
+.team-logo {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+.team-name {
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.motd-vs {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.vs-text {
+    font-size: 2rem;
+    font-weight: 900;
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.match-time {
+    background: rgba(0, 0, 0, 0.3);
+    color: #ffd700;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 1rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.motd-prediction {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.prediction-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.prediction-value {
+    color: #00ff66;
+    font-size: 1.8rem;
+    font-weight: 800;
+    text-shadow: 0 0 20px rgba(0, 255, 102, 0.5);
+    margin: 0;
+}
+
+.motd-preview {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.preview-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.preview-label i {
+    font-size: 1.2rem;
+    color: #00ccff;
+}
+
+.preview-text {
+    color: rgba(255, 255, 255, 0.95);
+    line-height: 1.7;
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .match-of-the-day {
+        border-radius: 15px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .motd-header {
+        padding: 1rem;
+    }
+    
+    .motd-badge {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+    
+    .motd-badge i {
+        font-size: 1.1rem;
+    }
+    
+    .motd-content {
+        padding: 1.5rem 1rem;
+    }
+    
+    .motd-teams {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .team-logo-container {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .team-name {
+        font-size: 1.1rem;
+    }
+    
+    .vs-text {
+        font-size: 1.5rem;
+        width: 60px;
+        height: 60px;
+    }
+    
+    .match-time {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .prediction-value {
+        font-size: 1.5rem;
+    }
+    
+    .motd-prediction {
+        padding: 1.2rem;
+    }
+    
+    .motd-preview {
+        padding: 1.2rem;
+    }
+    
+    .preview-label {
+        font-size: 1rem;
+    }
+    
+    .preview-text {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .motd-badge {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .motd-content {
+        padding: 1rem 0.75rem;
+    }
+    
+    .team-logo-container {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .team-name {
+        font-size: 1rem;
+    }
+    
+    .vs-text {
+        font-size: 1.3rem;
+        width: 50px;
+        height: 50px;
+    }
+    
+    .prediction-value {
+        font-size: 1.3rem;
+    }
+    
+    .preview-text {
+        font-size: 0.9rem;
+    }
+}
