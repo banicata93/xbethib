@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match of the Day - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --warning-color: #f39c12;
+            --success-color: #27ae60;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Roboto', sans-serif;
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        
+        .navbar {
+            background: var(--primary-color) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            color: white !important;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: white;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%) !important;
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            border: none;
+            font-weight: 600;
+            padding: 20px;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+        
+        .form-control, .form-select {
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--warning-color);
+            box-shadow: 0 0 0 0.2rem rgba(243, 156, 18, 0.25);
+        }
+        
+        .btn-warning {
+            background: var(--warning-color);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-warning:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+        }
+        
+        .btn-secondary {
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+        }
+        
+        .preview-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+            margin-top: 20px;
+        }
+        
+        .team-logo-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .vs-badge {
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .match-time {
+            color: #ffd700;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .prediction-badge {
+            background: rgba(46, 213, 115, 0.2);
+            border: 2px solid #2ed573;
+            color: #2ed573;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin">
+                <i class="bi bi-star-fill me-2"></i>Match of the Day Admin
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Admin
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="bi bi-house me-1"></i>View Site
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Form Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-star-fill me-2"></i>Set Match of the Day
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="motdForm">
+                            <div class="row g-3">
+                                <!-- Home Team -->
+                                <div class="col-md-6">
+                                    <label for="homeTeamName" class="form-label">
+                                        <i class="bi bi-house-door me-2"></i>Home Team Name
+                                    </label>
+                                    <input type="text" class="form-control" id="homeTeamName" required placeholder="e.g., Manchester United">
+                                </div>
+                                
+                                <!-- Away Team -->
+                                <div class="col-md-6">
+                                    <label for="awayTeamName" class="form-label">
+                                        <i class="bi bi-airplane me-2"></i>Away Team Name
+                                    </label>
+                                    <input type="text" class="form-control" id="awayTeamName" required placeholder="e.g., Liverpool">
+                                </div>
+                                
+                                <!-- Home Team Logo -->
+                                <div class="col-md-6">
+                                    <label for="homeTeamLogo" class="form-label">
+                                        <i class="bi bi-image me-2"></i>Home Team Logo URL
+                                    </label>
+                                    <input type="url" class="form-control" id="homeTeamLogo" placeholder="https://example.com/logo.png">
+                                    <div class="form-text">Optional - Leave empty for default logo</div>
+                                </div>
+                                
+                                <!-- Away Team Logo -->
+                                <div class="col-md-6">
+                                    <label for="awayTeamLogo" class="form-label">
+                                        <i class="bi bi-image me-2"></i>Away Team Logo URL
+                                    </label>
+                                    <input type="url" class="form-control" id="awayTeamLogo" placeholder="https://example.com/logo.png">
+                                    <div class="form-text">Optional - Leave empty for default logo</div>
+                                </div>
+                                
+                                <!-- Match Time -->
+                                <div class="col-md-6">
+                                    <label for="matchTime" class="form-label">
+                                        <i class="bi bi-clock me-2"></i>Match Time
+                                    </label>
+                                    <input type="time" class="form-control" id="matchTime" required>
+                                </div>
+                                
+                                <!-- Prediction -->
+                                <div class="col-md-6">
+                                    <label for="prediction" class="form-label">
+                                        <i class="bi bi-lightning me-2"></i>Prediction
+                                    </label>
+                                    <select class="form-select" id="prediction" required>
+                                        <option value="">Select Prediction</option>
+                                        <option value="BTTS">BTTS (Both Teams To Score)</option>
+                                        <option value="Over 2.5">Over 2.5 Goals</option>
+                                        <option value="Over 1.5">Over 1.5 Goals</option>
+                                        <option value="Under 2.5">Under 2.5 Goals</option>
+                                        <option value="Home Win">Home Win</option>
+                                        <option value="Draw">Draw</option>
+                                        <option value="Away Win">Away Win</option>
+                                        <option value="1X">1X (Home or Draw)</option>
+                                        <option value="X2">X2 (Draw or Away)</option>
+                                        <option value="12">12 (Home or Away)</option>
+                                        <option value="BTTS & Over 2.5">BTTS & Over 2.5</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Match Preview -->
+                                <div class="col-12">
+                                    <label for="matchPreview" class="form-label">
+                                        <i class="bi bi-card-text me-2"></i>Match Preview
+                                    </label>
+                                    <textarea class="form-control" id="matchPreview" rows="4" required placeholder="Write a brief preview of the match (2-3 sentences)"></textarea>
+                                    <div class="form-text">Describe the match, teams form, key players, etc.</div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-center gap-3 mt-4">
+                                <button type="button" class="btn btn-secondary btn-lg px-5" onclick="showPreview()">
+                                    <i class="bi bi-eye me-2"></i>Preview
+                                </button>
+                                <button type="submit" class="btn btn-warning btn-lg px-5">
+                                    <i class="bi bi-star-fill me-2"></i>Save Match of the Day
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Preview Section -->
+                <div id="previewSection" class="preview-section" style="display: none;">
+                    <div class="text-center mb-3">
+                        <h4 class="mb-0">
+                            <i class="bi bi-star-fill me-2" style="animation: pulse 2s ease-in-out infinite;"></i>
+                            MATCH OF THE DAY
+                        </h4>
+                    </div>
+                    
+                    <div class="row align-items-center justify-content-center g-4">
+                        <div class="col-4 text-center">
+                            <img id="previewHomeLogo" src="/images/default-team-logo.png" alt="Home Team" class="team-logo-preview mb-2">
+                            <h5 id="previewHomeName" class="mb-0">Home Team</h5>
+                        </div>
+                        
+                        <div class="col-4 text-center">
+                            <div class="vs-badge mx-auto mb-2">VS</div>
+                            <div class="match-time" id="previewTime">--:--</div>
+                        </div>
+                        
+                        <div class="col-4 text-center">
+                            <img id="previewAwayLogo" src="/images/default-team-logo.png" alt="Away Team" class="team-logo-preview mb-2">
+                            <h5 id="previewAwayName" class="mb-0">Away Team</h5>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <div class="prediction-badge" id="previewPrediction">Prediction</div>
+                    </div>
+                    
+                    <div class="mt-4 p-3" style="background: rgba(255,255,255,0.1); border-radius: 10px;">
+                        <h6><i class="bi bi-info-circle me-2"></i>Match Preview</h6>
+                        <p id="previewText" class="mb-0">Preview text will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+    </style>
+    <script>
+        // Preview function
+        function showPreview() {
+            const homeTeamName = document.getElementById('homeTeamName').value;
+            const awayTeamName = document.getElementById('awayTeamName').value;
+            const homeTeamLogo = document.getElementById('homeTeamLogo').value;
+            const awayTeamLogo = document.getElementById('awayTeamLogo').value;
+            const matchTime = document.getElementById('matchTime').value;
+            const prediction = document.getElementById('prediction').value;
+            const matchPreview = document.getElementById('matchPreview').value;
+            
+            if (!homeTeamName || !awayTeamName || !matchTime || !prediction || !matchPreview) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            // Update preview
+            document.getElementById('previewHomeName').textContent = homeTeamName;
+            document.getElementById('previewAwayName').textContent = awayTeamName;
+            document.getElementById('previewHomeLogo').src = homeTeamLogo || '/images/default-team-logo.png';
+            document.getElementById('previewAwayLogo').src = awayTeamLogo || '/images/default-team-logo.png';
+            document.getElementById('previewTime').textContent = matchTime;
+            document.getElementById('previewPrediction').textContent = prediction;
+            document.getElementById('previewText').textContent = matchPreview;
+            
+            // Show preview
+            document.getElementById('previewSection').style.display = 'block';
+            document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Form submission
+        document.getElementById('motdForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                homeTeam: {
+                    name: document.getElementById('homeTeamName').value,
+                    logo: document.getElementById('homeTeamLogo').value || ''
+                },
+                awayTeam: {
+                    name: document.getElementById('awayTeamName').value,
+                    logo: document.getElementById('awayTeamLogo').value || ''
+                },
+                time: document.getElementById('matchTime').value,
+                prediction: document.getElementById('prediction').value,
+                preview: document.getElementById('matchPreview').value
+            };
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('Please login first');
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                const response = await fetch('/api/match-of-the-day', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to save Match of the Day');
+                }
+                
+                alert('Match of the Day saved successfully! ⭐');
+                
+                // Optionally redirect to home page
+                if (confirm('Would you like to view it on the home page?')) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error: ' + error.message);
+            }
+        });
+        
+        // Load existing MOTD if available
+        async function loadExistingMotd() {
+            try {
+                const response = await fetch('/api/match-of-the-day');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data) {
+                        document.getElementById('homeTeamName').value = data.homeTeam?.name || '';
+                        document.getElementById('awayTeamName').value = data.awayTeam?.name || '';
+                        document.getElementById('homeTeamLogo').value = data.homeTeam?.logo || '';
+                        document.getElementById('awayTeamLogo').value = data.awayTeam?.logo || '';
+                        document.getElementById('matchTime').value = data.time || '';
+                        document.getElementById('prediction').value = data.prediction || '';
+                        document.getElementById('matchPreview').value = data.preview || '';
+                    }
+                }
+            } catch (error) {
+                console.log('No existing MOTD found');
+            }
+        }
+        
+        // Load on page load
+        loadExistingMotd();
+    </script>
+</body>
+</html>
