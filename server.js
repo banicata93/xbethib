@@ -94,7 +94,6 @@ app.get('/match-of-the-day-admin', (req, res) => {
 const predictionsRouter = require('./routes/predictions');
 const matchOfTheDayRouter = require('./routes/matchOfTheDay');
 const authRouter = require('./routes/auth');
-const botPredictionsRouter = require('./routes/botPredictions');
 
 // Connect to database before handling API requests
 app.use(async (req, res, next) => {
@@ -107,7 +106,6 @@ app.use(async (req, res, next) => {
 app.use('/api/predictions', predictionsRouter);
 app.use('/api/match-of-the-day', matchOfTheDayRouter);
 app.use('/api/auth', authRouter);
-app.use('/api/botPredictions', botPredictionsRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -119,6 +117,15 @@ app.use((err, req, res, next) => {
 app.use('*', (req, res) => {
     res.status(404).send('Page not found');
 });
+
+// Start server locally if not in Vercel
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, async () => {
+        console.log(`Server running on port ${PORT}`);
+        await connectToDatabase();
+    });
+}
 
 // For Vercel serverless
 module.exports = app;
