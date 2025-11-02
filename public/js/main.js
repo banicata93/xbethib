@@ -1,4 +1,4 @@
-// Simplified main.js - No API calls, faster loading
+// Main.js - Load predictions from API
 
 // Helper function to get status badge
 function getStatusBadge(result) {
@@ -11,24 +11,110 @@ function getStatusBadge(result) {
     return badges[result] || '';
 }
 
-// Static predictions - no API call needed
-function loadPredictions() {
+// Format date for display
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const matchDate = new Date(date);
+    matchDate.setHours(0, 0, 0, 0);
+    
+    if (matchDate.getTime() === today.getTime()) {
+        return 'Today';
+    }
+    
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    if (matchDate.getTime() === tomorrow.getTime()) {
+        return 'Tomorrow';
+    }
+    
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
+}
+
+// Load predictions from API
+async function loadPredictions() {
     const predictionsBody = document.getElementById('predictions-body');
-    const loadingIndicator = document.getElementById('loading-indicator');
-    const errorMessage = document.getElementById('error-message');
     
-    // Hide loading and error messages immediately
-    if (loadingIndicator) loadingIndicator.style.display = 'none';
-    if (errorMessage) errorMessage.style.display = 'none';
+    if (!predictionsBody) {
+        console.error('Predictions body element not found');
+        return;
+    }
     
-    // Show message that predictions are loaded from server-side
-    if (predictionsBody && predictionsBody.innerHTML.trim() === '') {
+    // Show loading state
+    predictionsBody.innerHTML = `
+        <tr>
+            <td colspan="5" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 mb-0" style="color: rgba(255, 255, 255, 0.7);">Loading predictions...</p>
+            </td>
+        </tr>
+    `;
+    
+    try {
+        const response = await fetch('/api/predictions');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const predictions = await response.json();
+        console.log('Loaded predictions:', predictions);
+        
+        if (!predictions || predictions.length === 0) {
+            predictionsBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-4">
+                        <p class="mb-0" style="color: rgba(255, 255, 255, 0.7);">
+                            <i class="bi bi-info-circle me-2"></i>
+                            No predictions available. Check back soon!
+                        </p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        // Filter out Match of the Day from regular predictions
+        const regularPredictions = predictions.filter(p => !p.isMatchOfTheDay);
+        
+        // Build table rows
+        let html = '';
+        regularPredictions.forEach(prediction => {
+            const statusBadge = getStatusBadge(prediction.result || 'pending');
+            const dateDisplay = formatDate(prediction.matchDate);
+            
+            html += `
+                <tr>
+                    <td>
+                        <img src="${prediction.leagueFlag || '/images/default-flag.png'}" 
+                             alt="League" 
+                             class="flag-icon"
+                             onerror="this.src='/images/default-flag.png'">
+                        ${dateDisplay}
+                    </td>
+                    <td>${prediction.homeTeam}</td>
+                    <td>${prediction.awayTeam}</td>
+                    <td><strong>${prediction.prediction}</strong></td>
+                    <td>${statusBadge}</td>
+                </tr>
+            `;
+        });
+        
+        predictionsBody.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Error loading predictions:', error);
         predictionsBody.innerHTML = `
             <tr>
                 <td colspan="5" class="text-center py-4">
-                    <p class="mb-0" style="color: rgba(255, 255, 255, 0.7);">
-                        <i class="bi bi-info-circle me-2"></i>
-                        Predictions are updated daily. Check back soon!
+                    <p class="mb-0 text-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Error loading predictions. Please try again later.
                     </p>
                 </td>
             </tr>
