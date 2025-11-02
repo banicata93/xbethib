@@ -118,32 +118,32 @@ async function loadAdminPredictions() {
             });
             
             const row = document.createElement('tr');
-            const homeDisplay = `${prediction.homeTeamFlag || ''} ${prediction.homeTeam || ''}`.trim();
-            const awayDisplay = `${prediction.awayTeamFlag || ''} ${prediction.awayTeam || ''}`.trim();
-            
             row.innerHTML = `
-                <td style="padding: 5px;">${formattedDate}</td>
-                <td style="font-size: 1rem; padding: 5px;">${prediction.leagueFlag || prediction.league?.flag || ''}</td>
-                <td style="padding: 5px;">${homeDisplay}</td>
-                <td style="padding: 5px;">${awayDisplay}</td>
-                <td class="text-primary fw-bold" style="padding: 5px;">${prediction.prediction || ''}</td>
-                <td style="padding: 5px;">
+                <td class="fw-bold">${formattedDate}</td>
+                <td style="font-size: 1.2rem;">${prediction.leagueFlag || prediction.league?.flag || ''}</td>
+                <td class="fw-bold">${prediction.homeTeam || ''}</td>
+                <td class="fw-bold">${prediction.awayTeam || ''}</td>
+                <td class="text-primary fw-bold">${prediction.prediction || ''}</td>
+                <td>
                     ${getStatusBadge(prediction.result || 'pending')}
-                    ${prediction.odds ? `<br><small class="text-muted" style="font-size: 0.7rem;">Odds: ${prediction.odds}</small>` : ''}
+                    ${prediction.odds ? `<br><small class="text-muted">Odds: ${prediction.odds}</small>` : ''}
                 </td>
-                <td style="padding: 5px;">
+                <td>
                     ${(prediction.result === 'pending' || !prediction.result) ? `
-                        <button class="btn btn-success btn-sm me-1" onclick="markResult('${prediction._id}', 'win')" title="Win">
-                            <i class="bi bi-check"></i>
+                        <button class="btn btn-success btn-sm me-1 mb-1" onclick="markResult('${prediction._id}', 'win')" title="Mark as Win">
+                            <i class="bi bi-check-circle"></i>
                         </button>
-                        <button class="btn btn-danger btn-sm me-1" onclick="markResult('${prediction._id}', 'loss')" title="Loss">
-                            <i class="bi bi-x"></i>
+                        <button class="btn btn-danger btn-sm me-1 mb-1" onclick="markResult('${prediction._id}', 'loss')" title="Mark as Loss">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                        <button class="btn btn-secondary btn-sm me-1 mb-1" onclick="markResult('${prediction._id}', 'void')" title="Mark as Void">
+                            <i class="bi bi-slash-circle"></i>
                         </button>
                     ` : ''}
-                    <button class="btn btn-warning btn-sm me-1" onclick="editPrediction('${prediction._id}')" title="Edit">
+                    <button class="btn btn-warning btn-sm me-1 mb-1" onclick="editPrediction('${prediction._id}')" title="Edit">
                         <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm" onclick="deletePrediction('${prediction._id}')" title="Delete">
+                    <button class="btn btn-outline-danger btn-sm mb-1" onclick="deletePrediction('${prediction._id}')" title="Delete">
                         <i class="bi bi-trash"></i>
                     </button>
                 </td>
@@ -276,28 +276,13 @@ function showEditModal(prediction) {
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label for="editLeagueFlag" class="form-label">League Flag</label>
-                                    <input type="text" class="form-control" id="editLeagueFlag" placeholder="🇬🇧" required>
-                                </div>
-                                
-                                <div class="mb-3">
                                     <label for="editHomeTeam" class="form-label">Home Team</label>
                                     <input type="text" class="form-control" id="editHomeTeam" required>
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label for="editHomeTeamFlag" class="form-label">Home Team Flag</label>
-                                    <input type="text" class="form-control" id="editHomeTeamFlag" placeholder="🏴">
-                                </div>
-                                
-                                <div class="mb-3">
                                     <label for="editAwayTeam" class="form-label">Away Team</label>
                                     <input type="text" class="form-control" id="editAwayTeam" required>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="editAwayTeamFlag" class="form-label">Away Team Flag</label>
-                                    <input type="text" class="form-control" id="editAwayTeamFlag" placeholder="🏴">
                                 </div>
                                 
                                 <div class="mb-3">
@@ -344,9 +329,7 @@ function showEditModal(prediction) {
     
     document.getElementById('editLeagueFlag').value = prediction.league?.flag || prediction.leagueFlag || '';
     document.getElementById('editHomeTeam').value = prediction.homeTeam || '';
-    document.getElementById('editHomeTeamFlag').value = prediction.homeTeamFlag || '';
     document.getElementById('editAwayTeam').value = prediction.awayTeam || '';
-    document.getElementById('editAwayTeamFlag').value = prediction.awayTeamFlag || '';
     document.getElementById('editPrediction').value = prediction.prediction || '';
     document.getElementById('editOdds').value = prediction.odds || '';
     document.getElementById('editResult').value = prediction.result || 'pending';
@@ -367,9 +350,7 @@ window.saveEditedPrediction = async function() {
         const formData = {
             matchDate: matchDate,
             homeTeam: document.getElementById('editHomeTeam').value,
-            homeTeamFlag: document.getElementById('editHomeTeamFlag').value || '',
             awayTeam: document.getElementById('editAwayTeam').value,
-            awayTeamFlag: document.getElementById('editAwayTeamFlag').value || '',
             league: {
                 name: 'League',
                 flag: document.getElementById('editLeagueFlag').value.trim()
