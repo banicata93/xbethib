@@ -2,18 +2,33 @@
 (function() {
     'use strict';
     
+    // Function to generate team logo URL
+    function getTeamLogoUrl(teamName, teamId) {
+        // Try different sources in order
+        if (teamId) {
+            // Try API-Sports first
+            return `https://media.api-sports.io/football/teams/${teamId}.png`;
+        }
+        
+        // Fallback to UI Avatars with team initials
+        const initials = teamName.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&size=200&background=667eea&color=fff&bold=true&font-size=0.5`;
+    }
+    
     // Default match data
     const defaultMatch = {
         homeTeam: {
-            name: 'Home Team',
-            logo: '/images/default-team.png'
+            name: 'Manchester United',
+            logo: null,
+            id: 33
         },
         awayTeam: {
-            name: 'Away Team',
-            logo: '/images/default-team.png'
+            name: 'Liverpool',
+            logo: null,
+            id: 40
         },
         time: '20:00',
-        prediction: 'Home Win',
+        prediction: 'Over 2.5 Goals',
         preview: 'This is a highly anticipated match between two top teams. Both sides are in excellent form and will be looking to secure all three points.'
     };
     
@@ -24,9 +39,17 @@
         // Update home team
         const homeLogoEl = document.getElementById('motd-home-logo');
         const homeNameEl = document.getElementById('motd-home-name');
-        if (homeLogoEl && data.homeTeam.logo) {
-            homeLogoEl.src = data.homeTeam.logo;
+        const homeLogoContainer = homeLogoEl?.parentElement;
+        
+        if (homeLogoEl) {
+            const logoUrl = data.homeTeam.logo || getTeamLogoUrl(data.homeTeam.name, data.homeTeam.id);
+            homeLogoEl.src = logoUrl;
             homeLogoEl.alt = data.homeTeam.name;
+            
+            // Show container if hidden
+            if (homeLogoContainer) {
+                homeLogoContainer.style.display = 'flex';
+            }
         }
         if (homeNameEl) {
             homeNameEl.textContent = data.homeTeam.name;
@@ -35,9 +58,17 @@
         // Update away team
         const awayLogoEl = document.getElementById('motd-away-logo');
         const awayNameEl = document.getElementById('motd-away-name');
-        if (awayLogoEl && data.awayTeam.logo) {
-            awayLogoEl.src = data.awayTeam.logo;
+        const awayLogoContainer = awayLogoEl?.parentElement;
+        
+        if (awayLogoEl) {
+            const logoUrl = data.awayTeam.logo || getTeamLogoUrl(data.awayTeam.name, data.awayTeam.id);
+            awayLogoEl.src = logoUrl;
             awayLogoEl.alt = data.awayTeam.name;
+            
+            // Show container if hidden
+            if (awayLogoContainer) {
+                awayLogoContainer.style.display = 'flex';
+            }
         }
         if (awayNameEl) {
             awayNameEl.textContent = data.awayTeam.name;
