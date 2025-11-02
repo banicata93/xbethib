@@ -31,7 +31,13 @@ function formatDate(dateString) {
         return 'Tomorrow';
     }
     
-    return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+// Get date key for grouping
+function getDateKey(dateString) {
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];
 }
 
 // Load predictions from API
@@ -82,27 +88,53 @@ async function loadPredictions() {
         // Filter out Match of the Day from regular predictions
         const regularPredictions = predictions.filter(p => !p.isMatchOfTheDay);
         
-        // Build table rows
-        let html = '';
+        // Group predictions by date
+        const groupedByDate = {};
         regularPredictions.forEach(prediction => {
-            const statusBadge = getStatusBadge(prediction.result || 'pending');
-            const dateDisplay = formatDate(prediction.matchDate);
+            const dateKey = getDateKey(prediction.matchDate);
+            if (!groupedByDate[dateKey]) {
+                groupedByDate[dateKey] = [];
+            }
+            groupedByDate[dateKey].push(prediction);
+        });
+        
+        // Sort dates
+        const sortedDates = Object.keys(groupedByDate).sort();
+        
+        // Build table rows with date separators
+        let html = '';
+        sortedDates.forEach(dateKey => {
+            const datePredictions = groupedByDate[dateKey];
+            const dateDisplay = formatDate(datePredictions[0].matchDate);
             
+            // Add date separator row
             html += `
-                <tr>
-                    <td>
-                        <img src="${prediction.leagueFlag || '/images/default-flag.png'}" 
-                             alt="League" 
-                             class="flag-icon"
-                             onerror="this.src='/images/default-flag.png'">
-                        ${dateDisplay}
+                <tr class="date-separator">
+                    <td colspan="5" class="date-header">
+                        <i class="bi bi-calendar3"></i> ${dateDisplay}
                     </td>
-                    <td>${prediction.homeTeam}</td>
-                    <td>${prediction.awayTeam}</td>
-                    <td><strong>${prediction.prediction}</strong></td>
-                    <td>${statusBadge}</td>
                 </tr>
             `;
+            
+            // Add predictions for this date
+            datePredictions.forEach(prediction => {
+                const statusBadge = getStatusBadge(prediction.result || 'pending');
+                
+                html += `
+                    <tr>
+                        <td>
+                            <img src="${prediction.leagueFlag || '/images/default-flag.svg'}" 
+                                 alt="League" 
+                                 class="flag-icon"
+                                 onerror="this.src='/images/default-flag.svg'">
+                        </td>
+                        <td>${prediction.homeTeam}</td>
+                        <td>${prediction.awayTeam}</td>
+                        <td><strong>${prediction.prediction}</strong></td>
+                        <td>${statusBadge}</td>
+                    </tr>
+                `;
+            });
         });
         
         predictionsBody.innerHTML = html;
