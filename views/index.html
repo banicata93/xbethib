@@ -165,31 +165,50 @@
                     </div>
                     
                     <!-- Stats Banner -->
-                    <div class="stats-banner">
-                        <div class="row text-center g-2">
-                            <div class="col-6 col-md-3">
-                                <div class="stat-item">
-                                    <h3 id="winRate" class="stat-value mb-0">--</h3>
-                                    <p class="stat-label mb-0">Win Rate (24h)</p>
+                    <!-- Match of the Day -->
+                    <div class="match-of-the-day">
+                        <div class="motd-header">
+                            <div class="motd-badge">
+                                <i class="bi bi-star-fill"></i>
+                                <span>Match of the Day</span>
+                            </div>
+                        </div>
+                        
+                        <div class="motd-content">
+                            <div class="motd-teams">
+                                <div class="motd-team motd-home-team">
+                                    <div class="team-logo-container">
+                                        <img id="motd-home-logo" src="/images/default-team.png" alt="Home Team" class="team-logo" onerror="this.style.display='none'">
+                                    </div>
+                                    <h3 id="motd-home-name" class="team-name">Home Team</h3>
+                                </div>
+                                
+                                <div class="motd-vs">
+                                    <span class="vs-text">VS</span>
+                                    <div class="match-time" id="motd-time">20:00</div>
+                                </div>
+                                
+                                <div class="motd-team motd-away-team">
+                                    <div class="team-logo-container">
+                                        <img id="motd-away-logo" src="/images/default-team.png" alt="Away Team" class="team-logo" onerror="this.style.display='none'">
+                                    </div>
+                                    <h3 id="motd-away-name" class="team-name">Away Team</h3>
                                 </div>
                             </div>
-                            <div class="col-6 col-md-3">
-                                <div class="stat-item">
-                                    <h3 id="totalWins" class="stat-value mb-0">--</h3>
-                                    <p class="stat-label mb-0">Wins (24h)</p>
-                                </div>
+                            
+                            <div class="motd-prediction">
+                                <div class="prediction-label">Our Prediction</div>
+                                <div class="prediction-value" id="motd-prediction">Home Win</div>
                             </div>
-                            <div class="col-6 col-md-3">
-                                <div class="stat-item">
-                                    <h3 id="totalLosses" class="stat-value mb-0">--</h3>
-                                    <p class="stat-label mb-0">Losses (24h)</p>
+                            
+                            <div class="motd-preview">
+                                <div class="preview-label">
+                                    <i class="bi bi-file-text"></i>
+                                    Match Preview
                                 </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="stat-item">
-                                    <h3 id="currentStreak" class="stat-value mb-0">--</h3>
-                                    <p class="stat-label mb-0">Streak (24h)</p>
-                                </div>
+                                <p id="motd-preview-text" class="preview-text">
+                                    This is a highly anticipated match between two top teams. Both sides are in excellent form and will be looking to secure all three points.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -261,6 +280,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="/js/analytics-tracker.js?v=1.0"></script>
     <script src="/js/stats.js?v=1.1"></script>
+    <script src="/js/match-of-the-day.js?v=1.0"></script>
     <script src="/js/main.js?v=1.1"></script>
     
     <!-- Modern Mobile Preview Tool -->
