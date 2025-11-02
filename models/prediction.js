@@ -14,9 +14,17 @@ const predictionSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    homeTeamFlag: {
+        type: String,
+        default: ''
+    },
     awayTeam: {
         type: String,
         required: true
+    },
+    awayTeamFlag: {
+        type: String,
+        default: ''
     },
     prediction: {
         type: String,
