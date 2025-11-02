@@ -1,162 +1,9 @@
-// Load predictions from API
-async function loadPredictions() {
-    const loadingIndicator = document.getElementById('loading-indicator');
-    const errorMessage = document.getElementById('error-message');
-    const predictionsBody = document.getElementById('predictions-body');
-    
-    try {
-        // Show loading spinner
-        predictionsBody.innerHTML = `
-            <tr>
-                <td colspan="5" class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-3 text-muted">Loading predictions...</p>
-                </td>
-            </tr>
-        `;
-        
-        loadingIndicator.style.display = 'none';
-        errorMessage.style.display = 'none';
-        
-        const response = await fetch('/api/predictions');
-        
-        if (!response.ok) {
-            throw new Error('Failed to load predictions');
-        }
-        
-        const predictions = await response.json();
-        
-        // Hide loading indicator
-        loadingIndicator.style.display = 'none';
-        
-        // Clear existing predictions
-        predictionsBody.innerHTML = '';
-        
-        if (predictions.length === 0) {
-            predictionsBody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="text-center py-4">
-                        <p class="mb-0">No predictions available at the moment.</p>
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-        
-        // Group predictions by date
-        predictions.sort((a, b) => new Date(b.matchDate) - new Date(a.matchDate));
-        
-        // Group by date
-        const groupedByDate = {};
-        predictions.forEach(prediction => {
-            const matchDate = new Date(prediction.matchDate);
-            const dateKey = matchDate.toLocaleDateString('bg-BG', { 
-                day: '2-digit', 
-                month: '2-digit',
-                year: 'numeric'
-            });
-            
-            if (!groupedByDate[dateKey]) {
-                groupedByDate[dateKey] = [];
-            }
-            groupedByDate[dateKey].push(prediction);
-        });
-        
-        // Render grouped predictions
-        const dateKeys = Object.keys(groupedByDate);
-        dateKeys.forEach((dateKey, index) => {
-            // Add date header row
-            const dateHeaderRow = document.createElement('tr');
-            dateHeaderRow.className = 'date-header-row';
-            dateHeaderRow.innerHTML = `
-                <td colspan="5" class="date-header">
-                    <strong>${dateKey}</strong>
-                </td>
-            `;
-            predictionsBody.appendChild(dateHeaderRow);
-            
-            // Sort predictions by league flag (country) within each date
-            const sortedPredictions = groupedByDate[dateKey].sort((a, b) => {
-                const flagA = (a.leagueFlag || '').toLowerCase();
-                const flagB = (b.leagueFlag || '').toLowerCase();
-                return flagA.localeCompare(flagB);
-            });
-            
-            // Add predictions for this date
-            sortedPredictions.forEach(prediction => {
-                const row = document.createElement('tr');
-                
-                // Get status badge
-                const statusBadge = getStatusBadge(prediction.result || 'pending');
-                
-                row.innerHTML = `
-                    <td class="league-cell">
-                        <span class="team-flag">${prediction.leagueFlag || '⚽'}</span>
-                    </td>
-                    <td class="team-name">${prediction.homeTeam}</td>
-                    <td class="team-name">${prediction.awayTeam}</td>
-                    <td class="prediction-cell">
-                        <span class="prediction-badge">${prediction.prediction}</span>
-                        ${prediction.odds ? `<span class="odds-badge">@${prediction.odds}</span>` : ''}
-                    </td>
-                    <td class="status-cell">${statusBadge}</td>
-                `;
-                
-                predictionsBody.appendChild(row);
-            });
-            
-            // Add mobile ad after first date group (newest date) on mobile
-            if (index === 0 && window.innerWidth < 768) {
-                const adRow = document.createElement('tr');
-                adRow.className = 'd-md-none mobile-ad-row';
-                adRow.innerHTML = `
-                    <td colspan="5" class="p-0">
-                        <div class="goleador-premium-ad mt-3 mb-2">
-                            <a href="https://www.goleadortips.com" target="_blank" class="premium-ad-link">
-                                <div class="premium-ad-content">
-                                    <div class="premium-ad-icon">
-                                        <i class="fas fa-trophy"></i>
-                                    </div>
-                                    <div class="premium-ad-text">
-                                        <div class="premium-ad-title">GoleadorTips Premium</div>
-                                        <div class="premium-ad-description">Get exclusive football predictions</div>
-                                    </div>
-                                    <div class="premium-ad-button">
-                                        <span>Join Now</span>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </td>
-                `;
-                predictionsBody.appendChild(adRow);
-            }
-        });
-        
-        // If no predictions for today
-        if (predictionsBody.children.length === 0) {
-            predictionsBody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="text-center py-4">
-                        <p class="mb-0">No predictions available for today.</p>
-                    </td>
-                </tr>
-            `;
-        }
-        
-    } catch (error) {
-        console.error('Error loading predictions:', error);
-        loadingIndicator.style.display = 'none';
-        errorMessage.style.display = 'block';
-    }
-}
+// Simplified main.js - No API calls, faster loading
 
 // Helper function to get status badge
 function getStatusBadge(result) {
     const badges = {
-        'pending': '',  // Празно - нищо не се показва
+        'pending': '',
         'win': '<span class="status-badge status-win">✅</span>',
         'loss': '<span class="status-badge status-loss">❌</span>',
         'void': '<span class="status-badge status-void">⛔</span>'
@@ -164,15 +11,35 @@ function getStatusBadge(result) {
     return badges[result] || '';
 }
 
-// Retry button functionality
+// Static predictions - no API call needed
+function loadPredictions() {
+    const predictionsBody = document.getElementById('predictions-body');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const errorMessage = document.getElementById('error-message');
+    
+    // Hide loading and error messages immediately
+    if (loadingIndicator) loadingIndicator.style.display = 'none';
+    if (errorMessage) errorMessage.style.display = 'none';
+    
+    // Show message that predictions are loaded from server-side
+    if (predictionsBody && predictionsBody.innerHTML.trim() === '') {
+        predictionsBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center py-4">
+                    <p class="mb-0" style="color: rgba(255, 255, 255, 0.7);">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Predictions are updated daily. Check back soon!
+                    </p>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     loadPredictions();
-    
-    const retryButton = document.getElementById('retry-button');
-    if (retryButton) {
-        retryButton.addEventListener('click', loadPredictions);
-    }
-    
-    // Reload predictions every 5 minutes
-    setInterval(loadPredictions, 5 * 60 * 1000);
 });
+
+// Expose for external use
+window.loadPredictions = loadPredictions;
