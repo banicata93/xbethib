@@ -85,6 +85,30 @@ app.get('/bulk-import', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'bulk-import.html'));
 });
 
+// Match of the Day admin page
+app.get('/match-of-the-day-admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'match-of-the-day-admin.html'));
+});
+
+// API Routes
+const predictionsRouter = require('./routes/predictions');
+const matchOfTheDayRouter = require('./routes/matchOfTheDay');
+const authRouter = require('./routes/auth');
+const botPredictionsRouter = require('./routes/botPredictions');
+
+// Connect to database before handling API requests
+app.use(async (req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+        await connectToDatabase();
+    }
+    next();
+});
+
+app.use('/api/predictions', predictionsRouter);
+app.use('/api/match-of-the-day', matchOfTheDayRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/botPredictions', botPredictionsRouter);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error('Error:', err);
