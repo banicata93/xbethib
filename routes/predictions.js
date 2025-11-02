@@ -159,4 +159,37 @@ router.patch('/:id/result', auth, async (req, res) => {
     }
 });
 
+// Set Match of the Day (protected route)
+router.post('/match-of-the-day', auth, async (req, res) => {
+    try {
+        const { matchDate, leagueFlag, homeTeam, awayTeam } = req.body;
+        
+        if (!matchDate || !leagueFlag || !homeTeam || !awayTeam) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        // Премахваме старите Match of the Day
+        await Prediction.updateMany(
+            { isMatchOfTheDay: true },
+            { isMatchOfTheDay: false }
+        );
+
+        // Създаваме новия Match of the Day
+        const newMotd = new Prediction({
+            matchDate: new Date(matchDate),
+            homeTeam,
+            awayTeam,
+            leagueFlag,
+            prediction: 'Match of the Day',
+            isMatchOfTheDay: true
+        });
+
+        const savedMotd = await newMotd.save();
+        res.status(201).json(savedMotd);
+    } catch (error) {
+        console.error('Error setting Match of the Day:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 module.exports = router;
