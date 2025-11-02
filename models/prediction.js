@@ -32,6 +32,10 @@ const predictionSchema = new mongoose.Schema({
         min: 1.01,
         max: 100,
         default: null
+    },
+    isMatchOfTheDay: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
