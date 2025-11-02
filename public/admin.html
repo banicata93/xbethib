@@ -117,23 +117,29 @@
         }
         
         .table tbody td {
-            padding: 8px;
+            padding: 5px 6px;
             border: none;
             border-bottom: 1px solid #f1f3f4;
+            vertical-align: middle;
         }
         
         .table thead th {
-            padding: 10px;
+            padding: 6px;
         }
         
         .btn-sm {
-            padding: 4px 8px;
-            font-size: 0.8rem;
+            padding: 3px 6px;
+            font-size: 0.75rem;
         }
         
         .form-control-sm, .form-select-sm {
             font-size: 0.875rem;
             padding: 0.375rem 0.5rem;
+        }
+        
+        .badge {
+            font-size: 0.7rem;
+            padding: 3px 6px;
         }
         
         .table-striped tbody tr:nth-of-type(odd) {
@@ -276,15 +282,15 @@
                 <div class="card-header bg-warning text-dark">
                     <h5 class="mb-0"><i class="bi bi-star-fill me-2"></i>Match of the Day</h5>
                 </div>
-                <div class="card-body p-3">
+                <div class="card-body p-2">
                     <form id="motdForm">
                         <div class="row g-2">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <input type="date" class="form-control form-control-sm" id="motdDate" required>
                             </div>
-                            <div class="col-md-2">
-                                <select class="form-select form-select-sm" id="motdFlag" required>
-                                    <option value="">Flag</option>
+                            <div class="col-md-1">
+                                <select class="form-select form-select-sm" id="motdLeagueFlag" required>
+                                    <option value="">🏆</option>
                                     <option value="🇪🇺">🇪🇺</option>
                                     <option value="🇬🇧">🇬🇧</option>
                                     <option value="🇪🇸">🇪🇸</option>
@@ -293,17 +299,31 @@
                                     <option value="🇫🇷">🇫🇷</option>
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <input type="text" class="form-control form-control-sm" id="motdHome" placeholder="Home Team" required>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-1">
+                                <input type="text" class="form-control form-control-sm" id="motdHomeFlag" placeholder="🏴" maxlength="10">
+                            </div>
+                            <div class="col-md-2">
                                 <input type="text" class="form-control form-control-sm" id="motdAway" placeholder="Away Team" required>
                             </div>
                             <div class="col-md-1">
-                                <button type="submit" class="btn btn-warning btn-sm w-100"><i class="bi bi-star"></i></button>
+                                <input type="text" class="form-control form-control-sm" id="motdAwayFlag" placeholder="🏴" maxlength="10">
+                            </div>
+                            <div class="col-md-2">
+                                <input type="text" class="form-control form-control-sm" id="motdPrediction" placeholder="Prediction" required>
+                            </div>
+                            <div class="col-md-1">
+                                <button type="submit" class="btn btn-warning btn-sm w-100"><i class="bi bi-star"></i> Set</button>
                             </div>
                         </div>
                     </form>
+                    <!-- Preview Section -->
+                    <div id="motdPreview" class="mt-2 p-2 bg-light rounded" style="display: none;">
+                        <small class="text-muted">Preview:</small>
+                        <div id="motdPreviewContent" class="fw-bold"></div>
+                    </div>
                 </div>
             </div>
 
@@ -377,21 +397,21 @@
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Manage Predictions</h5>
                 </div>
-                <div class="card-body p-2">
+                <div class="card-body p-1">
                     <div class="table-responsive">
-                        <table class="table table-hover table-sm mb-0">
+                        <table class="table table-hover mb-0" style="font-size: 0.8rem;">
                             <thead class="table-dark">
                                 <tr>
-                                    <th style="font-size: 0.85rem;">Date</th>
-                                    <th style="font-size: 0.85rem;">Flag</th>
-                                    <th style="font-size: 0.85rem;">Home</th>
-                                    <th style="font-size: 0.85rem;">Away</th>
-                                    <th style="font-size: 0.85rem;">Prediction</th>
-                                    <th style="font-size: 0.85rem;">Status</th>
-                                    <th style="font-size: 0.85rem;">Actions</th>
+                                    <th style="padding: 6px;">Date</th>
+                                    <th style="padding: 6px;">Flag</th>
+                                    <th style="padding: 6px;">Home</th>
+                                    <th style="padding: 6px;">Away</th>
+                                    <th style="padding: 6px;">Prediction</th>
+                                    <th style="padding: 6px;">Status</th>
+                                    <th style="padding: 6px;">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="admin-predictions-body" class="align-middle" style="font-size: 0.85rem;">
+                            <tbody id="admin-predictions-body" class="align-middle">
                                 <!-- Predictions will be loaded here -->
                             </tbody>
                         </table>
@@ -430,17 +450,49 @@
             document.getElementById('matchDate').value = tomorrowString;
         }
 
+        // Match of the Day preview
+        function updateMotdPreview() {
+            const date = document.getElementById('motdDate').value;
+            const leagueFlag = document.getElementById('motdLeagueFlag').value;
+            const home = document.getElementById('motdHome').value;
+            const homeFlag = document.getElementById('motdHomeFlag').value;
+            const away = document.getElementById('motdAway').value;
+            const awayFlag = document.getElementById('motdAwayFlag').value;
+            const prediction = document.getElementById('motdPrediction').value;
+            
+            if (date && home && away) {
+                const preview = `${leagueFlag} ${homeFlag} ${home} vs ${awayFlag} ${away} - ${prediction || 'TBD'}`;
+                document.getElementById('motdPreviewContent').textContent = preview;
+                document.getElementById('motdPreview').style.display = 'block';
+            } else {
+                document.getElementById('motdPreview').style.display = 'none';
+            }
+        }
+
+        // Add event listeners for preview
+        ['motdDate', 'motdLeagueFlag', 'motdHome', 'motdHomeFlag', 'motdAway', 'motdAwayFlag', 'motdPrediction'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('input', updateMotdPreview);
+            }
+        });
+
         // Match of the Day form handler
         document.getElementById('motdForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const formData = {
                 matchDate: document.getElementById('motdDate').value,
-                leagueFlag: document.getElementById('motdFlag').value,
+                leagueFlag: document.getElementById('motdLeagueFlag').value,
                 homeTeam: document.getElementById('motdHome').value,
+                homeTeamFlag: document.getElementById('motdHomeFlag').value || '',
                 awayTeam: document.getElementById('motdAway').value,
+                awayTeamFlag: document.getElementById('motdAwayFlag').value || '',
+                prediction: document.getElementById('motdPrediction').value,
                 isMatchOfTheDay: true
             };
+
+            console.log('Sending MOTD data:', formData);
 
             try {
                 const currentToken = localStorage.getItem('token');
@@ -459,12 +511,18 @@
                     body: JSON.stringify(formData)
                 });
 
+                console.log('MOTD response status:', response.status);
+                
                 if (!response.ok) {
-                    throw new Error('Failed to set Match of the Day');
+                    const error = await response.json();
+                    console.error('MOTD error:', error);
+                    throw new Error(error.message || 'Failed to set Match of the Day');
                 }
 
                 alert('Match of the Day set successfully!');
                 document.getElementById('motdForm').reset();
+                document.getElementById('motdPreview').style.display = 'none';
+                loadPredictions();
             } catch (error) {
                 console.error('Error setting Match of the Day:', error);
                 alert('Failed to set Match of the Day: ' + error.message);
