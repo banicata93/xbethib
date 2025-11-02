@@ -106,7 +106,7 @@ async function loadAdminPredictions() {
         let currentDate = '';
         
         predictions.forEach(prediction => {
-            if (!prediction || !prediction.league) {
+            if (!prediction) {
                 console.error('Invalid prediction data:', prediction);
                 return;
             }
@@ -117,46 +117,30 @@ async function loadAdminPredictions() {
                 month: '2-digit'
             });
             
-            const dateString = date.toISOString().split('T')[0];
-            if (currentDate !== dateString) {
-                currentDate = dateString;
-                const dateRow = document.createElement('tr');
-                dateRow.className = 'date-separator';
-                dateRow.innerHTML = `
-                    <td colspan="6" style="padding: 0.5rem 1rem; font-weight: 600;">
-                        ${formattedDate}
-                    </td>
-                `;
-                tbody.appendChild(dateRow);
-            }
-            
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${formattedDate}</td>
-                <td><span class="team-flag">${prediction.league?.flag || ''}</span></td>
+                <td style="font-size: 1.1rem;">${prediction.leagueFlag || prediction.league?.flag || ''}</td>
                 <td>${prediction.homeTeam || ''}</td>
                 <td>${prediction.awayTeam || ''}</td>
-                <td>${prediction.prediction || ''}</td>
+                <td class="text-primary fw-bold">${prediction.prediction || ''}</td>
                 <td>
                     ${getStatusBadge(prediction.result || 'pending')}
                     ${prediction.odds ? `<br><small class="text-muted">Odds: ${prediction.odds}</small>` : ''}
                 </td>
                 <td>
                     ${(prediction.result === 'pending' || !prediction.result) ? `
-                        <button class="btn btn-success btn-sm me-1 mb-1" onclick="markResult('${prediction._id}', 'win')" title="Mark as Win">
-                            <i class="bi bi-check-circle"></i>
+                        <button class="btn btn-success btn-sm me-1" onclick="markResult('${prediction._id}', 'win')" title="Win">
+                            <i class="bi bi-check"></i>
                         </button>
-                        <button class="btn btn-danger btn-sm me-1 mb-1" onclick="markResult('${prediction._id}', 'loss')" title="Mark as Loss">
-                            <i class="bi bi-x-circle"></i>
-                        </button>
-                        <button class="btn btn-secondary btn-sm me-1 mb-1" onclick="markResult('${prediction._id}', 'void')" title="Mark as Void">
-                            <i class="bi bi-slash-circle"></i>
+                        <button class="btn btn-danger btn-sm me-1" onclick="markResult('${prediction._id}', 'loss')" title="Loss">
+                            <i class="bi bi-x"></i>
                         </button>
                     ` : ''}
-                    <button class="btn btn-warning btn-sm me-1 mb-1" onclick="editPrediction('${prediction._id}')" title="Edit">
+                    <button class="btn btn-warning btn-sm me-1" onclick="editPrediction('${prediction._id}')" title="Edit">
                         <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm mb-1" onclick="deletePrediction('${prediction._id}')" title="Delete">
+                    <button class="btn btn-outline-danger btn-sm" onclick="deletePrediction('${prediction._id}')" title="Delete">
                         <i class="bi bi-trash"></i>
                     </button>
                 </td>
@@ -196,7 +180,7 @@ window.deletePrediction = async function(id) {
 }
 
 // Маркиране на резултат
-window.updateResult = async function(id, result) {
+window.markResult = async function(id, result) {
     try {
         const response = await fetch(`/api/predictions/${id}/result`, {
             method: 'PATCH',
@@ -221,6 +205,8 @@ window.updateResult = async function(id, result) {
         alert('Failed to update result: ' + error.message);
     }
 }
+
+window.updateResult = window.markResult;
 
 // Helper функция за status badges
 function getStatusBadge(result) {
