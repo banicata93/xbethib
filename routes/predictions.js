@@ -162,10 +162,15 @@ router.patch('/:id/result', auth, async (req, res) => {
 // Set Match of the Day (protected route)
 router.post('/match-of-the-day', auth, async (req, res) => {
     try {
-        const { matchDate, leagueFlag, homeTeam, awayTeam } = req.body;
+        const { matchDate, leagueFlag, homeTeam, homeTeamFlag, awayTeam, awayTeamFlag, prediction } = req.body;
         
-        if (!matchDate || !leagueFlag || !homeTeam || !awayTeam) {
-            return res.status(400).json({ message: 'All fields are required' });
+        console.log('Received MOTD data:', req.body);
+        
+        if (!matchDate || !leagueFlag || !homeTeam || !awayTeam || !prediction) {
+            return res.status(400).json({ 
+                message: 'Required fields: matchDate, leagueFlag, homeTeam, awayTeam, prediction',
+                received: req.body
+            });
         }
 
         // Премахваме старите Match of the Day
@@ -178,13 +183,16 @@ router.post('/match-of-the-day', auth, async (req, res) => {
         const newMotd = new Prediction({
             matchDate: new Date(matchDate),
             homeTeam,
+            homeTeamFlag: homeTeamFlag || '',
             awayTeam,
+            awayTeamFlag: awayTeamFlag || '',
             leagueFlag,
-            prediction: 'Match of the Day',
+            prediction,
             isMatchOfTheDay: true
         });
 
         const savedMotd = await newMotd.save();
+        console.log('MOTD saved successfully:', savedMotd);
         res.status(201).json(savedMotd);
     } catch (error) {
         console.error('Error setting Match of the Day:', error);
