@@ -2238,8 +2238,8 @@ body {
 
 .motd-prediction {
     text-align: center;
-    margin-bottom: 1rem;
-    padding: 1rem;
+    margin-bottom: 0.75rem;
+    padding: 0.6rem 1rem;
     background: rgba(255, 255, 255, 0.15);
     border-radius: 15px;
     backdrop-filter: blur(10px);
@@ -2247,16 +2247,16 @@ body {
 
 .prediction-label {
     color: rgba(255, 255, 255, 0.9);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0;
     font-weight: 600;
 }
 
 .prediction-value {
     color: #00ff66;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 800;
     text-shadow: 0 0 20px rgba(0, 255, 102, 0.5);
     margin: 0;
@@ -2395,4 +2395,20 @@ body {
     .preview-text {
         font-size: 0.9rem;
     }
+}
+
+/* Inline prediction display */
+.motd-prediction {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.75rem !important;
+}
+
+.prediction-label {
+    display: inline-block !important;
+}
+
+.prediction-value {
+    display: inline-block !important;
 }
