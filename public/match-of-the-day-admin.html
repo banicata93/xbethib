@@ -192,19 +192,25 @@
                                 <!-- Home Team Logo -->
                                 <div class="col-md-6">
                                     <label for="homeTeamLogo" class="form-label">
-                                        <i class="bi bi-image me-2"></i>Home Team Logo URL
+                                        <i class="bi bi-image me-2"></i>Home Team Logo (PNG/JPG)
                                     </label>
-                                    <input type="url" class="form-control" id="homeTeamLogo" placeholder="https://example.com/logo.png">
-                                    <div class="form-text">Optional - Leave empty for default logo</div>
+                                    <input type="file" class="form-control" id="homeTeamLogo" accept="image/png,image/jpeg,image/jpg,image/webp">
+                                    <div class="form-text">Качи PNG или JPG изображение (макс 2MB)</div>
+                                    <div id="homeLogoPreview" class="mt-2" style="display: none;">
+                                        <img id="homeLogoImg" src="" alt="Preview" style="max-width: 80px; max-height: 80px; border-radius: 8px; border: 2px solid #e1e8ed;">
+                                    </div>
                                 </div>
                                 
                                 <!-- Away Team Logo -->
                                 <div class="col-md-6">
                                     <label for="awayTeamLogo" class="form-label">
-                                        <i class="bi bi-image me-2"></i>Away Team Logo URL
+                                        <i class="bi bi-image me-2"></i>Away Team Logo (PNG/JPG)
                                     </label>
-                                    <input type="url" class="form-control" id="awayTeamLogo" placeholder="https://example.com/logo.png">
-                                    <div class="form-text">Optional - Leave empty for default logo</div>
+                                    <input type="file" class="form-control" id="awayTeamLogo" accept="image/png,image/jpeg,image/jpg,image/webp">
+                                    <div class="form-text">Качи PNG или JPG изображение (макс 2MB)</div>
+                                    <div id="awayLogoPreview" class="mt-2" style="display: none;">
+                                        <img id="awayLogoImg" src="" alt="Preview" style="max-width: 80px; max-height: 80px; border-radius: 8px; border: 2px solid #e1e8ed;">
+                                    </div>
                                 </div>
                                 
                                 <!-- Match Time -->
@@ -305,26 +311,65 @@
         }
     </style>
     <script>
+        // Global variables for logo data
+        let homeLogoData = '';
+        let awayLogoData = '';
+        
+        // File upload handlers
+        document.getElementById('homeTeamLogo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Размерът на файла трябва да е под 2MB');
+                    e.target.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    homeLogoData = event.target.result;
+                    document.getElementById('homeLogoImg').src = homeLogoData;
+                    document.getElementById('homeLogoPreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        document.getElementById('awayTeamLogo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Размерът на файла трябва да е под 2MB');
+                    e.target.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    awayLogoData = event.target.result;
+                    document.getElementById('awayLogoImg').src = awayLogoData;
+                    document.getElementById('awayLogoPreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
         // Preview function
         function showPreview() {
             const homeTeamName = document.getElementById('homeTeamName').value;
             const awayTeamName = document.getElementById('awayTeamName').value;
-            const homeTeamLogo = document.getElementById('homeTeamLogo').value;
-            const awayTeamLogo = document.getElementById('awayTeamLogo').value;
             const matchTime = document.getElementById('matchTime').value;
             const prediction = document.getElementById('prediction').value;
             const matchPreview = document.getElementById('matchPreview').value;
             
             if (!homeTeamName || !awayTeamName || !matchTime || !prediction || !matchPreview) {
-                alert('Please fill in all required fields');
+                alert('Моля попълнете всички задължителни полета');
                 return;
             }
             
             // Update preview
             document.getElementById('previewHomeName').textContent = homeTeamName;
             document.getElementById('previewAwayName').textContent = awayTeamName;
-            document.getElementById('previewHomeLogo').src = homeTeamLogo || '/images/default-team-logo.png';
-            document.getElementById('previewAwayLogo').src = awayTeamLogo || '/images/default-team-logo.png';
+            document.getElementById('previewHomeLogo').src = homeLogoData || '/images/default-team-logo.png';
+            document.getElementById('previewAwayLogo').src = awayLogoData || '/images/default-team-logo.png';
             document.getElementById('previewTime').textContent = matchTime;
             document.getElementById('previewPrediction').textContent = prediction;
             document.getElementById('previewText').textContent = matchPreview;
@@ -341,11 +386,11 @@
             const formData = {
                 homeTeam: {
                     name: document.getElementById('homeTeamName').value,
-                    logo: document.getElementById('homeTeamLogo').value || ''
+                    logo: homeLogoData || ''
                 },
                 awayTeam: {
                     name: document.getElementById('awayTeamName').value,
-                    logo: document.getElementById('awayTeamLogo').value || ''
+                    logo: awayLogoData || ''
                 },
                 time: document.getElementById('matchTime').value,
                 prediction: document.getElementById('prediction').value,
@@ -395,11 +440,21 @@
                     if (data) {
                         document.getElementById('homeTeamName').value = data.homeTeam?.name || '';
                         document.getElementById('awayTeamName').value = data.awayTeam?.name || '';
-                        document.getElementById('homeTeamLogo').value = data.homeTeam?.logo || '';
-                        document.getElementById('awayTeamLogo').value = data.awayTeam?.logo || '';
                         document.getElementById('matchTime').value = data.time || '';
                         document.getElementById('prediction').value = data.prediction || '';
                         document.getElementById('matchPreview').value = data.preview || '';
+                        
+                        // Load existing logos
+                        if (data.homeTeam?.logo) {
+                            homeLogoData = data.homeTeam.logo;
+                            document.getElementById('homeLogoImg').src = homeLogoData;
+                            document.getElementById('homeLogoPreview').style.display = 'block';
+                        }
+                        if (data.awayTeam?.logo) {
+                            awayLogoData = data.awayTeam.logo;
+                            document.getElementById('awayLogoImg').src = awayLogoData;
+                            document.getElementById('awayLogoPreview').style.display = 'block';
+                        }
                     }
                 }
             } catch (error) {
