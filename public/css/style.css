@@ -2657,3 +2657,12 @@ body {
         margin-right: 0.3rem;
     }
 }
+
+/* FINAL OVERRIDE - Date centering - DO NOT REMOVE */
+.date-separator td,
+.date-separator td.date-header,
+tr.date-separator td {
+    text-align: center !important;
+    display: table-cell !important;
+    vertical-align: middle !important;
+}
