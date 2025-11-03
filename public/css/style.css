@@ -2618,3 +2618,42 @@ body {
         font-size: 0.9rem !important;
     }
 }
+
+/* Compact and centered date row */
+.date-separator td.date-header {
+    text-align: center !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    background: linear-gradient(135deg, rgba(0, 255, 102, 0.12), rgba(0, 204, 255, 0.12)) !important;
+    border-top: 1px solid rgba(0, 255, 102, 0.4) !important;
+    border-bottom: 1px solid rgba(0, 255, 102, 0.4) !important;
+    color: #00ff66 !important;
+    text-shadow: 0 0 8px rgba(0, 255, 102, 0.4) !important;
+    letter-spacing: 0.5px !important;
+}
+
+.date-separator td.date-header i {
+    margin-right: 0.4rem;
+    font-size: 0.85rem;
+}
+
+/* Mobile date header */
+@media (max-width: 768px) {
+    .date-separator td.date-header {
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.85rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .date-separator td.date-header {
+        padding: 0.35rem 0.6rem !important;
+        font-size: 0.8rem !important;
+    }
+    
+    .date-separator td.date-header i {
+        font-size: 0.75rem;
+        margin-right: 0.3rem;
+    }
+}
