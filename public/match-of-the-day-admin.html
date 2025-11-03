@@ -132,6 +132,26 @@
             font-weight: bold;
             display: inline-block;
         }
+        
+        .error-message {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .success-message {
+            background: #efe;
+            border: 1px solid #cfc;
+            color: #3c3;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -163,6 +183,10 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-10">
+                <!-- Error/Success Messages -->
+                <div id="errorMessage" class="error-message"></div>
+                <div id="successMessage" class="success-message"></div>
+                
                 <!-- Form Card -->
                 <div class="card mb-4">
                     <div class="card-header">
@@ -256,7 +280,7 @@
                                 <button type="button" class="btn btn-secondary btn-lg px-5" onclick="showPreview()">
                                     <i class="bi bi-eye me-2"></i>Preview
                                 </button>
-                                <button type="submit" class="btn btn-warning btn-lg px-5">
+                                <button type="submit" class="btn btn-warning btn-lg px-5" id="submitBtn">
                                     <i class="bi bi-star-fill me-2"></i>Save Match of the Day
                                 </button>
                             </div>
@@ -315,12 +339,32 @@
         let homeLogoData = '';
         let awayLogoData = '';
         
+        // Helper functions for messages
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 10000);
+        }
+        
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            successDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
         // File upload handlers
         document.getElementById('homeTeamLogo').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 if (file.size > 2 * 1024 * 1024) {
-                    alert('Размерът на файла трябва да е под 2MB');
+                    showError('Размерът на файла трябва да е под 2MB');
                     e.target.value = '';
                     return;
                 }
@@ -338,7 +382,7 @@
             const file = e.target.files[0];
             if (file) {
                 if (file.size > 2 * 1024 * 1024) {
-                    alert('Размерът на файла трябва да е под 2MB');
+                    showError('Размерът на файла трябва да е под 2MB');
                     e.target.value = '';
                     return;
                 }
@@ -361,7 +405,7 @@
             const matchPreview = document.getElementById('matchPreview').value;
             
             if (!homeTeamName || !awayTeamName || !matchTime || !prediction || !matchPreview) {
-                alert('Моля попълнете всички задължителни полета');
+                showError('Моля попълнете всички задължителни полета');
                 return;
             }
             
@@ -383,6 +427,10 @@
         document.getElementById('motdForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            
             const formData = {
                 homeTeam: {
                     name: document.getElementById('homeTeamName').value,
@@ -397,11 +445,15 @@
                 preview: document.getElementById('matchPreview').value
             };
             
+            console.log('Submitting MOTD:', formData);
+            
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
-                    alert('Please login first');
-                    window.location.href = '/login';
+                    showError('Моля влезте в системата първо');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
                     return;
                 }
                 
@@ -414,20 +466,28 @@
                     body: JSON.stringify(formData)
                 });
                 
+                const data = await response.json();
+                console.log('Response:', data);
+                
                 if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.message || 'Failed to save Match of the Day');
+                    throw new Error(data.message || `Server error: ${response.status}`);
                 }
                 
-                alert('Match of the Day saved successfully! ⭐');
+                showSuccess('Match of the Day запазен успешно! ⭐');
                 
                 // Optionally redirect to home page
-                if (confirm('Would you like to view it on the home page?')) {
-                    window.location.href = '/';
-                }
+                setTimeout(() => {
+                    if (confirm('Искате ли да го видите на началната страница?')) {
+                        window.location.href = '/';
+                    }
+                }, 1500);
+                
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error: ' + error.message);
+                showError('Грешка: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-star-fill me-2"></i>Save Match of the Day';
             }
         });
         
@@ -445,12 +505,12 @@
                         document.getElementById('matchPreview').value = data.preview || '';
                         
                         // Load existing logos
-                        if (data.homeTeam?.logo) {
+                        if (data.homeTeam?.logo && data.homeTeam.logo !== '/images/default-team.png') {
                             homeLogoData = data.homeTeam.logo;
                             document.getElementById('homeLogoImg').src = homeLogoData;
                             document.getElementById('homeLogoPreview').style.display = 'block';
                         }
-                        if (data.awayTeam?.logo) {
+                        if (data.awayTeam?.logo && data.awayTeam.logo !== '/images/default-team.png') {
                             awayLogoData = data.awayTeam.logo;
                             document.getElementById('awayLogoImg').src = awayLogoData;
                             document.getElementById('awayLogoPreview').style.display = 'block';
