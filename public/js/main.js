@@ -107,7 +107,7 @@ async function loadPredictions() {
             const datePredictions = groupedByDate[dateKey];
             const dateDisplay = formatDate(datePredictions[0].matchDate);
             
-            // Add date separator row
+            // Add date separator row - FULL WIDTH
             html += `
                 <tr class="date-separator">
                     <td colspan="5" class="date-header">
@@ -119,19 +119,18 @@ async function loadPredictions() {
             // Add predictions for this date
             datePredictions.forEach(prediction => {
                 const statusBadge = getStatusBadge(prediction.result || 'pending');
+                // Use leagueFlag emoji from database
+                const leagueFlag = prediction.leagueFlag || '⚽';
                 
                 html += `
                     <tr>
-                        <td>
-                            <img src="${prediction.leagueFlag || '/images/default-flag.svg'}" 
-                                 alt="League" 
-                                 class="flag-icon"
-                                 onerror="this.src='/images/default-flag.svg'">
+                        <td class="text-center">
+                            <span class="team-flag">${leagueFlag}</span>
                         </td>
-                        <td>${prediction.homeTeam}</td>
-                        <td>${prediction.awayTeam}</td>
-                        <td><strong>${prediction.prediction}</strong></td>
-                        <td>${statusBadge}</td>
+                        <td class="team-cell">${prediction.homeTeam}</td>
+                        <td class="team-cell">${prediction.awayTeam}</td>
+                        <td class="prediction-cell"><strong>${prediction.prediction}</strong></td>
+                        <td class="text-center">${statusBadge}</td>
                     </tr>
                 `;
             });
