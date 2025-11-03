@@ -1,4 +1,4 @@
-// Main.js - Load predictions from API
+// Main.js - Load predictions from API with caching
 
 // Helper function to get status badge
 function getStatusBadge(result) {
@@ -62,7 +62,9 @@ async function loadPredictions() {
     `;
     
     try {
-        const response = await fetch('/api/predictions');
+        // Add cache busting parameter to force fresh data
+        const cacheBuster = new Date().getTime();
+        const response = await fetch(`/api/predictions?_=${cacheBuster}`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -70,6 +72,11 @@ async function loadPredictions() {
         
         const predictions = await response.json();
         console.log('Loaded predictions:', predictions);
+        
+        // Check if response is an error message
+        if (predictions.message) {
+            throw new Error(predictions.message);
+        }
         
         if (!predictions || predictions.length === 0) {
             predictionsBody.innerHTML = `
@@ -107,7 +114,7 @@ async function loadPredictions() {
             const datePredictions = groupedByDate[dateKey];
             const dateDisplay = formatDate(datePredictions[0].matchDate);
             
-            // Add date separator row - FULL WIDTH
+            // Add date separator row - FULL WIDTH, CENTERED, COMPACT
             html += `
                 <tr class="date-separator">
                     <td colspan="5" class="date-header">
@@ -145,7 +152,10 @@ async function loadPredictions() {
                 <td colspan="5" class="text-center py-4">
                     <p class="mb-0 text-danger">
                         <i class="bi bi-exclamation-triangle me-2"></i>
-                        Error loading predictions. Please try again later.
+                        Database connection error. Please check MongoDB Atlas connection.
+                    </p>
+                    <p class="mb-0 mt-2" style="color: rgba(255, 255, 255, 0.5); font-size: 0.85rem;">
+                        ${error.message}
                     </p>
                 </td>
             </tr>
@@ -157,6 +167,9 @@ async function loadPredictions() {
 document.addEventListener('DOMContentLoaded', function() {
     loadPredictions();
 });
+
+// Reload predictions every 30 seconds to catch new updates
+setInterval(loadPredictions, 30000);
 
 // Expose for external use
 window.loadPredictions = loadPredictions;
