@@ -359,40 +359,86 @@
             successDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
         
-        // File upload handlers
-        document.getElementById('homeTeamLogo').addEventListener('change', function(e) {
+        
+        // Image compression function
+        function compressImage(file, maxWidth = 300, maxHeight = 300, quality = 0.7) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Calculate new dimensions
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height = height * (maxWidth / width);
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width = width * (maxHeight / height);
+                                height = maxHeight;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Convert to base64 with compression (JPEG format)
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                        console.log('Original size:', file.size, 'Compressed size:', compressedDataUrl.length);
+                        resolve(compressedDataUrl);
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // File upload handlers with compression
+        document.getElementById('homeTeamLogo').addEventListener('change', async function(e) {
             const file = e.target.files[0];
             if (file) {
-                if (file.size > 2 * 1024 * 1024) {
-                    showError('Размерът на файла трябва да е под 2MB');
+                if (file.size > 5 * 1024 * 1024) {
+                    showError('Размерът на файла трябва да е под 5MB');
                     e.target.value = '';
                     return;
                 }
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    homeLogoData = event.target.result;
+                try {
+                    homeLogoData = await compressImage(file);
                     document.getElementById('homeLogoImg').src = homeLogoData;
                     document.getElementById('homeLogoPreview').style.display = 'block';
-                };
-                reader.readAsDataURL(file);
+                } catch (error) {
+                    showError('Грешка при обработка на изображението');
+                    console.error(error);
+                }
             }
         });
         
-        document.getElementById('awayTeamLogo').addEventListener('change', function(e) {
+        document.getElementById('awayTeamLogo').addEventListener('change', async function(e) {
             const file = e.target.files[0];
             if (file) {
-                if (file.size > 2 * 1024 * 1024) {
-                    showError('Размерът на файла трябва да е под 2MB');
+                if (file.size > 5 * 1024 * 1024) {
+                    showError('Размерът на файла трябва да е под 5MB');
                     e.target.value = '';
                     return;
                 }
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    awayLogoData = event.target.result;
+                try {
+                    awayLogoData = await compressImage(file);
                     document.getElementById('awayLogoImg').src = awayLogoData;
                     document.getElementById('awayLogoPreview').style.display = 'block';
-                };
-                reader.readAsDataURL(file);
+                } catch (error) {
+                    showError('Грешка при обработка на изображението');
+                    console.error(error);
+                }
             }
         });
         
