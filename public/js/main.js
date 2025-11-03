@@ -71,7 +71,7 @@ async function loadPredictions() {
         }
         
         const predictions = await response.json();
-        console.log('Loaded predictions:', predictions);
+        console.log('Loaded predictions:', predictions.length, 'total');
         
         // Check if response is an error message
         if (predictions.message) {
@@ -94,6 +94,7 @@ async function loadPredictions() {
         
         // Filter out Match of the Day from regular predictions
         const regularPredictions = predictions.filter(p => !p.isMatchOfTheDay);
+        console.log('Regular predictions:', regularPredictions.length);
         
         // Group predictions by date
         const groupedByDate = {};
@@ -105,8 +106,9 @@ async function loadPredictions() {
             groupedByDate[dateKey].push(prediction);
         });
         
-        // Sort dates
-        const sortedDates = Object.keys(groupedByDate).sort();
+        // Sort dates in DESCENDING order (newest first)
+        const sortedDates = Object.keys(groupedByDate).sort().reverse();
+        console.log('Dates:', sortedDates.slice(0, 5));
         
         // Build table rows with date separators
         let html = '';
@@ -117,7 +119,7 @@ async function loadPredictions() {
             // Add date separator row - FULL WIDTH, CENTERED, COMPACT
             html += `
                 <tr class="date-separator">
-                    <td colspan="5" class="date-header">
+                    <td colspan="5" class="date-header" style="text-align: center !important;">
                         <i class="bi bi-calendar3"></i> ${dateDisplay}
                     </td>
                 </tr>
