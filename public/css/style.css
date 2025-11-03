@@ -2466,3 +2466,155 @@ body {
         font-size: 0.75rem;
     }
 }
+
+/* FIXED TABLE LAYOUT - Override previous styles */
+#predictions-table {
+    table-layout: fixed !important;
+    width: 100% !important;
+}
+
+/* Fixed column widths */
+#predictions-table th:nth-child(1),
+#predictions-table td:nth-child(1) {
+    width: 8% !important;
+    min-width: 60px !important;
+    max-width: 80px !important;
+    text-align: center !important;
+    padding: 0.8rem 0.5rem !important;
+}
+
+#predictions-table th:nth-child(2),
+#predictions-table td:nth-child(2) {
+    width: 28% !important;
+    text-align: left !important;
+    padding: 0.8rem 0.6rem !important;
+}
+
+#predictions-table th:nth-child(3),
+#predictions-table td:nth-child(3) {
+    width: 28% !important;
+    text-align: left !important;
+    padding: 0.8rem 0.6rem !important;
+}
+
+#predictions-table th:nth-child(4),
+#predictions-table td:nth-child(4) {
+    width: 24% !important;
+    text-align: center !important;
+    padding: 0.8rem 0.6rem !important;
+}
+
+#predictions-table th:nth-child(5),
+#predictions-table td:nth-child(5) {
+    width: 12% !important;
+    text-align: center !important;
+    padding: 0.8rem 0.5rem !important;
+}
+
+/* Date separator full width */
+.date-separator td {
+    text-align: center !important;
+    padding: 1rem !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, rgba(0, 255, 102, 0.15), rgba(0, 204, 255, 0.15)) !important;
+    border-top: 2px solid rgba(0, 255, 102, 0.5) !important;
+    border-bottom: 2px solid rgba(0, 255, 102, 0.5) !important;
+}
+
+/* Team flag emoji styling */
+.team-flag {
+    font-size: 1.5em !important;
+    display: inline-block !important;
+    line-height: 1 !important;
+}
+
+/* Remove old flag-icon img styles */
+.flag-icon {
+    display: none !important;
+}
+
+/* Team cells */
+.team-cell {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Prediction cell */
+.prediction-cell {
+    font-weight: 600 !important;
+}
+
+/* Mobile responsive - keep fixed layout */
+@media (max-width: 768px) {
+    #predictions-table th:nth-child(1),
+    #predictions-table td:nth-child(1) {
+        width: 10% !important;
+        min-width: 50px !important;
+        padding: 0.6rem 0.3rem !important;
+    }
+    
+    #predictions-table th:nth-child(2),
+    #predictions-table td:nth-child(2),
+    #predictions-table th:nth-child(3),
+    #predictions-table td:nth-child(3) {
+        width: 28% !important;
+        padding: 0.6rem 0.4rem !important;
+    }
+    
+    #predictions-table th:nth-child(4),
+    #predictions-table td:nth-child(4) {
+        width: 24% !important;
+        padding: 0.6rem 0.4rem !important;
+    }
+    
+    #predictions-table th:nth-child(5),
+    #predictions-table td:nth-child(5) {
+        width: 10% !important;
+        padding: 0.6rem 0.3rem !important;
+    }
+    
+    .team-flag {
+        font-size: 1.2em !important;
+    }
+}
+
+@media (max-width: 480px) {
+    #predictions-table th:nth-child(1),
+    #predictions-table td:nth-child(1) {
+        width: 12% !important;
+        min-width: 40px !important;
+        padding: 0.5rem 0.2rem !important;
+    }
+    
+    #predictions-table th:nth-child(2),
+    #predictions-table td:nth-child(2),
+    #predictions-table th:nth-child(3),
+    #predictions-table td:nth-child(3) {
+        width: 27% !important;
+        padding: 0.5rem 0.3rem !important;
+        font-size: 0.8rem !important;
+    }
+    
+    #predictions-table th:nth-child(4),
+    #predictions-table td:nth-child(4) {
+        width: 24% !important;
+        padding: 0.5rem 0.3rem !important;
+        font-size: 0.8rem !important;
+    }
+    
+    #predictions-table th:nth-child(5),
+    #predictions-table td:nth-child(5) {
+        width: 10% !important;
+        padding: 0.5rem 0.2rem !important;
+    }
+    
+    .team-flag {
+        font-size: 1em !important;
+    }
+    
+    .date-separator td {
+        padding: 0.75rem !important;
+        font-size: 0.9rem !important;
+    }
+}
