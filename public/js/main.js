@@ -119,7 +119,7 @@ async function loadPredictions() {
             // Add date separator row - FULL WIDTH, CENTERED, COMPACT
             html += `
                 <tr class="date-separator">
-                    <td colspan="5" class="date-header" style="text-align: center !important;">
+                    <td colspan="5" class="date-header">
                         <i class="bi bi-calendar3"></i> ${dateDisplay}
                     </td>
                 </tr>
@@ -169,9 +169,6 @@ async function loadPredictions() {
 document.addEventListener('DOMContentLoaded', function() {
     loadPredictions();
 });
-
-// Reload predictions every 30 seconds to catch new updates
-setInterval(loadPredictions, 30000);
 
 // Expose for external use
 window.loadPredictions = loadPredictions;
