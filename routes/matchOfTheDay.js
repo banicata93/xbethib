@@ -9,12 +9,14 @@ const auth = (req, res, next) => {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         
         if (!token) {
+            console.log('No token provided');
             return res.status(401).json({ message: 'Authentication required' });
         }
 
         try {
             const JWT_SECRET = process.env.JWT_SECRET;
             if (!JWT_SECRET) {
+                console.error('JWT_SECRET not configured');
                 return res.status(500).json({ message: 'Server configuration error' });
             }
 
@@ -22,9 +24,11 @@ const auth = (req, res, next) => {
             req.user = decoded;
             next();
         } catch (error) {
+            console.error('Token verification failed:', error.message);
             return res.status(401).json({ message: 'Invalid token' });
         }
     } catch (error) {
+        console.error('Auth middleware error:', error);
         return res.status(500).json({ message: 'Server error' });
     }
 };
@@ -50,21 +54,39 @@ router.get('/', async (req, res) => {
 // POST - Create/Update Match of the Day (protected)
 router.post('/', auth, async (req, res) => {
     try {
+        console.log('Received MOTD request:', JSON.stringify(req.body, null, 2));
+        
         const { homeTeam, awayTeam, time, prediction, preview } = req.body;
         
         // Validation
         if (!homeTeam?.name || !awayTeam?.name || !time || !prediction || !preview) {
+            console.error('Validation failed:', {
+                homeTeamName: !!homeTeam?.name,
+                awayTeamName: !!awayTeam?.name,
+                time: !!time,
+                prediction: !!prediction,
+                preview: !!preview
+            });
             return res.status(400).json({ 
                 message: 'Missing required fields',
-                required: ['homeTeam.name', 'awayTeam.name', 'time', 'prediction', 'preview']
+                required: ['homeTeam.name', 'awayTeam.name', 'time', 'prediction', 'preview'],
+                received: {
+                    homeTeam: homeTeam?.name ? 'provided' : 'missing',
+                    awayTeam: awayTeam?.name ? 'provided' : 'missing',
+                    time: time ? 'provided' : 'missing',
+                    prediction: prediction ? 'provided' : 'missing',
+                    preview: preview ? 'provided' : 'missing'
+                }
             });
         }
         
+        console.log('Deactivating previous MOTD entries...');
         // Deactivate all previous Match of the Day entries
-        await MatchOfTheDay.updateMany(
+        const deactivateResult = await MatchOfTheDay.updateMany(
             { isActive: true },
             { isActive: false }
         );
+        console.log('Deactivated entries:', deactivateResult.modifiedCount);
         
         // Create new Match of the Day
         const newMotd = new MatchOfTheDay({
@@ -82,13 +104,21 @@ router.post('/', auth, async (req, res) => {
             isActive: true
         });
         
+        console.log('Saving new MOTD...');
         const savedMotd = await newMotd.save();
-        console.log('Match of the Day saved:', savedMotd);
+        console.log('Match of the Day saved successfully:', savedMotd._id);
         
-        res.status(201).json(savedMotd);
+        res.status(201).json({
+            message: 'Match of the Day saved successfully',
+            data: savedMotd
+        });
     } catch (error) {
         console.error('Error saving Match of the Day:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ 
+            message: 'Failed to save Match of the Day',
+            error: error.message,
+            details: error.stack
+        });
     }
 });
 
@@ -98,6 +128,7 @@ router.delete('/:id', auth, async (req, res) => {
         await MatchOfTheDay.findByIdAndDelete(req.params.id);
         res.json({ message: 'Match of the Day deleted' });
     } catch (error) {
+        console.error('Error deleting Match of the Day:', error);
         res.status(500).json({ message: error.message });
     }
 });
