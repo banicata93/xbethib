@@ -58,11 +58,11 @@ const resultUpdateSchema = Joi.object({
 const matchOfTheDaySchema = Joi.object({
     homeTeam: Joi.object({
         name: Joi.string().min(2).max(100).required(),
-        logo: Joi.string().optional().allow('')
+        logo: Joi.string().max(5000000).optional().allow('') // Allow large base64 images (up to 5MB)
     }).required(),
     awayTeam: Joi.object({
         name: Joi.string().min(2).max(100).required(),
-        logo: Joi.string().optional().allow('')
+        logo: Joi.string().max(5000000).optional().allow('') // Allow large base64 images (up to 5MB)
     }).required(),
     time: Joi.string().required(),
     prediction: Joi.string().min(2).max(200).required(),
