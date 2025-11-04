@@ -292,15 +292,32 @@
             }
             
             #goleador-popup {
-                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-                border-radius: 25px;
+                background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+                border-radius: 20px;
                 padding: 0;
-                max-width: 500px;
+                max-width: 420px;
                 width: 90%;
-                box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
+                box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(0, 255, 102, 0.2);
                 animation: slideUp 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
                 overflow: hidden;
-                border: 2px solid rgba(0, 255, 102, 0.3);
+                position: relative;
+            }
+            
+            #goleador-popup::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: linear-gradient(90deg, #00ff66, #00ccff, #00ff66);
+                background-size: 200% 100%;
+                animation: shimmer 3s linear infinite;
+            }
+            
+            @keyframes shimmer {
+                0% { background-position: -200% 0; }
+                100% { background-position: 200% 0; }
             }
             
             @keyframes slideUp {
@@ -309,44 +326,68 @@
             }
             
             .goleador-header {
-                background: linear-gradient(135deg, #00ff66, #00ccff);
-                padding: 30px;
+                background: linear-gradient(135deg, #00ff66 0%, #00ccff 100%);
+                padding: 25px 30px;
                 text-align: center;
                 position: relative;
             }
             
             .goleador-header h2 {
-                color: #1a1a2e;
-                font-size: 28px;
-                font-weight: 800;
-                margin: 0;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+                color: #0f0f23;
+                font-size: 26px;
+                font-weight: 900;
+                margin: 0 0 5px 0;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
+                letter-spacing: 0.5px;
             }
             
             .goleador-header p {
-                color: #1a1a2e;
-                font-size: 14px;
-                margin: 5px 0 0 0;
-                opacity: 0.9;
+                color: #0f0f23;
+                font-size: 13px;
+                margin: 0;
+                opacity: 0.85;
+                font-weight: 600;
             }
             
             .goleador-body {
-                padding: 35px;
+                padding: 30px;
                 color: white;
             }
             
             .goleador-body h3 {
                 color: #00ff66;
-                font-size: 22px;
-                margin-bottom: 15px;
+                font-size: 19px;
+                margin-bottom: 12px;
                 font-weight: 700;
+                text-align: center;
             }
             
             .goleador-body p {
-                font-size: 16px;
-                line-height: 1.6;
-                margin-bottom: 25px;
-                color: rgba(255, 255, 255, 0.9);
+                font-size: 14px;
+                line-height: 1.5;
+                margin-bottom: 20px;
+                color: rgba(255, 255, 255, 0.85);
+                text-align: center;
+            }
+            
+            .promo-badge {
+                background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+                color: white;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                display: inline-block;
+                margin-bottom: 15px;
+                box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+                animation: pulse 2s ease-in-out infinite;
+            }
+            
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.05); }
             }
             
             .goleador-cta {
