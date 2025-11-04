@@ -92,8 +92,8 @@ async function loadPredictions() {
             return;
         }
         
-        // Filter out Match of the Day from regular predictions
-        const regularPredictions = predictions.filter(p => !p.isMatchOfTheDay);
+        // All predictions are regular now (Match of the Day is separate)
+        const regularPredictions = predictions;
         console.log('Regular predictions:', regularPredictions.length);
         
         // Group predictions by date
