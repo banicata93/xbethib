@@ -24,7 +24,8 @@ router.get('/', async (req, res) => {
             cpu: {
                 user: process.cpuUsage().user,
                 system: process.cpuUsage().system
-            }
+            },
+            cache: getCacheStats()
         }
     };
 
