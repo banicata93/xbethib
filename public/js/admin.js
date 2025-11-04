@@ -4,22 +4,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Get token from localStorage or sessionStorage
     token = localStorage.getItem('token') || sessionStorage.getItem('token');
     
-    console.log('Checking for token...');
-    console.log('localStorage token:', localStorage.getItem('token'));
-    console.log('sessionStorage token:', sessionStorage.getItem('token'));
-    console.log('Final token:', token);
-    
     const predictionForm = document.getElementById('predictionForm');
     
     if (!token) {
-        console.log('No token found, redirecting to login');
         setTimeout(() => {
             window.location.href = '/login';
         }, 500);
         return;
     }
 
-    console.log('Token found, loading admin panel');
     // Load predictions when page loads
     loadAdminPredictions();
     
