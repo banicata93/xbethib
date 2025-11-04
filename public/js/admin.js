@@ -222,6 +222,7 @@ function getStatusBadge(result) {
 // Редактиране на прогноза
 window.editPrediction = async function(id) {
     try {
+        const token = window.token || localStorage.getItem('token');
         // Зареждаме данните на прогнозата
         const response = await fetch('/api/predictions', {
             headers: {
@@ -360,6 +361,7 @@ window.saveEditedPrediction = async function() {
         
         console.log('Form data:', formData);
         
+        const token = window.token || localStorage.getItem('token');
         const response = await fetch(`/api/predictions/${id}`, {
             method: 'PUT',
             headers: {
