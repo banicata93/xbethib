@@ -457,120 +457,75 @@
             }
         </style>
         
-        <div id="mobile-preview-overlay">
-            <div id="mobile-preview-container">
-                <div id="mobile-preview-controls">
-                    <button class="device-btn active" data-device="iphone-se" data-width="375" data-height="667">
-                        <i class="fas fa-mobile-alt"></i> iPhone SE
+        <div id="goleador-overlay">
+            <div id="goleador-popup">
+                <div class="goleador-header">
+                    <button class="goleador-close" onclick="document.getElementById('goleador-promo').style.display='none'">
+                        <i class="fas fa-times"></i>
                     </button>
-                    <button class="device-btn" data-device="iphone-12" data-width="390" data-height="844">
-                        <i class="fas fa-mobile-alt"></i> iPhone 12
-                    </button>
-                    <button class="device-btn" data-device="iphone-14-pro" data-width="430" data-height="932">
-                        <i class="fas fa-mobile-alt"></i> iPhone 14 Pro Max
-                    </button>
-                    <button class="device-btn" data-device="galaxy-s21" data-width="360" data-height="800">
-                        <i class="fab fa-android"></i> Galaxy S21
-                    </button>
-                    <button class="device-btn" data-device="pixel-5" data-width="393" data-height="851">
-                        <i class="fab fa-android"></i> Pixel 5
-                    </button>
-                    <button id="close-preview-btn">
-                        <i class="fas fa-times"></i> Close
-                    </button>
+                    <h2>🏆 GOLEADOR TIPS</h2>
+                    <p>Premium Sports Predictions</p>
                 </div>
                 
-                <div id="mobile-frame-wrapper">
-                    <iframe id="mobile-frame" src="" width="375" height="667"></iframe>
+                <div class="goleador-body">
+                    <h3>Професионални Прогнози</h3>
+                    <p>Получи достъп до експертни анализи и прогнози от професионални типстъри!</p>
+                    
+                    <div class="goleador-features">
+                        <div class="feature-item">
+                            <i class="fas fa-chart-line"></i>
+                            <p>Висока точност</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-trophy"></i>
+                            <p>Доказани резултати</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-users"></i>
+                            <p>VIP Общност</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-bell"></i>
+                            <p>Дневни типове</p>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <a href="https://goleadortips.com" target="_blank" class="goleador-cta">
+                            Виж повече
+                        </a>
+                    </div>
                 </div>
-                
-                <div id="device-label">iPhone SE (375 × 667)</div>
             </div>
         </div>
     </div>
     
-    <!-- Mobile Preview Toggle Button -->
-    <button id="mobile-preview-toggle" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: linear-gradient(135deg, #00ff66, #00ccff); border: none; border-radius: 50%; width: 60px; height: 60px; box-shadow: 0 4px 15px rgba(0, 255, 102, 0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;" title="Open Mobile Preview">
-        <i class="fas fa-mobile-alt" style="font-size: 24px; color: #111827;"></i>
-    </button>
-    
     <script>
         (function() {
-            const toggleBtn = document.getElementById('mobile-preview-toggle');
-            const previewTool = document.getElementById('mobile-preview-tool');
-            const mobileFrame = document.getElementById('mobile-frame');
-            const closeBtn = document.getElementById('close-preview-btn');
-            const deviceBtns = document.querySelectorAll('.device-btn');
-            const deviceLabel = document.getElementById('device-label');
-            
-            // Hide on mobile
-            if (window.innerWidth <= 768) {
-                toggleBtn.style.display = 'none';
-                return;
-            }
-            
-            // Open preview
-            toggleBtn.addEventListener('click', function() {
-                previewTool.style.display = 'block';
-                mobileFrame.src = window.location.href;
-            });
-            
-            // Close preview
-            closeBtn.addEventListener('click', function() {
-                previewTool.style.display = 'none';
-                mobileFrame.src = '';
-            });
+            // Show popup after 5 seconds
+            setTimeout(function() {
+                const promo = document.getElementById('goleador-promo');
+                const hasSeenPromo = localStorage.getItem('goleadorPromoSeen');
+                
+                // Show only once per session
+                if (!hasSeenPromo) {
+                    promo.style.display = 'block';
+                    localStorage.setItem('goleadorPromoSeen', 'true');
+                }
+            }, 5000);
             
             // Close on overlay click
-            document.getElementById('mobile-preview-overlay').addEventListener('click', function(e) {
+            document.getElementById('goleador-overlay').addEventListener('click', function(e) {
                 if (e.target === this) {
-                    previewTool.style.display = 'none';
-                    mobileFrame.src = '';
+                    document.getElementById('goleador-promo').style.display = 'none';
                 }
             });
             
             // Close on ESC key
             document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && previewTool.style.display === 'block') {
-                    previewTool.style.display = 'none';
-                    mobileFrame.src = '';
+                if (e.key === 'Escape') {
+                    document.getElementById('goleador-promo').style.display = 'none';
                 }
-            });
-            
-            // Device switching
-            deviceBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    deviceBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    const width = this.dataset.width;
-                    const height = this.dataset.height;
-                    const device = this.dataset.device;
-                    
-                    mobileFrame.style.width = width + 'px';
-                    mobileFrame.style.height = height + 'px';
-                    
-                    const deviceNames = {
-                        'iphone-se': 'iPhone SE',
-                        'iphone-12': 'iPhone 12',
-                        'iphone-14-pro': 'iPhone 14 Pro Max',
-                        'galaxy-s21': 'Samsung Galaxy S21',
-                        'pixel-5': 'Google Pixel 5'
-                    };
-                    
-                    deviceLabel.textContent = `${deviceNames[device]} (${width} × ${height})`;
-                });
-            });
-            
-            // Hover effect
-            toggleBtn.addEventListener('mouseenter', function() {
-                this.style.transform = 'scale(1.1) translateY(-3px)';
-                this.style.boxShadow = '0 6px 20px rgba(0, 255, 102, 0.6)';
-            });
-            
-            toggleBtn.addEventListener('mouseleave', function() {
-                this.style.transform = 'scale(1) translateY(0)';
-                this.style.boxShadow = '0 4px 15px rgba(0, 255, 102, 0.4)';
             });
         })();
     </script>
