@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const Prediction = require('../models/prediction');
+const { validate, predictionSchema, resultUpdateSchema } = require('../utils/validationSchemas');
 
 // Middleware to verify JWT token
 const auth = (req, res, next) => {
@@ -68,7 +69,7 @@ router.get('/', async (req, res) => {
 });
 
 // Add new prediction (protected route)
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, validate(predictionSchema), async (req, res) => {
     try {
         console.log('Received prediction data:', req.body);
         const { matchDate, homeTeam, awayTeam, leagueFlag, prediction } = req.body;
@@ -132,7 +133,7 @@ router.delete('/:id', auth, async (req, res) => {
 });
 
 // Update prediction result (protected route)
-router.patch('/:id/result', auth, async (req, res) => {
+router.patch('/:id/result', auth, validate(resultUpdateSchema), async (req, res) => {
     try {
         const { id } = req.params;
         const { result } = req.body;
@@ -159,45 +160,8 @@ router.patch('/:id/result', auth, async (req, res) => {
     }
 });
 
-// Set Match of the Day (protected route)
-router.post('/match-of-the-day', auth, async (req, res) => {
-    try {
-        const { matchDate, leagueFlag, homeTeam, homeTeamFlag, awayTeam, awayTeamFlag, prediction } = req.body;
-        
-        console.log('Received MOTD data:', req.body);
-        
-        if (!matchDate || !leagueFlag || !homeTeam || !awayTeam || !prediction) {
-            return res.status(400).json({ 
-                message: 'Required fields: matchDate, leagueFlag, homeTeam, awayTeam, prediction',
-                received: req.body
-            });
-        }
-
-        // Премахваме старите Match of the Day
-        await Prediction.updateMany(
-            { isMatchOfTheDay: true },
-            { isMatchOfTheDay: false }
-        );
-
-        // Създаваме новия Match of the Day
-        const newMotd = new Prediction({
-            matchDate: new Date(matchDate),
-            homeTeam,
-            homeTeamFlag: homeTeamFlag || '',
-            awayTeam,
-            awayTeamFlag: awayTeamFlag || '',
-            leagueFlag,
-            prediction,
-            isMatchOfTheDay: true
-        });
-
-        const savedMotd = await newMotd.save();
-        console.log('MOTD saved successfully:', savedMotd);
-        res.status(201).json(savedMotd);
-    } catch (error) {
-        console.error('Error setting Match of the Day:', error);
-        res.status(500).json({ message: error.message });
-    }
-});
+// NOTE: Match of the Day functionality has been moved to /api/match-of-the-day
+// This old endpoint is deprecated and should not be used
+// Use the new MatchOfTheDay model and routes instead
 
 module.exports = router;
