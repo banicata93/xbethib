@@ -1,8 +1,11 @@
+// Make token globally accessible
+window.token = null;
 let token = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     // Get token from localStorage or sessionStorage
     token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    window.token = token;
     
     const predictionForm = document.getElementById('predictionForm');
     
@@ -152,6 +155,7 @@ window.deletePrediction = async function(id) {
     if (!confirm('Are you sure you want to delete this prediction?')) return;
 
     try {
+        const token = window.token || localStorage.getItem('token');
         const response = await fetch(`/api/predictions/${id}`, {
             method: 'DELETE',
             headers: {
