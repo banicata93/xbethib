@@ -181,6 +181,7 @@ window.deletePrediction = async function(id) {
 // Маркиране на резултат
 window.markResult = async function(id, result) {
     try {
+        const token = window.token || localStorage.getItem('token');
         const response = await fetch(`/api/predictions/${id}/result`, {
             method: 'PATCH',
             headers: {
