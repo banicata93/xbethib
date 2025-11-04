@@ -152,6 +152,27 @@
             margin-top: 15px;
             display: none;
         }
+        
+        #predictionCustom {
+            transition: all 0.3s ease;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .input-group .form-select {
+            border-top-right-radius: 10px !important;
+            border-bottom-right-radius: 10px !important;
+        }
     </style>
 </head>
 <body>
@@ -250,20 +271,26 @@
                                     <label for="prediction" class="form-label">
                                         <i class="bi bi-lightning me-2"></i>Prediction
                                     </label>
-                                    <select class="form-select" id="prediction" required>
-                                        <option value="">Select Prediction</option>
-                                        <option value="BTTS">BTTS (Both Teams To Score)</option>
-                                        <option value="Over 2.5">Over 2.5 Goals</option>
-                                        <option value="Over 1.5">Over 1.5 Goals</option>
-                                        <option value="Under 2.5">Under 2.5 Goals</option>
-                                        <option value="Home Win">Home Win</option>
-                                        <option value="Draw">Draw</option>
-                                        <option value="Away Win">Away Win</option>
-                                        <option value="1X">1X (Home or Draw)</option>
-                                        <option value="X2">X2 (Draw or Away)</option>
-                                        <option value="12">12 (Home or Away)</option>
-                                        <option value="BTTS & Over 2.5">BTTS & Over 2.5</option>
-                                    </select>
+                                    <div class="input-group">
+                                        <select class="form-select" id="predictionSelect" style="max-width: 70%;">
+                                            <option value="">Select or type custom...</option>
+                                            <option value="BTTS">BTTS (Both Teams To Score)</option>
+                                            <option value="Over 2.5">Over 2.5 Goals</option>
+                                            <option value="Over 1.5">Over 1.5 Goals</option>
+                                            <option value="Under 2.5">Under 2.5 Goals</option>
+                                            <option value="Home Win">Home Win</option>
+                                            <option value="Draw">Draw</option>
+                                            <option value="Away Win">Away Win</option>
+                                            <option value="1X">1X (Home or Draw)</option>
+                                            <option value="X2">X2 (Draw or Away)</option>
+                                            <option value="12">12 (Home or Away)</option>
+                                            <option value="BTTS & Over 2.5">BTTS & Over 2.5</option>
+                                            <option value="custom">Custom Prediction</option>
+                                        </select>
+                                    </div>
+                                    <input type="text" class="form-control mt-2" id="predictionCustom" placeholder="Or type your custom prediction here..." style="display: none;">
+                                    <input type="hidden" id="prediction" required>
+                                    <div class="form-text">Select from dropdown or type a custom prediction</div>
                                 </div>
                                 
                                 <!-- Match Preview -->
@@ -338,6 +365,31 @@
         // Global variables for logo data
         let homeLogoData = '';
         let awayLogoData = '';
+        
+        // Prediction field logic
+        document.getElementById('predictionSelect').addEventListener('change', function() {
+            const customInput = document.getElementById('predictionCustom');
+            const hiddenInput = document.getElementById('prediction');
+            
+            if (this.value === 'custom') {
+                customInput.style.display = 'block';
+                customInput.required = true;
+                hiddenInput.value = '';
+            } else if (this.value === '') {
+                customInput.style.display = 'none';
+                customInput.required = false;
+                hiddenInput.value = '';
+            } else {
+                customInput.style.display = 'none';
+                customInput.required = false;
+                hiddenInput.value = this.value;
+            }
+        });
+        
+        document.getElementById('predictionCustom').addEventListener('input', function() {
+            const hiddenInput = document.getElementById('prediction');
+            hiddenInput.value = this.value;
+        });
         
         // Helper functions for messages
         function showError(message) {
@@ -447,10 +499,18 @@
             const homeTeamName = document.getElementById('homeTeamName').value;
             const awayTeamName = document.getElementById('awayTeamName').value;
             const matchTime = document.getElementById('matchTime').value;
+            const predictionSelect = document.getElementById('predictionSelect').value;
+            const predictionCustom = document.getElementById('predictionCustom').value;
             const prediction = document.getElementById('prediction').value;
             const matchPreview = document.getElementById('matchPreview').value;
             
-            if (!homeTeamName || !awayTeamName || !matchTime || !prediction || !matchPreview) {
+            // Validate prediction
+            if (!prediction || prediction === '') {
+                showError('Моля изберете или въведете прогноза');
+                return;
+            }
+            
+            if (!homeTeamName || !awayTeamName || !matchTime || !matchPreview) {
                 showError('Моля попълнете всички задължителни полета');
                 return;
             }
@@ -547,8 +607,24 @@
                         document.getElementById('homeTeamName').value = data.homeTeam?.name || '';
                         document.getElementById('awayTeamName').value = data.awayTeam?.name || '';
                         document.getElementById('matchTime').value = data.time || '';
-                        document.getElementById('prediction').value = data.prediction || '';
                         document.getElementById('matchPreview').value = data.preview || '';
+                        
+                        // Load prediction - check if it's in the dropdown
+                        const predictionValue = data.prediction || '';
+                        const predictionSelect = document.getElementById('predictionSelect');
+                        const predictionOptions = Array.from(predictionSelect.options).map(opt => opt.value);
+                        
+                        if (predictionOptions.includes(predictionValue)) {
+                            predictionSelect.value = predictionValue;
+                            document.getElementById('prediction').value = predictionValue;
+                        } else if (predictionValue) {
+                            // Custom prediction
+                            predictionSelect.value = 'custom';
+                            document.getElementById('predictionCustom').value = predictionValue;
+                            document.getElementById('predictionCustom').style.display = 'block';
+                            document.getElementById('predictionCustom').required = true;
+                            document.getElementById('prediction').value = predictionValue;
+                        }
                         
                         // Load existing logos
                         if (data.homeTeam?.logo && data.homeTeam.logo !== '/images/default-team.png') {
