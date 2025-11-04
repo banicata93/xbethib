@@ -46,7 +46,9 @@ const matchOfTheDaySchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Index for quick lookup of active match
-matchOfTheDaySchema.index({ isActive: 1, date: -1 });
+// Indexes for better query performance
+matchOfTheDaySchema.index({ isActive: 1 }); // For finding active MOTD
+matchOfTheDaySchema.index({ date: -1 }); // For sorting by date
+matchOfTheDaySchema.index({ isActive: 1, date: -1 }); // Composite index
 
 module.exports = mongoose.model('MatchOfTheDay', matchOfTheDaySchema);
