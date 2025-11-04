@@ -5,8 +5,7 @@
 
 const requiredEnvVars = [
     'MONGODB_URI',
-    'JWT_SECRET',
-    'NODE_ENV'
+    'JWT_SECRET'
 ];
 
 function validateEnv() {
