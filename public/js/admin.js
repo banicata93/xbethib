@@ -84,7 +84,6 @@ async function loadAdminPredictions() {
         }
 
         const predictions = await response.json();
-        console.log('Received predictions:', predictions);
         
         // Sort predictions by date (newest first)
         predictions.sort((a, b) => {
