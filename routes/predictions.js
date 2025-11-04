@@ -3,9 +3,10 @@ const router = express.Router();
 const Prediction = require('../models/prediction');
 const auth = require('../middleware/auth');
 const { validate, predictionSchema, resultUpdateSchema } = require('../utils/validationSchemas');
+const { cacheMiddleware, invalidateCache } = require('../utils/cache');
 
-// Get all predictions
-router.get('/', async (req, res) => {
+// Get all predictions (cached for 5 minutes)
+router.get('/', cacheMiddleware(300), async (req, res) => {
     try {
         const predictions = await Prediction.find().sort({ matchDate: -1 });
         
