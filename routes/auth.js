@@ -2,10 +2,30 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 const Admin = require('../models/admin');
+const { validate, loginSchema } = require('../utils/validationSchemas');
 
-// Login route
-router.post('/login', async (req, res) => {
+// Rate limiter for login attempts
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // Maximum 5 attempts per 15 minutes
+    message: {
+        message: 'Твърде много опити за вход. Моля опитайте след 15 минути.',
+        retryAfter: 15
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) => {
+        res.status(429).json({
+            message: 'Твърде много опити за вход. Моля опитайте след 15 минути.',
+            retryAfter: 15
+        });
+    }
+});
+
+// Login route with rate limiting and validation
+router.post('/login', loginLimiter, validate(loginSchema), async (req, res) => {
     try {
         console.log('Login request received:', req.body);
         const { username, password } = req.body;
