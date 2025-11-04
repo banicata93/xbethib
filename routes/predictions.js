@@ -72,6 +72,10 @@ router.put('/:id', auth, async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
     try {
         await Prediction.findByIdAndDelete(req.params.id);
+        
+        // Invalidate predictions cache
+        invalidateCache('/api/predictions');
+        
         res.json({ message: 'Prediction deleted' });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -93,6 +97,9 @@ router.patch('/:id/result', auth, validate(resultUpdateSchema), async (req, res)
         if (!prediction) {
             return res.status(404).json({ message: 'Prediction not found' });
         }
+        
+        // Invalidate predictions cache
+        invalidateCache('/api/predictions');
         
         res.json(prediction);
     } catch (error) {
