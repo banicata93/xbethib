@@ -50,8 +50,27 @@ app.use(compression({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static Files
-app.use(express.static('public'));
+// Static Files with CDN-friendly caching headers
+app.use(express.static('public', {
+    maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0, // 1 day in production
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, path) => {
+        // Cache static assets aggressively
+        if (path.endsWith('.css') || path.endsWith('.js')) {
+            res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day
+        } else if (path.endsWith('.jpg') || path.endsWith('.jpeg') || 
+                   path.endsWith('.png') || path.endsWith('.gif') || 
+                   path.endsWith('.svg') || path.endsWith('.webp')) {
+            res.setHeader('Cache-Control', 'public, max-age=604800'); // 7 days
+        } else if (path.endsWith('.woff') || path.endsWith('.woff2') || 
+                   path.endsWith('.ttf') || path.endsWith('.eot')) {
+            res.setHeader('Cache-Control', 'public, max-age=2592000'); // 30 days
+        } else {
+            res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour for HTML
+        }
+    }
+}));
 
 // MongoDB connection with caching for serverless
 let cachedDb = null;
