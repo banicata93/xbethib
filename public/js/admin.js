@@ -2,10 +2,14 @@
 window.token = null;
 let token = null;
 
+console.log('🚀 Admin.js loaded! Version: 1762262123');
+
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('📋 DOMContentLoaded event fired');
     // Get token from localStorage or sessionStorage
     token = localStorage.getItem('token') || sessionStorage.getItem('token');
     window.token = token;
+    console.log('🔑 Token loaded:', token ? 'YES' : 'NO');
     
     const predictionForm = document.getElementById('predictionForm');
     
@@ -152,10 +156,17 @@ async function loadAdminPredictions() {
 }
 
 window.deletePrediction = async function(id) {
-    if (!confirm('Are you sure you want to delete this prediction?')) return;
+    console.log('🗑️ Delete button clicked for ID:', id);
+    if (!confirm('Are you sure you want to delete this prediction?')) {
+        console.log('❌ User cancelled delete');
+        return;
+    }
 
     try {
         const token = window.token || localStorage.getItem('token');
+        console.log('🔑 Using token:', token ? 'YES' : 'NO');
+        console.log('📡 Sending DELETE request to:', `/api/predictions/${id}`);
+        
         const response = await fetch(`/api/predictions/${id}`, {
             method: 'DELETE',
             headers: {
