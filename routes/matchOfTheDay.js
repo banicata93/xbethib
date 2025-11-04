@@ -1,38 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('jsonwebtoken');
 const MatchOfTheDay = require('../models/matchOfTheDay');
+const auth = require('../middleware/auth');
 const { validate, matchOfTheDaySchema } = require('../utils/validationSchemas');
-
-// Middleware to verify JWT token
-const auth = (req, res, next) => {
-    try {
-        const token = req.header('Authorization')?.replace('Bearer ', '');
-        
-        if (!token) {
-            console.log('No token provided');
-            return res.status(401).json({ message: 'Authentication required' });
-        }
-
-        try {
-            const JWT_SECRET = process.env.JWT_SECRET;
-            if (!JWT_SECRET) {
-                console.error('JWT_SECRET not configured');
-                return res.status(500).json({ message: 'Server configuration error' });
-            }
-
-            const decoded = jwt.verify(token, JWT_SECRET);
-            req.user = decoded;
-            next();
-        } catch (error) {
-            console.error('Token verification failed:', error.message);
-            return res.status(401).json({ message: 'Invalid token' });
-        }
-    } catch (error) {
-        console.error('Auth middleware error:', error);
-        return res.status(500).json({ message: 'Server error' });
-    }
-};
 
 // GET - Get current Match of the Day (public)
 router.get('/', async (req, res) => {
