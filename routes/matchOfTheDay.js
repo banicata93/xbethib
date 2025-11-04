@@ -3,9 +3,10 @@ const router = express.Router();
 const MatchOfTheDay = require('../models/matchOfTheDay');
 const auth = require('../middleware/auth');
 const { validate, matchOfTheDaySchema } = require('../utils/validationSchemas');
+const { cacheMiddleware, invalidateCache } = require('../utils/cache');
 
-// GET - Get current Match of the Day (public)
-router.get('/', async (req, res) => {
+// GET - Get current Match of the Day (public, cached for 10 minutes)
+router.get('/', cacheMiddleware(600), async (req, res) => {
     try {
         // Find the most recent active Match of the Day
         const motd = await MatchOfTheDay.findOne({ isActive: true })
@@ -50,6 +51,9 @@ router.post('/', auth, validate(matchOfTheDaySchema), async (req, res) => {
         });
         
         const savedMotd = await newMotd.save();
+        
+        // Invalidate Match of the Day cache
+        invalidateCache('/api/match-of-the-day');
         
         res.status(201).json({
             message: 'Match of the Day запазен успешно!',
