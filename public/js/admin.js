@@ -171,6 +171,7 @@ window.deletePrediction = async function(id) {
             throw new Error('Failed to delete prediction');
         }
 
+        Toast.success('Prediction deleted successfully! 🗑️');
         loadAdminPredictions();
     } catch (error) {
         console.error('Error deleting prediction:', error);
@@ -199,6 +200,12 @@ window.markResult = async function(id, result) {
             throw new Error('Failed to update result');
         }
 
+        const resultEmojis = {
+            'win': '✅',
+            'loss': '❌',
+            'void': '🚫'
+        };
+        Toast.success(`Result updated to ${result.toUpperCase()} ${resultEmojis[result] || ''}`);
         loadAdminPredictions();
     } catch (error) {
         console.error('Error updating result:', error);
