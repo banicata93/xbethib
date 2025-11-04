@@ -2160,28 +2160,37 @@ body {
 }
 
 .team-logo-container {
-    width: 50px;
-    height: 50px;
+    width: 70px;
+    height: 70px;
     margin: 0 auto 0.5rem;
-    background: white;
-    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
     overflow: hidden;
     position: relative;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
 }
 
 .team-logo-container::after {
     content: '';
     position: absolute;
-    inset: -3px;
-    background: linear-gradient(135deg, #00ff66, #00ccff);
-    border-radius: 50%;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0, 255, 102, 0.2), rgba(0, 204, 255, 0.2));
+    border-radius: 12px;
     z-index: -1;
     opacity: 0;
     transition: opacity 0.3s ease;
+}
+
+.motd-team:hover .team-logo-container {
+    transform: scale(1.05);
+    border-color: rgba(0, 255, 102, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 255, 102, 0.3);
 }
 
 .motd-team:hover .team-logo-container::after {
@@ -2189,9 +2198,10 @@ body {
 }
 
 .team-logo {
-    width: 80%;
-    height: 80%;
+    width: 85%;
+    height: 85%;
     object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
 }
 
 .team-name {
@@ -2324,13 +2334,13 @@ body {
     }
     
     .motd-teams {
-        flex-direction: column;
+        flex-direction: row;
         gap: 0.75rem;
     }
     
     .team-logo-container {
-        width: 55px;
-        height: 55px;
+        width: 60px;
+        height: 60px;
     }
     
     .team-name {
@@ -2380,8 +2390,8 @@ body {
     }
     
     .team-logo-container {
-        width: 45px;
-        height: 45px;
+        width: 50px;
+        height: 50px;
     }
     
     .team-name {
