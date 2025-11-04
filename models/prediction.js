@@ -40,13 +40,17 @@ const predictionSchema = new mongoose.Schema({
         min: 1.01,
         max: 100,
         default: null
-    },
-    isMatchOfTheDay: {
-        type: Boolean,
-        default: false
     }
+    // NOTE: isMatchOfTheDay field is deprecated
+    // Match of the Day now uses separate MatchOfTheDay model
 }, {
     timestamps: true
 });
+
+// Indexes for better query performance
+predictionSchema.index({ matchDate: -1 }); // For sorting by date (descending)
+predictionSchema.index({ result: 1 }); // For filtering by result
+predictionSchema.index({ matchDate: -1, result: 1 }); // Composite index for common queries
+predictionSchema.index({ createdAt: -1 }); // For recent predictions
 
 module.exports = mongoose.model('Prediction', predictionSchema);
