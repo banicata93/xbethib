@@ -39,6 +39,10 @@ router.post('/', auth, validate(predictionSchema), async (req, res) => {
         });
 
         const savedPrediction = await newPrediction.save();
+        
+        // Invalidate predictions cache
+        invalidateCache('/api/predictions');
+        
         res.status(201).json(savedPrediction);
     } catch (error) {
         console.error('Error in POST /predictions:', error);
@@ -54,6 +58,10 @@ router.put('/:id', auth, async (req, res) => {
             req.body,
             { new: true }
         );
+        
+        // Invalidate predictions cache
+        invalidateCache('/api/predictions');
+        
         res.json(prediction);
     } catch (error) {
         res.status(400).json({ message: error.message });
