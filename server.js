@@ -138,6 +138,7 @@ app.get('/match-of-the-day-admin', (req, res) => {
 const predictionsRouter = require('./routes/predictions');
 const matchOfTheDayRouter = require('./routes/matchOfTheDay');
 const authRouter = require('./routes/auth');
+const healthRouter = require('./routes/health');
 
 // Connect to database before handling API requests
 app.use(async (req, res, next) => {
@@ -150,6 +151,7 @@ app.use(async (req, res, next) => {
 app.use('/api/predictions', predictionsRouter);
 app.use('/api/match-of-the-day', matchOfTheDayRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/health', healthRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
