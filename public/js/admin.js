@@ -2,7 +2,7 @@
 window.token = null;
 let token = null;
 
-console.log('🚀 Admin.js loaded! Version: 1762262123');
+console.log('🚀 Admin.js loaded! Version: 1762262334 - CSP Fixed!');
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📋 DOMContentLoaded event fired');
@@ -26,6 +26,34 @@ document.addEventListener('DOMContentLoaded', () => {
     if (predictionForm) {
         predictionForm.addEventListener('submit', handleAddPrediction);
     }
+    
+    // Event delegation for dynamically created buttons
+    document.addEventListener('click', function(e) {
+        // Delete button
+        if (e.target.closest('.delete-prediction-btn')) {
+            const btn = e.target.closest('.delete-prediction-btn');
+            const id = btn.dataset.id;
+            console.log('🗑️ Delete button clicked via event delegation, ID:', id);
+            window.deletePrediction(id);
+        }
+        
+        // Edit button
+        if (e.target.closest('.edit-prediction-btn')) {
+            const btn = e.target.closest('.edit-prediction-btn');
+            const id = btn.dataset.id;
+            console.log('✏️ Edit button clicked via event delegation, ID:', id);
+            window.editPrediction(id);
+        }
+        
+        // Mark result buttons
+        if (e.target.closest('.mark-result-btn')) {
+            const btn = e.target.closest('.mark-result-btn');
+            const id = btn.dataset.id;
+            const result = btn.dataset.result;
+            console.log('📊 Mark result button clicked via event delegation, ID:', id, 'Result:', result);
+            window.markResult(id, result);
+        }
+    });
 });
 
 async function handleAddPrediction(e) {
@@ -129,20 +157,20 @@ async function loadAdminPredictions() {
                 </td>
                 <td>
                     ${(prediction.result === 'pending' || !prediction.result) ? `
-                        <button class="btn btn-success btn-sm me-1 mb-1" onclick="markResult('${prediction._id}', 'win')" title="Mark as Win">
+                        <button class="btn btn-success btn-sm me-1 mb-1 mark-result-btn" data-id="${prediction._id}" data-result="win" title="Mark as Win">
                             <i class="bi bi-check-circle"></i>
                         </button>
-                        <button class="btn btn-danger btn-sm me-1 mb-1" onclick="markResult('${prediction._id}', 'loss')" title="Mark as Loss">
+                        <button class="btn btn-danger btn-sm me-1 mb-1 mark-result-btn" data-id="${prediction._id}" data-result="loss" title="Mark as Loss">
                             <i class="bi bi-x-circle"></i>
                         </button>
-                        <button class="btn btn-secondary btn-sm me-1 mb-1" onclick="markResult('${prediction._id}', 'void')" title="Mark as Void">
+                        <button class="btn btn-secondary btn-sm me-1 mb-1 mark-result-btn" data-id="${prediction._id}" data-result="void" title="Mark as Void">
                             <i class="bi bi-slash-circle"></i>
                         </button>
                     ` : ''}
-                    <button class="btn btn-warning btn-sm me-1 mb-1" onclick="editPrediction('${prediction._id}')" title="Edit">
+                    <button class="btn btn-warning btn-sm me-1 mb-1 edit-prediction-btn" data-id="${prediction._id}" title="Edit">
                         <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm mb-1" onclick="deletePrediction('${prediction._id}')" title="Delete">
+                    <button class="btn btn-outline-danger btn-sm mb-1 delete-prediction-btn" data-id="${prediction._id}" title="Delete">
                         <i class="bi bi-trash"></i>
                     </button>
                 </td>
@@ -324,7 +352,7 @@ function showEditModal(prediction) {
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" onclick="saveEditedPrediction()">Save Changes</button>
+                            <button type="button" class="btn btn-primary" id="saveEditedPredictionBtn">Save Changes</button>
                         </div>
                     </div>
                 </div>
@@ -333,6 +361,9 @@ function showEditModal(prediction) {
         
         document.body.insertAdjacentHTML('beforeend', modalHTML);
         modal = document.getElementById('editPredictionModal');
+        
+        // Add event listener to Save button
+        document.getElementById('saveEditedPredictionBtn').addEventListener('click', window.saveEditedPrediction);
     }
     
     // Попълваме формата с данните на прогнозата
