@@ -58,7 +58,7 @@ async function handleAddPrediction(e) {
         const data = await response.json();
 
         if (response.ok) {
-            alert('Prediction added successfully');
+            Toast.success('Prediction added successfully! ✅');
             loadAdminPredictions();
             e.target.reset();
         } else {
@@ -69,7 +69,7 @@ async function handleAddPrediction(e) {
         if (error.message === 'Invalid token') {
             window.location.href = '/login';
         } else {
-            alert('Failed to add prediction: ' + error.message);
+            Toast.error('Failed to add prediction: ' + error.message);
         }
     }
 }
@@ -152,7 +152,7 @@ async function loadAdminPredictions() {
         });
     } catch (error) {
         console.error('Error loading predictions:', error);
-        alert('Failed to load predictions: ' + error.message);
+        Toast.error('Failed to load predictions: ' + error.message);
     }
 }
 
@@ -178,7 +178,7 @@ window.deletePrediction = async function(id) {
         loadAdminPredictions();
     } catch (error) {
         console.error('Error deleting prediction:', error);
-        alert('Failed to delete prediction: ' + error.message);
+        Toast.error('Failed to delete prediction: ' + error.message);
     }
 }
 
@@ -205,7 +205,7 @@ window.markResult = async function(id, result) {
         loadAdminPredictions();
     } catch (error) {
         console.error('Error updating result:', error);
-        alert('Failed to update result: ' + error.message);
+        Toast.error('Failed to update result: ' + error.message);
     }
 }
 
@@ -247,7 +247,7 @@ window.editPrediction = async function(id) {
         showEditModal(prediction);
     } catch (error) {
         console.error('Error loading prediction for edit:', error);
-        alert('Failed to load prediction: ' + error.message);
+        Toast.error('Failed to load prediction: ' + error.message);
     }
 }
 
@@ -379,7 +379,7 @@ window.saveEditedPrediction = async function() {
         }
         
         console.log('Update successful');
-        alert('Prediction updated successfully!');
+        Toast.success('Prediction updated successfully! ✅');
         
         // Затваряме модала
         const modal = bootstrap.Modal.getInstance(document.getElementById('editPredictionModal'));
@@ -387,10 +387,8 @@ window.saveEditedPrediction = async function() {
         
         // Презареждаме прогнозите
         await loadAdminPredictions();
-        
-        alert('Prediction updated successfully!');
     } catch (error) {
         console.error('Error updating prediction:', error);
-        alert('Failed to update prediction: ' + error.message);
+        Toast.error('Failed to update prediction: ' + error.message);
     }
 }
