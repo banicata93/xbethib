@@ -268,21 +268,22 @@
     <script src="/js/match-of-the-day.js?v=1.0"></script>
     <script src="/js/main.js?v=1.1"></script>
     
-    <!-- Modern Mobile Preview Tool -->
-    <div id="mobile-preview-tool" style="display: none;">
+    <!-- Goleador Tips Promo Popup -->
+    <div id="goleador-promo" style="display: none;">
         <style>
-            #mobile-preview-overlay {
+            #goleador-overlay {
                 position: fixed;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgba(0, 0, 0, 0.9);
-                z-index: 99998;
+                background: rgba(0, 0, 0, 0.85);
+                z-index: 99999;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                animation: fadeIn 0.3s ease;
+                animation: fadeIn 0.4s ease;
+                backdrop-filter: blur(5px);
             }
             
             @keyframes fadeIn {
@@ -290,103 +291,169 @@
                 to { opacity: 1; }
             }
             
-            #mobile-preview-container {
-                background: #1a1a1a;
-                border-radius: 20px;
-                padding: 20px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-                animation: slideUp 0.4s ease;
+            #goleador-popup {
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                border-radius: 25px;
+                padding: 0;
+                max-width: 500px;
+                width: 90%;
+                box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
+                animation: slideUp 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                overflow: hidden;
+                border: 2px solid rgba(0, 255, 102, 0.3);
             }
             
             @keyframes slideUp {
-                from { transform: translateY(50px); opacity: 0; }
-                to { transform: translateY(0); opacity: 1; }
+                from { transform: scale(0.8) translateY(50px); opacity: 0; }
+                to { transform: scale(1) translateY(0); opacity: 1; }
             }
             
-            #mobile-preview-controls {
-                display: flex;
-                gap: 10px;
-                margin-bottom: 15px;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .device-btn {
-                background: rgba(255, 255, 255, 0.1);
-                border: 2px solid rgba(0, 255, 102, 0.3);
-                color: white;
-                padding: 8px 16px;
-                border-radius: 8px;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                font-size: 13px;
-                font-weight: 600;
-            }
-            
-            .device-btn:hover {
-                background: rgba(0, 255, 102, 0.2);
-                border-color: #00ff66;
-                transform: translateY(-2px);
-            }
-            
-            .device-btn.active {
+            .goleador-header {
                 background: linear-gradient(135deg, #00ff66, #00ccff);
-                color: #111827;
-                border-color: #00ff66;
-            }
-            
-            #close-preview-btn {
-                background: linear-gradient(135deg, #f093fb, #f5576c);
-                border: none;
-                color: white;
-                padding: 8px 20px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: 600;
-                margin-left: 10px;
-            }
-            
-            #close-preview-btn:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
-            }
-            
-            #mobile-frame-wrapper {
-                background: #2a2a2a;
-                border-radius: 40px;
-                padding: 15px;
-                box-shadow: 0 0 0 8px #1a1a1a, 0 0 0 10px rgba(0, 255, 102, 0.2);
+                padding: 30px;
+                text-align: center;
                 position: relative;
             }
             
-            #mobile-frame-wrapper::before {
-                content: '';
-                position: absolute;
-                top: 8px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 60px;
-                height: 6px;
-                background: #1a1a1a;
-                border-radius: 3px;
+            .goleador-header h2 {
+                color: #1a1a2e;
+                font-size: 28px;
+                font-weight: 800;
+                margin: 0;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
             }
             
-            #mobile-frame {
-                border: none;
-                border-radius: 25px;
-                background: white;
-                overflow: hidden;
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            .goleador-header p {
+                color: #1a1a2e;
+                font-size: 14px;
+                margin: 5px 0 0 0;
+                opacity: 0.9;
             }
             
-            #device-label {
-                text-align: center;
+            .goleador-body {
+                padding: 35px;
+                color: white;
+            }
+            
+            .goleador-body h3 {
                 color: #00ff66;
-                font-size: 12px;
-                margin-top: 10px;
-                font-weight: 600;
+                font-size: 22px;
+                margin-bottom: 15px;
+                font-weight: 700;
+            }
+            
+            .goleador-body p {
+                font-size: 16px;
+                line-height: 1.6;
+                margin-bottom: 25px;
+                color: rgba(255, 255, 255, 0.9);
+            }
+            
+            .goleador-cta {
+                display: inline-block;
+                background: linear-gradient(135deg, #00ff66, #00ccff);
+                color: #1a1a2e;
+                padding: 15px 40px;
+                border-radius: 50px;
+                text-decoration: none;
+                font-weight: 700;
+                font-size: 18px;
+                transition: all 0.3s ease;
+                box-shadow: 0 8px 25px rgba(0, 255, 102, 0.4);
                 text-transform: uppercase;
                 letter-spacing: 1px;
+            }
+            
+            .goleador-cta:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 12px 35px rgba(0, 255, 102, 0.6);
+                color: #1a1a2e;
+            }
+            
+            .goleador-close {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: rgba(255, 255, 255, 0.2);
+                border: none;
+                color: #1a1a2e;
+                width: 35px;
+                height: 35px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+            }
+            
+            .goleador-close:hover {
+                background: rgba(255, 255, 255, 0.3);
+                transform: rotate(90deg);
+            }
+            
+            .goleador-features {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+                margin-bottom: 25px;
+            }
+            
+            .feature-item {
+                background: rgba(0, 255, 102, 0.1);
+                padding: 12px;
+                border-radius: 10px;
+                text-align: center;
+                border: 1px solid rgba(0, 255, 102, 0.2);
+            }
+            
+            .feature-item i {
+                font-size: 24px;
+                color: #00ff66;
+                margin-bottom: 8px;
+            }
+            
+            .feature-item p {
+                font-size: 13px;
+                margin: 0;
+                color: rgba(255, 255, 255, 0.8);
+            }
+            
+            @media (max-width: 768px) {
+                #goleador-popup {
+                    width: 95%;
+                    max-width: none;
+                }
+                
+                .goleador-header {
+                    padding: 25px 20px;
+                }
+                
+                .goleador-header h2 {
+                    font-size: 24px;
+                }
+                
+                .goleador-body {
+                    padding: 25px 20px;
+                }
+                
+                .goleador-body h3 {
+                    font-size: 20px;
+                }
+                
+                .goleador-body p {
+                    font-size: 15px;
+                }
+                
+                .goleador-features {
+                    grid-template-columns: 1fr;
+                }
+                
+                .goleador-cta {
+                    padding: 12px 30px;
+                    font-size: 16px;
+                }
             }
         </style>
         
