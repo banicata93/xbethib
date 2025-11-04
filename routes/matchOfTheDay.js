@@ -97,7 +97,11 @@ router.post('/', auth, validate(matchOfTheDaySchema), async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
     try {
         await MatchOfTheDay.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Match of the Day deleted' });
+        
+        // Invalidate Match of the Day cache
+        invalidateCache('/api/match-of-the-day');
+        
+        res.json({ message: 'Match of the Day deleted successfully' });
     } catch (error) {
         console.error('Error deleting Match of the Day:', error);
         res.status(500).json({ message: error.message });
