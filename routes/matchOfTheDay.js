@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const MatchOfTheDay = require('../models/matchOfTheDay');
+const { validate, matchOfTheDaySchema } = require('../utils/validationSchemas');
 
 // Middleware to verify JWT token
 const auth = (req, res, next) => {
@@ -52,7 +53,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST - Create/Update Match of the Day (protected)
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, validate(matchOfTheDaySchema), async (req, res) => {
     try {
         console.log('Received MOTD request');
         console.log('Body keys:', Object.keys(req.body));
