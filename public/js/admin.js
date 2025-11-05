@@ -400,10 +400,6 @@ window.saveEditedPrediction = async function() {
             matchDate: matchDate,
             homeTeam: document.getElementById('editHomeTeam').value,
             awayTeam: document.getElementById('editAwayTeam').value,
-            league: {
-                name: 'League',
-                flag: document.getElementById('editLeagueFlag').value.trim()
-            },
             leagueFlag: document.getElementById('editLeagueFlag').value.trim(),
             prediction: document.getElementById('editPrediction').value,
             odds: oddsValue ? parseFloat(oddsValue) : null,
