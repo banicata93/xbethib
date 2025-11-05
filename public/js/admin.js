@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-async function handleAddPrediction(e) {
+window.handleAddPrediction = async function(e) {
     e.preventDefault();
     
     const matchDate = document.getElementById('matchDate').value;
@@ -317,6 +317,11 @@ function showEditModal(prediction) {
                                 <div class="mb-3">
                                     <label for="editMatchDate" class="form-label">Match Date</label>
                                     <input type="date" class="form-control" id="editMatchDate" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="editLeagueFlag" class="form-label">League Flag</label>
+                                    <input type="text" class="form-control" id="editLeagueFlag" placeholder="🇬🇧">
                                 </div>
                                 
                                 <div class="mb-3">
