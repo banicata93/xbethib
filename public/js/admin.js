@@ -65,10 +65,7 @@ window.handleAddPrediction = async function(e) {
         matchDate: matchDate,
         homeTeam: document.getElementById('homeTeam').value,
         awayTeam: document.getElementById('awayTeam').value,
-        league: {
-            name: 'League',
-            flag: document.getElementById('leagueFlag').value.trim()
-        },
+        leagueFlag: document.getElementById('leagueFlag').value.trim(),
         prediction: document.getElementById('prediction').value,
         odds: oddsValue ? parseFloat(oddsValue) : null
     };
