@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAdminPredictions();
     
     if (predictionForm) {
-        predictionForm.addEventListener('submit', handleAddPrediction);
+        predictionForm.addEventListener('submit', window.handleAddPrediction);
     }
     
     // Event delegation for dynamically created buttons
