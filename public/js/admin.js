@@ -4,6 +4,35 @@ let token = null;
 
 console.log('🚀 Admin.js loaded! Version: 1762262334 - CSP Fixed!');
 
+// Global helper functions for date and prediction buttons
+window.setTodayDate = function() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayString = `${yyyy}-${mm}-${dd}`;
+    document.getElementById('matchDate').value = todayString;
+};
+
+window.setTomorrowDate = function() {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const yyyy = tomorrow.getFullYear();
+    const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    const dd = String(tomorrow.getDate()).padStart(2, '0');
+    const tomorrowString = `${yyyy}-${mm}-${dd}`;
+    document.getElementById('matchDate').value = tomorrowString;
+};
+
+window.setPrediction = function(value) {
+    document.getElementById('prediction').value = value;
+};
+
+window.logout = function() {
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📋 DOMContentLoaded event fired');
     // Get token from localStorage or sessionStorage
@@ -22,6 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load predictions when page loads
     loadAdminPredictions();
+    
+    // Set today's date as default
+    window.setTodayDate();
     
     if (predictionForm) {
         predictionForm.addEventListener('submit', window.handleAddPrediction);
