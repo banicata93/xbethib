@@ -139,10 +139,17 @@
             return;
         }
         
+        // Check if there are any completed matches (not pending)
+        const hasCompletedMatches = data.archive.some(m => m.result !== 'pending');
+        if (!hasCompletedMatches) {
+            archiveContainer.style.display = 'none';
+            return;
+        }
+        
         // Show archive container
         archiveContainer.style.display = 'block';
         
-        // Build streak display
+        // Build streak display - only W, L, V (no pending)
         let streakHTML = '';
         const streak = data.streak || '';
         
@@ -164,10 +171,9 @@
                     className = 'void';
                     title = 'Void';
                     break;
-                case 'P':
-                    className = 'pending';
-                    title = 'Pending';
-                    break;
+                default:
+                    // Skip any other characters (like P for pending)
+                    continue;
             }
             
             streakHTML += `<div class="streak-item ${className}" title="${title}">${char}</div>`;
@@ -175,9 +181,10 @@
         
         streakContainer.innerHTML = streakHTML;
         
-        // Build stats display
+        // Build stats display - calculate win rate only from completed matches
         const stats = data.stats || {};
-        const winRate = stats.total > 0 ? Math.round((stats.wins / stats.total) * 100) : 0;
+        const completedMatches = (stats.wins || 0) + (stats.losses || 0) + (stats.voids || 0);
+        const winRate = completedMatches > 0 ? Math.round((stats.wins / completedMatches) * 100) : 0;
         
         statsContainer.innerHTML = `
             <div class="stat-item">
