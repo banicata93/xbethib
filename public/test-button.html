@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Button</title>
+</head>
+<body>
+    <h1>Test Button Click</h1>
+    <button id="testBtn">Click Me</button>
+    <div id="output"></div>
+
+    <script>
+        console.log('Script loaded');
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            
+            const btn = document.getElementById('testBtn');
+            const output = document.getElementById('output');
+            
+            if (btn) {
+                console.log('Button found');
+                btn.addEventListener('click', function() {
+                    console.log('Button clicked!');
+                    output.innerHTML = 'Button was clicked at ' + new Date().toLocaleTimeString();
+                });
+            } else {
+                console.error('Button NOT found');
+            }
+        });
+    </script>
+</body>
+</html>
