@@ -350,6 +350,21 @@
                         <p id="previewText" class="mb-0">Preview text will appear here...</p>
                     </div>
                 </div>
+                
+                <!-- Archive Management Section -->
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h3 class="mb-0">
+                            <i class="bi bi-clock-history me-2"></i>
+                            Last 7 Days Archive
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="archiveList">
+                            <p class="text-muted text-center">Loading archive...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -593,6 +608,133 @@
         
         // Load on page load
         loadExistingMotd();
+        
+        // Archive Management Functions
+        async function loadArchive() {
+            try {
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                const response = await fetch('/api/match-of-the-day/archive', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    displayArchive(data);
+                } else {
+                    document.getElementById('archiveList').innerHTML = '<p class="text-muted text-center">No archive data available</p>';
+                }
+            } catch (error) {
+                console.error('Error loading archive:', error);
+                document.getElementById('archiveList').innerHTML = '<p class="text-danger text-center">Error loading archive</p>';
+            }
+        }
+        
+        function displayArchive(data) {
+            const archiveList = document.getElementById('archiveList');
+            
+            if (!data.archive || data.archive.length === 0) {
+                archiveList.innerHTML = '<p class="text-muted text-center">No matches in archive yet</p>';
+                return;
+            }
+            
+            // Display streak
+            let html = '<div class="mb-4 text-center">';
+            html += '<h5>Streak: ';
+            const streak = data.streak || '';
+            for (let char of streak) {
+                let color = '';
+                switch(char) {
+                    case 'W': color = 'success'; break;
+                    case 'L': color = 'danger'; break;
+                    case 'V': color = 'secondary'; break;
+                    case 'P': color = 'warning'; break;
+                }
+                html += `<span class="badge bg-${color} me-1">${char}</span>`;
+            }
+            html += '</h5>';
+            html += `<p class="text-muted">Win Rate: ${data.stats.total > 0 ? Math.round((data.stats.wins / data.stats.total) * 100) : 0}% (${data.stats.wins}W - ${data.stats.losses}L - ${data.stats.voids}V)</p>`;
+            html += '</div>';
+            
+            // Display matches
+            html += '<div class="table-responsive">';
+            html += '<table class="table table-hover">';
+            html += '<thead><tr><th>Date</th><th>Match</th><th>Prediction</th><th>Result</th><th>Action</th></tr></thead>';
+            html += '<tbody>';
+            
+            data.archive.forEach(match => {
+                const date = new Date(match.date).toLocaleDateString('bg-BG');
+                const matchName = `${match.homeTeam.name} vs ${match.awayTeam.name}`;
+                
+                let resultBadge = '';
+                switch(match.result) {
+                    case 'win':
+                        resultBadge = '<span class="badge bg-success">Win</span>';
+                        break;
+                    case 'loss':
+                        resultBadge = '<span class="badge bg-danger">Loss</span>';
+                        break;
+                    case 'void':
+                        resultBadge = '<span class="badge bg-secondary">Void</span>';
+                        break;
+                    default:
+                        resultBadge = '<span class="badge bg-warning">Pending</span>';
+                }
+                
+                html += `<tr>
+                    <td>${date}</td>
+                    <td>${matchName}</td>
+                    <td>${match.prediction}</td>
+                    <td>${resultBadge}</td>
+                    <td>
+                        <select class="form-select form-select-sm" onchange="updateResult('${match._id}', this.value)" style="width: auto;">
+                            <option value="">Update...</option>
+                            <option value="win" ${match.result === 'win' ? 'selected' : ''}>Win</option>
+                            <option value="loss" ${match.result === 'loss' ? 'selected' : ''}>Loss</option>
+                            <option value="void" ${match.result === 'void' ? 'selected' : ''}>Void</option>
+                            <option value="pending" ${match.result === 'pending' ? 'selected' : ''}>Pending</option>
+                        </select>
+                    </td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table></div>';
+            archiveList.innerHTML = html;
+        }
+        
+        async function updateResult(matchId, result) {
+            if (!result) return;
+            
+            try {
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                const response = await fetch(`/api/match-of-the-day/${matchId}/result`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ result })
+                });
+                
+                if (response.ok) {
+                    showSuccess('Result updated successfully!');
+                    loadArchive(); // Reload archive
+                } else {
+                    const data = await response.json();
+                    showError(data.message || 'Failed to update result');
+                }
+            } catch (error) {
+                console.error('Error updating result:', error);
+                showError('Error updating result');
+            }
+        }
+        
+        // Load archive on page load
+        loadArchive();
+        
+        // Make updateResult global
+        window.updateResult = updateResult;
     </script>
 </body>
 </html>
