@@ -659,7 +659,7 @@
                 return;
             }
             
-            // Display streak
+            // Display streak - only W, L, V (no pending)
             let html = '<div class="mb-4 text-center">';
             html += '<h5>Streak: ';
             const streak = data.streak || '';
@@ -669,13 +669,21 @@
                     case 'W': color = 'success'; break;
                     case 'L': color = 'danger'; break;
                     case 'V': color = 'secondary'; break;
-                    case 'P': color = 'warning'; break;
+                    default: continue; // Skip pending and any other characters
                 }
                 html += `<span class="badge bg-${color} me-1">${char}</span>`;
             }
             html += '</h5>';
-            html += `<p class="text-muted">Win Rate: ${data.stats.total > 0 ? Math.round((data.stats.wins / data.stats.total) * 100) : 0}% (${data.stats.wins}W - ${data.stats.losses}L - ${data.stats.voids}V)</p>`;
-            html += '</div>';
+            
+            // Calculate win rate based only on completed matches (exclude pending)
+            const completedMatches = data.stats.wins + data.stats.losses + data.stats.voids;
+            const winRate = completedMatches > 0 ? Math.round((data.stats.wins / completedMatches) * 100) : 0;
+            
+            html += `<p class="text-muted">Win Rate: ${winRate}% (${data.stats.wins}W - ${data.stats.losses}L - ${data.stats.voids}V)`;
+            if (data.stats.pending > 0) {
+                html += ` <span class="badge bg-warning">${data.stats.pending} Pending</span>`;
+            }
+            html += '</p></div>';
             
             // Display matches
             html += '<div class="table-responsive">';
