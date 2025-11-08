@@ -110,13 +110,102 @@
         }
     }
     
+    // Function to fetch and display archive
+    async function fetchArchive() {
+        try {
+            const response = await fetch('/api/match-of-the-day/archive');
+            if (response.ok) {
+                const data = await response.json();
+                displayArchive(data);
+            }
+        } catch (error) {
+            console.log('Could not load archive:', error);
+        }
+    }
+    
+    // Function to display archive
+    function displayArchive(data) {
+        const archiveContainer = document.getElementById('motd-archive');
+        const streakContainer = document.getElementById('archive-streak');
+        const statsContainer = document.getElementById('archive-stats');
+        
+        if (!archiveContainer || !streakContainer || !statsContainer) {
+            return;
+        }
+        
+        // Only show if there's data
+        if (!data.archive || data.archive.length === 0) {
+            archiveContainer.style.display = 'none';
+            return;
+        }
+        
+        // Show archive container
+        archiveContainer.style.display = 'block';
+        
+        // Build streak display
+        let streakHTML = '';
+        const streak = data.streak || '';
+        
+        for (let i = 0; i < streak.length; i++) {
+            const char = streak[i];
+            let className = '';
+            let title = '';
+            
+            switch(char) {
+                case 'W':
+                    className = 'win';
+                    title = 'Win';
+                    break;
+                case 'L':
+                    className = 'loss';
+                    title = 'Loss';
+                    break;
+                case 'V':
+                    className = 'void';
+                    title = 'Void';
+                    break;
+                case 'P':
+                    className = 'pending';
+                    title = 'Pending';
+                    break;
+            }
+            
+            streakHTML += `<div class="streak-item ${className}" title="${title}">${char}</div>`;
+        }
+        
+        streakContainer.innerHTML = streakHTML;
+        
+        // Build stats display
+        const stats = data.stats || {};
+        const winRate = stats.total > 0 ? Math.round((stats.wins / stats.total) * 100) : 0;
+        
+        statsContainer.innerHTML = `
+            <div class="stat-item">
+                <div class="stat-value">${stats.wins || 0}</div>
+                <div class="stat-label">Wins</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${stats.losses || 0}</div>
+                <div class="stat-label">Losses</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${winRate}%</div>
+                <div class="stat-label">Win Rate</div>
+            </div>
+        `;
+    }
+    
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
         // Try to fetch from API, fallback to default
         fetchMatchOfTheDay();
+        
+        // Fetch archive
+        fetchArchive();
     });
     
     // Expose global function for manual updates
     window.setMatchOfTheDay = updateMatchOfTheDay;
+    window.refreshArchive = fetchArchive;
     
 })();
