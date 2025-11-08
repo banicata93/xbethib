@@ -1,0 +1,31 @@
+{
+  "predictions": [
+    {
+      "matchDate": "2025-11-10",
+      "homeTeam": "Manchester United",
+      "awayTeam": "Liverpool",
+      "leagueFlag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+      "prediction": "BTTS",
+      "odds": 1.85,
+      "result": "pending"
+    },
+    {
+      "matchDate": "2025-11-10",
+      "homeTeam": "Real Madrid",
+      "awayTeam": "Barcelona",
+      "leagueFlag": "🇪🇸",
+      "prediction": "Over 2.5",
+      "odds": 1.75,
+      "result": "pending"
+    },
+    {
+      "matchDate": "2025-11-11",
+      "homeTeam": "Bayern Munich",
+      "awayTeam": "Borussia Dortmund",
+      "leagueFlag": "🇩🇪",
+      "prediction": "1",
+      "odds": 1.65,
+      "result": "pending"
+    }
+  ]
+}
