@@ -108,15 +108,19 @@ router.get('/archive', cacheMiddleware(300), async (req, res) => {
         .limit(7);
         // Return all fields for editing capability
         
-        // Format for streak display
-        const streak = archive.map(match => {
-            switch(match.result) {
-                case 'win': return 'W';
-                case 'loss': return 'L';
-                case 'void': return 'V';
-                default: return 'P'; // Pending
-            }
-        }).reverse().join(''); // Reverse to show oldest first
+        // Format for streak display - only show matches with results (exclude pending)
+        const streak = archive
+            .filter(match => match.result !== 'pending') // Exclude pending matches
+            .map(match => {
+                switch(match.result) {
+                    case 'win': return 'W';
+                    case 'loss': return 'L';
+                    case 'void': return 'V';
+                    default: return ''; // Should not happen
+                }
+            })
+            .reverse() // Reverse to show oldest first
+            .join('');
         
         res.json({
             archive,
