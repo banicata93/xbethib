@@ -1,8 +1,5 @@
-// Check authentication
-const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-if (!token) {
-    window.location.href = '/login.html';
-}
+// Get token (will be checked in DOMContentLoaded)
+let token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
 function clearInput() {
     document.getElementById('jsonInput').value = '';
@@ -10,7 +7,11 @@ function clearInput() {
 }
 
 async function importPredictions() {
+    console.log('importPredictions function called');
+    
     const jsonInput = document.getElementById('jsonInput').value.trim();
+    console.log('JSON input length:', jsonInput.length);
+    
     const importBtn = document.getElementById('importBtn');
     const resultBox = document.getElementById('resultBox');
     const resultTitle = document.getElementById('resultTitle');
@@ -19,6 +20,7 @@ async function importPredictions() {
 
     // Validate input
     if (!jsonInput) {
+        console.log('No JSON input provided');
         showResult('error', 'Грешка', 'Моля, paste-ни JSON данни');
         return;
     }
@@ -27,27 +29,34 @@ async function importPredictions() {
     let data;
     try {
         data = JSON.parse(jsonInput);
+        console.log('JSON parsed successfully:', data);
     } catch (error) {
+        console.error('JSON parse error:', error);
         showResult('error', 'Невалиден JSON', `Грешка при парсване: ${error.message}`);
         return;
     }
 
     // Validate structure
     if (!data.predictions || !Array.isArray(data.predictions)) {
+        console.error('Invalid structure - no predictions array');
         showResult('error', 'Невалидна структура', 'JSON трябва да съдържа "predictions" array');
         return;
     }
 
     if (data.predictions.length === 0) {
+        console.error('Empty predictions array');
         showResult('error', 'Празен масив', 'Няма прогнози за импортиране');
         return;
     }
+
+    console.log(`Importing ${data.predictions.length} predictions`);
 
     // Disable button
     importBtn.disabled = true;
     importBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Importing...';
 
     try {
+        console.log('Sending POST request to /api/predictions');
         const response = await fetch('/api/predictions', {
             method: 'POST',
             headers: {
@@ -57,7 +66,9 @@ async function importPredictions() {
             body: JSON.stringify(data)
         });
 
+        console.log('Response status:', response.status);
         const result = await response.json();
+        console.log('Response data:', result);
 
         if (response.ok) {
             let detailsHTML = `
@@ -185,30 +196,58 @@ function logout() {
 
 // Add event listeners when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing bulk-import.js');
+    
+    // Check authentication
+    if (!token) {
+        console.log('No token found, redirecting to login');
+        window.location.href = '/login.html';
+        return;
+    }
+    
+    console.log('Token found, setting up event listeners');
+    
     // Clear button
     const clearBtn = document.getElementById('clearBtn');
     if (clearBtn) {
+        console.log('Clear button found, adding listener');
         clearBtn.addEventListener('click', clearInput);
+    } else {
+        console.error('Clear button NOT found');
     }
 
     // Import button
     const importBtn = document.getElementById('importBtn');
     if (importBtn) {
-        importBtn.addEventListener('click', importPredictions);
+        console.log('Import button found, adding listener');
+        importBtn.addEventListener('click', function(e) {
+            console.log('Import button clicked!');
+            importPredictions();
+        });
+    } else {
+        console.error('Import button NOT found');
     }
 
     // Delete by date button
     const deleteDateBtn = document.getElementById('deleteDateBtn');
     if (deleteDateBtn) {
+        console.log('Delete button found, adding listener');
         deleteDateBtn.addEventListener('click', deleteByDate);
+    } else {
+        console.error('Delete button NOT found');
     }
 
     // Logout link
     const logoutLink = document.getElementById('logoutLink');
     if (logoutLink) {
+        console.log('Logout link found, adding listener');
         logoutLink.addEventListener('click', function(e) {
             e.preventDefault();
             logout();
         });
+    } else {
+        console.error('Logout link NOT found');
     }
+    
+    console.log('All event listeners set up successfully');
 });
