@@ -93,6 +93,78 @@ router.post('/', auth, validate(matchOfTheDaySchema), async (req, res) => {
     }
 });
 
+// GET - Get last 7 days archive (public, cached for 5 minutes)
+router.get('/archive', cacheMiddleware(300), async (req, res) => {
+    try {
+        // Get last 7 days of Match of the Day
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        
+        const archive = await MatchOfTheDay.find({
+            date: { $gte: sevenDaysAgo },
+            isActive: false // Only archived matches
+        })
+        .sort({ date: -1 })
+        .limit(7)
+        .select('homeTeam.name awayTeam.name prediction result date');
+        
+        // Format for streak display
+        const streak = archive.map(match => {
+            switch(match.result) {
+                case 'win': return 'W';
+                case 'loss': return 'L';
+                case 'void': return 'V';
+                default: return 'P'; // Pending
+            }
+        }).reverse().join(''); // Reverse to show oldest first
+        
+        res.json({
+            archive,
+            streak,
+            stats: {
+                total: archive.length,
+                wins: archive.filter(m => m.result === 'win').length,
+                losses: archive.filter(m => m.result === 'loss').length,
+                voids: archive.filter(m => m.result === 'void').length,
+                pending: archive.filter(m => m.result === 'pending').length
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching archive:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// PATCH - Update Match of the Day result (protected)
+router.patch('/:id/result', auth, async (req, res) => {
+    try {
+        const { result } = req.body;
+        
+        if (!['pending', 'win', 'loss', 'void'].includes(result)) {
+            return res.status(400).json({ message: 'Invalid result value' });
+        }
+        
+        const motd = await MatchOfTheDay.findByIdAndUpdate(
+            req.params.id,
+            { result },
+            { new: true }
+        );
+        
+        if (!motd) {
+            return res.status(404).json({ message: 'Match of the Day not found' });
+        }
+        
+        // Invalidate caches
+        invalidateCache('/api/match-of-the-day');
+        invalidateCache('/api/match-of-the-day/archive');
+        
+        res.json({ message: 'Result updated successfully', data: motd });
+    } catch (error) {
+        console.error('Error updating result:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // DELETE - Delete Match of the Day (protected)
 router.delete('/:id', auth, async (req, res) => {
     try {
@@ -100,6 +172,7 @@ router.delete('/:id', auth, async (req, res) => {
         
         // Invalidate Match of the Day cache
         invalidateCache('/api/match-of-the-day');
+        invalidateCache('/api/match-of-the-day/archive');
         
         res.json({ message: 'Match of the Day deleted successfully' });
     } catch (error) {
