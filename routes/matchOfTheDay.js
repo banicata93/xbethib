@@ -105,8 +105,8 @@ router.get('/archive', cacheMiddleware(300), async (req, res) => {
             isActive: false // Only archived matches
         })
         .sort({ date: -1 })
-        .limit(7)
-        .select('homeTeam.name awayTeam.name prediction result date');
+        .limit(7);
+        // Return all fields for editing capability
         
         // Format for streak display
         const streak = archive.map(match => {
@@ -131,6 +131,46 @@ router.get('/archive', cacheMiddleware(300), async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching archive:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// PUT - Update archived Match of the Day (protected)
+router.put('/:id', auth, async (req, res) => {
+    try {
+        const { homeTeam, awayTeam, time, prediction, preview, result } = req.body;
+        
+        const updateData = {
+            'homeTeam.name': homeTeam.name,
+            'homeTeam.logo': homeTeam.logo || '/images/default-team.png',
+            'awayTeam.name': awayTeam.name,
+            'awayTeam.logo': awayTeam.logo || '/images/default-team.png',
+            time,
+            prediction,
+            preview
+        };
+        
+        if (result) {
+            updateData.result = result;
+        }
+        
+        const motd = await MatchOfTheDay.findByIdAndUpdate(
+            req.params.id,
+            updateData,
+            { new: true }
+        );
+        
+        if (!motd) {
+            return res.status(404).json({ message: 'Match of the Day not found' });
+        }
+        
+        // Invalidate caches
+        invalidateCache('/api/match-of-the-day');
+        invalidateCache('/api/match-of-the-day/archive');
+        
+        res.json({ message: 'Match updated successfully', data: motd });
+    } catch (error) {
+        console.error('Error updating match:', error);
         res.status(500).json({ message: error.message });
     }
 });
