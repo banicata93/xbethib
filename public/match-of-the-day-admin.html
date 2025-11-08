@@ -456,6 +456,11 @@
             }
         });
         
+        // Track editing state
+        let editingMatchId = null;
+        let homeLogoData = null;
+        let awayLogoData = null;
+        
         // Preview function
         function showPreview() {
             const homeTeamName = document.getElementById('homeTeamName').value;
@@ -525,8 +530,13 @@
                     return;
                 }
                 
-                const response = await fetch('/api/match-of-the-day', {
-                    method: 'POST',
+                // Determine if we're editing or creating
+                const isEditing = editingMatchId !== null;
+                const url = isEditing ? `/api/match-of-the-day/${editingMatchId}` : '/api/match-of-the-day';
+                const method = isEditing ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
@@ -541,14 +551,24 @@
                     throw new Error(data.message || `Server error: ${response.status}`);
                 }
                 
-                showSuccess('Match of the Day запазен успешно! ⭐');
+                showSuccess(isEditing ? 'Match обновен успешно! ⭐' : 'Match of the Day запазен успешно! ⭐');
+                
+                // Reset editing state
+                editingMatchId = null;
+                
+                // Reload archive
+                setTimeout(() => {
+                    loadArchive();
+                }, 500);
                 
                 // Optionally redirect to home page
-                setTimeout(() => {
-                    if (confirm('Искате ли да го видите на началната страница?')) {
-                        window.location.href = '/';
-                    }
-                }, 1500);
+                if (!isEditing) {
+                    setTimeout(() => {
+                        if (confirm('Искате ли да го видите на началната страница?')) {
+                            window.location.href = '/';
+                        }
+                    }, 1500);
+                }
                 
             } catch (error) {
                 console.error('Error:', error);
@@ -660,7 +680,7 @@
             // Display matches
             html += '<div class="table-responsive">';
             html += '<table class="table table-hover">';
-            html += '<thead><tr><th>Date</th><th>Match</th><th>Prediction</th><th>Result</th><th>Action</th></tr></thead>';
+            html += '<thead><tr><th>Date</th><th>Match</th><th>Prediction</th><th>Result</th><th>Actions</th></tr></thead>';
             html += '<tbody>';
             
             data.archive.forEach(match => {
@@ -682,25 +702,60 @@
                         resultBadge = '<span class="badge bg-warning">Pending</span>';
                 }
                 
-                html += `<tr>
+                html += `<tr data-match-id="${match._id}">
                     <td>${date}</td>
                     <td>${matchName}</td>
                     <td>${match.prediction}</td>
                     <td>${resultBadge}</td>
                     <td>
-                        <select class="form-select form-select-sm" onchange="updateResult('${match._id}', this.value)" style="width: auto;">
-                            <option value="">Update...</option>
-                            <option value="win" ${match.result === 'win' ? 'selected' : ''}>Win</option>
-                            <option value="loss" ${match.result === 'loss' ? 'selected' : ''}>Loss</option>
-                            <option value="void" ${match.result === 'void' ? 'selected' : ''}>Void</option>
-                            <option value="pending" ${match.result === 'pending' ? 'selected' : ''}>Pending</option>
-                        </select>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <select class="form-select form-select-sm result-selector" data-match-id="${match._id}" style="max-width: 120px;">
+                                <option value="">Update...</option>
+                                <option value="win" ${match.result === 'win' ? 'selected' : ''}>Win</option>
+                                <option value="loss" ${match.result === 'loss' ? 'selected' : ''}>Loss</option>
+                                <option value="void" ${match.result === 'void' ? 'selected' : ''}>Void</option>
+                                <option value="pending" ${match.result === 'pending' ? 'selected' : ''}>Pending</option>
+                            </select>
+                            <button class="btn btn-outline-primary btn-sm edit-match" data-match-id="${match._id}" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm delete-match" data-match-id="${match._id}" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>`;
             });
             
             html += '</tbody></table></div>';
             archiveList.innerHTML = html;
+            
+            // Attach event listeners to all result selectors
+            document.querySelectorAll('.result-selector').forEach(select => {
+                select.addEventListener('change', function() {
+                    const matchId = this.getAttribute('data-match-id');
+                    const result = this.value;
+                    if (result) {
+                        updateResult(matchId, result);
+                    }
+                });
+            });
+            
+            // Attach event listeners to edit buttons
+            document.querySelectorAll('.edit-match').forEach(button => {
+                button.addEventListener('click', function() {
+                    const matchId = this.getAttribute('data-match-id');
+                    editMatch(matchId);
+                });
+            });
+            
+            // Attach event listeners to delete buttons
+            document.querySelectorAll('.delete-match').forEach(button => {
+                button.addEventListener('click', function() {
+                    const matchId = this.getAttribute('data-match-id');
+                    deleteMatch(matchId);
+                });
+            });
         }
         
         async function updateResult(matchId, result) {
@@ -719,7 +774,10 @@
                 
                 if (response.ok) {
                     showSuccess('Result updated successfully!');
-                    loadArchive(); // Reload archive
+                    // Reload archive to show updated streak
+                    setTimeout(() => {
+                        loadArchive();
+                    }, 500);
                 } else {
                     const data = await response.json();
                     showError(data.message || 'Failed to update result');
@@ -730,11 +788,106 @@
             }
         }
         
+        async function editMatch(matchId) {
+            try {
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                
+                // Fetch match data
+                const response = await fetch(`/api/match-of-the-day/archive`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const match = data.archive.find(m => m._id === matchId);
+                    
+                    if (match) {
+                        // Set editing state
+                        editingMatchId = matchId;
+                        
+                        // Populate form with match data
+                        document.getElementById('homeTeamName').value = match.homeTeam.name;
+                        document.getElementById('awayTeamName').value = match.awayTeam.name;
+                        document.getElementById('matchTime').value = match.time || '20:00';
+                        document.getElementById('matchPreview').value = match.preview;
+                        
+                        // Set logo URLs
+                        if (match.homeTeam.logo && match.homeTeam.logo !== '/images/default-team.png') {
+                            document.getElementById('homeTeamLogoUrl').value = match.homeTeam.logo;
+                            homeLogoData = match.homeTeam.logo;
+                            document.getElementById('homeLogoImg').src = homeLogoData;
+                            document.getElementById('homeLogoPreview').style.display = 'block';
+                        }
+                        if (match.awayTeam.logo && match.awayTeam.logo !== '/images/default-team.png') {
+                            document.getElementById('awayTeamLogoUrl').value = match.awayTeam.logo;
+                            awayLogoData = match.awayTeam.logo;
+                            document.getElementById('awayLogoImg').src = awayLogoData;
+                            document.getElementById('awayLogoPreview').style.display = 'block';
+                        }
+                        
+                        // Handle prediction
+                        const predictionSelect = document.getElementById('predictionSelect');
+                        const predictionOptions = Array.from(predictionSelect.options).map(opt => opt.value);
+                        
+                        if (predictionOptions.includes(match.prediction)) {
+                            predictionSelect.value = match.prediction;
+                            document.getElementById('prediction').value = match.prediction;
+                        } else {
+                            predictionSelect.value = 'custom';
+                            document.getElementById('predictionCustom').value = match.prediction;
+                            document.getElementById('predictionCustom').style.display = 'block';
+                            document.getElementById('predictionCustom').required = true;
+                            document.getElementById('prediction').value = match.prediction;
+                        }
+                        
+                        // Update submit button text
+                        document.getElementById('submitBtn').innerHTML = '<i class="bi bi-pencil me-2"></i>Update Match';
+                        
+                        // Scroll to form
+                        document.getElementById('motdForm').scrollIntoView({ behavior: 'smooth' });
+                        showSuccess('Match loaded for editing. Make changes and click Update Match.');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading match for edit:', error);
+                showError('Error loading match');
+            }
+        }
+        
+        async function deleteMatch(matchId) {
+            if (!confirm('Сигурен ли си, че искаш да изтриеш този мач?\n\nТова действие не може да бъде отменено!')) {
+                return;
+            }
+            
+            try {
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                const response = await fetch(`/api/match-of-the-day/${matchId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    showSuccess('Match deleted successfully!');
+                    // Reload archive
+                    setTimeout(() => {
+                        loadArchive();
+                    }, 500);
+                } else {
+                    const data = await response.json();
+                    showError(data.message || 'Failed to delete match');
+                }
+            } catch (error) {
+                console.error('Error deleting match:', error);
+                showError('Error deleting match');
+            }
+        }
+        
         // Load archive on page load
         loadArchive();
-        
-        // Make updateResult global
-        window.updateResult = updateResult;
     </script>
 </body>
 </html>
