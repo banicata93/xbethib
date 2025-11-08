@@ -69,6 +69,25 @@ const matchOfTheDaySchema = Joi.object({
     preview: Joi.string().min(10).max(2000).required() // Increased from 1000 to 2000
 });
 
+const bulkPredictionSchema = Joi.object({
+    predictions: Joi.array().items(
+        Joi.object({
+            matchDate: Joi.date().required(),
+            homeTeam: Joi.string().min(2).max(100).required(),
+            awayTeam: Joi.string().min(2).max(100).required(),
+            leagueFlag: Joi.string().max(16).optional().default('⚽'),
+            prediction: Joi.string().min(2).max(200).required(),
+            odds: Joi.number().min(1.01).max(100).optional().allow(null),
+            result: Joi.string().valid('pending', 'win', 'loss', 'void').optional().default('pending'),
+            homeTeamFlag: Joi.string().max(16).optional().allow(''),
+            awayTeamFlag: Joi.string().max(16).optional().allow('')
+        })
+    ).min(1).required().messages({
+        'array.min': 'At least one prediction is required',
+        'any.required': 'Predictions array is required'
+    })
+});
+
 /**
  * Validation middleware factory
  * @param {Joi.Schema} schema - Joi validation schema
@@ -100,6 +119,7 @@ function validate(schema) {
 
 module.exports = {
     predictionSchema,
+    bulkPredictionSchema,
     loginSchema,
     resultUpdateSchema,
     matchOfTheDaySchema,
