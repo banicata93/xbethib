@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Prediction = require('../models/prediction');
 const auth = require('../middleware/auth');
-const { validate, predictionSchema, resultUpdateSchema } = require('../utils/validationSchemas');
+const { validate, predictionSchema, bulkPredictionSchema, resultUpdateSchema } = require('../utils/validationSchemas');
 const { cacheMiddleware, invalidateCache } = require('../utils/cache');
 
 // Get all predictions (cached for 5 minutes)
@@ -25,25 +25,105 @@ router.get('/', cacheMiddleware(300), async (req, res) => {
     }
 });
 
-// Add new prediction (protected route)
-router.post('/', auth, validate(predictionSchema), async (req, res) => {
+// Add new prediction or bulk import (protected route)
+router.post('/', auth, async (req, res) => {
     try {
-        const { matchDate, homeTeam, awayTeam, leagueFlag, prediction } = req.body;
+        // Check if this is a bulk import
+        if (req.body.predictions && Array.isArray(req.body.predictions)) {
+            // Validate bulk import
+            const { error, value } = bulkPredictionSchema.validate(req.body, {
+                abortEarly: false,
+                stripUnknown: true
+            });
+            
+            if (error) {
+                const errors = error.details.map(detail => ({
+                    field: detail.path.join('.'),
+                    message: detail.message
+                }));
+                
+                return res.status(400).json({
+                    message: 'Validation error',
+                    errors
+                });
+            }
+            
+            // Bulk import
+            const predictions = value.predictions;
+            const results = {
+                success: [],
+                failed: []
+            };
 
-        const newPrediction = new Prediction({
-            matchDate: new Date(matchDate),
-            homeTeam,
-            awayTeam,
-            leagueFlag,
-            prediction
-        });
+            for (const predData of predictions) {
+                try {
+                    const { matchDate, homeTeam, awayTeam, leagueFlag, prediction, odds, result } = predData;
 
-        const savedPrediction = await newPrediction.save();
-        
-        // Invalidate predictions cache
-        invalidateCache('/api/predictions');
-        
-        res.status(201).json(savedPrediction);
+                    const newPrediction = new Prediction({
+                        matchDate: new Date(matchDate),
+                        homeTeam,
+                        awayTeam,
+                        leagueFlag: leagueFlag || '⚽',
+                        prediction,
+                        odds: odds || null,
+                        result: result || 'pending'
+                    });
+
+                    const savedPrediction = await newPrediction.save();
+                    results.success.push(savedPrediction);
+                } catch (error) {
+                    results.failed.push({
+                        data: predData,
+                        error: error.message
+                    });
+                }
+            }
+
+            // Invalidate predictions cache
+            invalidateCache('/api/predictions');
+
+            return res.status(201).json({
+                message: `Imported ${results.success.length} predictions, ${results.failed.length} failed`,
+                success: results.success.length,
+                failed: results.failed.length,
+                failedItems: results.failed
+            });
+        } else {
+            // Single prediction - validate with predictionSchema
+            const { error, value } = predictionSchema.validate(req.body, {
+                abortEarly: false,
+                stripUnknown: true
+            });
+            
+            if (error) {
+                const errors = error.details.map(detail => ({
+                    field: detail.path.join('.'),
+                    message: detail.message
+                }));
+                
+                return res.status(400).json({
+                    message: 'Validation error',
+                    errors
+                });
+            }
+            
+            const { matchDate, homeTeam, awayTeam, leagueFlag, prediction } = value;
+
+            const newPrediction = new Prediction({
+                matchDate: new Date(matchDate),
+                homeTeam,
+                awayTeam,
+                leagueFlag,
+                prediction
+            });
+
+            const savedPrediction = await newPrediction.save();
+            
+            // Invalidate predictions cache
+            invalidateCache('/api/predictions');
+            
+            res.status(201).json(savedPrediction);
+        }
     } catch (error) {
         console.error('Error in POST /predictions:', error);
         res.status(400).json({ message: error.message });
@@ -65,6 +145,41 @@ router.put('/:id', auth, async (req, res) => {
         res.json(prediction);
     } catch (error) {
         res.status(400).json({ message: error.message });
+    }
+});
+
+// Delete predictions by date (protected route)
+router.delete('/delete-by-date', auth, async (req, res) => {
+    try {
+        const { date } = req.query;
+        
+        if (!date) {
+            return res.status(400).json({ message: 'Date parameter is required' });
+        }
+        
+        // Parse the date and create start and end of day
+        const targetDate = new Date(date);
+        const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
+        const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
+        
+        // Delete all predictions for this date
+        const result = await Prediction.deleteMany({
+            matchDate: {
+                $gte: startOfDay,
+                $lte: endOfDay
+            }
+        });
+        
+        // Invalidate predictions cache
+        invalidateCache('/api/predictions');
+        
+        res.json({ 
+            message: `Deleted ${result.deletedCount} predictions for ${date}`,
+            deletedCount: result.deletedCount
+        });
+    } catch (error) {
+        console.error('Error deleting predictions by date:', error);
+        res.status(500).json({ message: error.message });
     }
 });
 
