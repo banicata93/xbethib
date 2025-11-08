@@ -41,6 +41,11 @@ const matchOfTheDaySchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+    result: {
+        type: String,
+        enum: ['pending', 'win', 'loss', 'void'],
+        default: 'pending'
     }
 }, {
     timestamps: true
