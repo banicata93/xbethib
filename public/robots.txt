@@ -2,9 +2,17 @@
 
 User-agent: *
 Allow: /
+Allow: /js/
+Allow: /css/
+Allow: /images/
+Allow: /api/predictions
+Allow: /api/match-of-the-day
 Disallow: /admin
 Disallow: /login
-Disallow: /api/
+Disallow: /bulk-import
+Disallow: /match-of-the-day-admin
+Disallow: /api/auth
+Disallow: /api/analytics
 
 # Sitemap location
 Sitemap: https://xbethub.com/sitemap.xml
