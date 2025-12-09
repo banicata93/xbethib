@@ -12,6 +12,12 @@ validateEnv();
 
 const app = express();
 
+// Redirect Middleware (must be before other middleware)
+const { wwwRedirect, httpsRedirect, trailingSlashRedirect } = require('./middleware/redirects');
+app.use(httpsRedirect);
+app.use(wwwRedirect);
+app.use(trailingSlashRedirect);
+
 // Security Middleware
 app.use(helmet({
     contentSecurityPolicy: {
@@ -103,8 +109,11 @@ async function connectToDatabase() {
     }
 }
 
+// Pre-render middleware for SEO
+const prerenderMiddleware = require('./middleware/prerender');
+
 // Serve static files
-app.get('/', async (req, res) => {
+app.get('/', prerenderMiddleware, async (req, res) => {
     try {
         console.log('Main page requested');
         const fs = require('fs');
@@ -158,6 +167,7 @@ const predictionsRouter = require('./routes/predictions');
 const matchOfTheDayRouter = require('./routes/matchOfTheDay');
 const authRouter = require('./routes/auth');
 const healthRouter = require('./routes/health');
+const sitemapRouter = require('./routes/sitemap');
 
 // Connect to database before handling API requests
 app.use(async (req, res, next) => {
@@ -171,6 +181,9 @@ app.use('/api/predictions', predictionsRouter);
 app.use('/api/match-of-the-day', matchOfTheDayRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/health', healthRouter);
+
+// Sitemap route (dynamic XML generation)
+app.use('/sitemap.xml', sitemapRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
