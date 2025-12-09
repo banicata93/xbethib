@@ -13,9 +13,8 @@ validateEnv();
 const app = express();
 
 // Redirect Middleware (must be before other middleware)
-const { wwwRedirect, httpsRedirect, trailingSlashRedirect } = require('./middleware/redirects');
+const { httpsRedirect, trailingSlashRedirect } = require('./middleware/redirects');
 app.use(httpsRedirect);
-app.use(wwwRedirect);
 app.use(trailingSlashRedirect);
 
 // Security Middleware
