@@ -154,16 +154,16 @@
             <!-- Main Content - заема цялата ширина на малки екрани -->
             <main class="col-12 col-md-7" role="main">
                 <article class="predictions-container">
-                    <h1 class="text-center mb-4">Today's Free Sports Betting Predictions</h1>
+                    <header>
+                        <h1 class="text-center mb-4">Today's Free Sports Betting Predictions</h1>
+                    </header>
                     
-                    
-                    <!-- Stats Banner -->
-                    <!-- Match of the Day -->
-                    <div class="match-of-the-day">
+                    <!-- Match of the Day Section -->
+                    <section class="match-of-the-day" aria-labelledby="motd-heading">
                         <div class="motd-header">
                             <div class="motd-badge">
                                 <i class="bi bi-star-fill"></i>
-                                <span>Match of the Day</span>
+                                <h2 id="motd-heading" style="display: inline; font-size: inherit; margin: 0;">Match of the Day</h2>
                             </div>
                         </div>
                         
@@ -218,9 +218,12 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                     
-                    <div class="table-responsive rounded">
+                    <!-- Predictions Table Section -->
+                    <section class="predictions-table-section" aria-labelledby="predictions-heading">
+                        <h2 id="predictions-heading" class="visually-hidden">All Predictions</h2>
+                        <div class="table-responsive rounded">
                         <table class="table table-hover mb-0" id="predictions-table" aria-label="Sports betting predictions table">
                             <thead>
                                 <tr>
@@ -236,7 +239,8 @@
                                 <!-- PREDICTIONS_END -->
                             </tbody>
                         </table>
-                    </div>
+                        </div>
+                    </section>
                     
                     <!-- Mobile ad is now rendered inside the table by JavaScript -->
                 </article>
