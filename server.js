@@ -23,10 +23,20 @@ app.use(helmet({
         directives: {
             defaultSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://cdn.jsdelivr.net",
+                "https://www.googletagmanager.com",
+                "https://www.google-analytics.com"
+            ],
             imgSrc: ["'self'", "data:", "https:", "http:"],
             fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
-            connectSrc: ["'self'"]
+            connectSrc: [
+                "'self'",
+                "https://www.google-analytics.com",
+                "https://www.googletagmanager.com"
+            ]
         }
     }
 }));
