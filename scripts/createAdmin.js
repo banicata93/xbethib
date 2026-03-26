@@ -1,6 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
 // Admin schema (matching the auth.js implementation)
 const adminSchema = new mongoose.Schema({
@@ -19,17 +19,11 @@ const adminSchema = new mongoose.Schema({
 
 const Admin = mongoose.model('Admin', adminSchema);
 
-// Hash password function (matching auth.js)
-function hashPassword(password) {
-    return crypto.createHash('sha256').update(password + process.env.JWT_SECRET).digest('hex');
-}
-
 async function createAdmin() {
     try {
         // Connect to MongoDB
         await mongoose.connect(process.env.MONGODB_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
+            serverSelectionTimeoutMS: 10000,
         });
         console.log('✅ Connected to MongoDB');
 
@@ -37,21 +31,20 @@ async function createAdmin() {
         const username = process.argv[2] || 'admin';
         const password = process.argv[3] || 'admin123';
 
+        // Hash password with bcrypt (matching auth.js)
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         // Check if admin already exists
         const existingAdmin = await Admin.findOne({ username });
         if (existingAdmin) {
             console.log(`⚠️  Admin user "${username}" already exists!`);
             console.log('   Updating password...');
-            existingAdmin.password = hashPassword(password);
+            existingAdmin.password = hashedPassword;
             await existingAdmin.save();
             console.log(`✅ Password updated for "${username}"`);
         } else {
             // Create new admin
-            const hashedPassword = hashPassword(password);
-            const admin = new Admin({
-                username,
-                password: hashedPassword
-            });
+            const admin = new Admin({ username, password: hashedPassword });
             await admin.save();
             console.log(`✅ Admin user created successfully!`);
         }
