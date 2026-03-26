@@ -1,10 +1,23 @@
 {
   "version": 2,
-  "functions": {
-    "api/index.js": {
-      "includeFiles": "public/**,views/**,middleware/**,routes/**,models/**,utils/**,config/**,functions/**"
+  "builds": [
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "public/**",
+          "views/**",
+          "middleware/**",
+          "routes/**",
+          "models/**",
+          "utils/**",
+          "config/**",
+          "functions/**"
+        ]
+      }
     }
-  },
+  ],
   "routes": [
     {
       "src": "/(.*)",
