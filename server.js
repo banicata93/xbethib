@@ -66,7 +66,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Static Files with CDN-friendly caching headers
-app.use(express.static('public', {
+app.use(express.static(path.join(__dirname, 'public'), {
     maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0, // 1 day in production
     etag: true,
     lastModified: true,
