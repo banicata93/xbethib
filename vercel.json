@@ -1,14 +1,14 @@
 {
   "version": 2,
   "functions": {
-    "server.js": {
-      "includeFiles": "public/**,views/**,middleware/**,routes/**,models/**,utils/**,config/**"
+    "api/index.js": {
+      "includeFiles": "public/**,views/**,middleware/**,routes/**,models/**,utils/**,config/**,functions/**"
     }
   },
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/server.js"
+      "dest": "/api/index.js"
     }
   ],
   "env": {
