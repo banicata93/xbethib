@@ -25,7 +25,6 @@
     "node-cache": "^5.1.2"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22",
-    "vercel": "^48.6.0"
+    "nodemon": "^2.0.22"
   }
 }
