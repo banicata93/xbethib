@@ -4,61 +4,9 @@
     {
       "src": "server.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "functions/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
-    {
-      "src": "/api/auth/login",
-      "dest": "/functions/auth.js"
-    },
-    {
-      "src": "/api/predictions(.*)",
-      "dest": "/functions/predictions.js"
-    },
-    {
-      "src": "/api/stats",
-      "dest": "/functions/stats.js"
-    },
-    {
-      "src": "/api/analytics(.*)",
-      "dest": "/functions/analytics.js"
-    },
-    {
-      "src": "/api/botAnalysis(.*)",
-      "dest": "/functions/botAnalysis.js"
-    },
-    {
-      "src": "/css/(.*)",
-      "dest": "/public/css/$1"
-    },
-    {
-      "src": "/js/(.*)",
-      "dest": "/public/js/$1"
-    },
-    {
-      "src": "/images/(.*)",
-      "dest": "/public/images/$1"
-    },
-    {
-      "src": "/robots.txt",
-      "dest": "/public/robots.txt"
-    },
-    {
-      "src": "/sitemap.xml",
-      "dest": "/public/sitemap.xml"
-    },
-    {
-      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot))",
-      "dest": "/public/$1"
-    },
     {
       "src": "/(.*)",
       "dest": "/server.js"
