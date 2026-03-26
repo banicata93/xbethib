@@ -1,13 +1,13 @@
-// Analytics Tracking Script for XBetHub
+// Analytics Tracking Script for Betunio
 (function() {
     'use strict';
     
     // Generate or get session ID
     function getSessionId() {
-        let sessionId = sessionStorage.getItem('xbethub_session');
+        let sessionId = sessionStorage.getItem('betunio_session');
         if (!sessionId) {
             sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            sessionStorage.setItem('xbethub_session', sessionId);
+            sessionStorage.setItem('betunio_session', sessionId);
         }
         return sessionId;
     }
