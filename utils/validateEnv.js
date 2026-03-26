@@ -12,12 +12,15 @@ function validateEnv() {
     const missing = requiredEnvVars.filter(varName => !process.env[varName]);
     
     if (missing.length > 0) {
-        console.error('❌ CRITICAL ERROR: Missing required environment variables:');
+        console.error('❌ Missing required environment variables:');
         missing.forEach(varName => {
             console.error(`   - ${varName}`);
         });
-        console.error('\nPlease set these variables in your .env file or environment.');
-        process.exit(1);
+        // In serverless / Vercel env: warn only, do not exit
+        if (!process.env.VERCEL && process.env.NODE_ENV !== 'production') {
+            process.exit(1);
+        }
+        return;
     }
     
     console.log('✅ All required environment variables are set');
