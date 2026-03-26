@@ -6,7 +6,7 @@ const MatchOfTheDay = require('../models/matchOfTheDay');
  * Includes static pages and dynamic content from database
  */
 async function generateSitemap() {
-    const baseUrl = 'https://xbethub.com';
+    const baseUrl = 'https://betunio.com';
     const currentDate = new Date().toISOString().split('T')[0];
     
     // Static pages
