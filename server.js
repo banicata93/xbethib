@@ -92,28 +92,27 @@ let cachedDb = null;
 
 async function connectToDatabase() {
     if (cachedDb && mongoose.connection.readyState === 1) {
-        console.log('Using cached database connection');
         return cachedDb;
     }
 
-    if (!process.env.MONGODB_URI) {
-        console.warn('WARNING: MONGODB_URI is not set in environment variables');
+    const uri = process.env.MONGODB_URI;
+    if (!uri) {
+        console.error('MONGODB_URI environment variable is not set');
         return null;
     }
 
     try {
-        console.log('Establishing new database connection...');
-        await mongoose.connect(process.env.MONGODB_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 5000,
+        await mongoose.connect(uri, {
+            serverSelectionTimeoutMS: 15000,
             socketTimeoutMS: 45000,
+            connectTimeoutMS: 15000,
         });
         cachedDb = mongoose.connection;
         console.log('MongoDB Connected Successfully');
         return cachedDb;
     } catch (error) {
-        console.error('MongoDB Connection Error:', error);
+        console.error('MongoDB Connection Error:', error.message);
+        cachedDb = null;
         return null;
     }
 }
@@ -190,6 +189,26 @@ app.use('/api/predictions', predictionsRouter);
 app.use('/api/match-of-the-day', matchOfTheDayRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/health', healthRouter);
+
+// Diagnostic endpoint - показва статуса на MongoDB връзката
+app.get('/api/db-check', async (req, res) => {
+    const uri = process.env.MONGODB_URI;
+    const hasUri = !!uri;
+    const uriPreview = hasUri
+        ? uri.replace(/:([^@]+)@/, ':****@')  // скрива паролата
+        : 'NOT SET';
+
+    const db = await connectToDatabase();
+    const state = mongoose.connection.readyState;
+    const stateMap = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
+
+    res.json({
+        mongodb_uri_set: hasUri,
+        mongodb_uri_preview: uriPreview,
+        connection_state: stateMap[state] || state,
+        connected: state === 1
+    });
+});
 
 // Sitemap route (dynamic XML generation)
 app.use('/sitemap.xml', sitemapRouter);
