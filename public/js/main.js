@@ -1,54 +1,66 @@
 // Main.js - Load predictions from API with caching
 
-// Helper function to get status badge
-function getStatusBadge(result) {
-    const badges = {
-        'pending': '',
-        'win': '<span class="status-badge status-win">✅</span>',
-        'loss': '<span class="status-badge status-loss">❌</span>',
-        'void': '<span class="status-badge status-void">⛔</span>'
-    };
-    return badges[result] || '';
+// Escape HTML to prevent XSS when injecting API data into the DOM
+function escapeHtml(str) {
+    return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
-// Format date for display
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const matchDate = new Date(date);
-    matchDate.setHours(0, 0, 0, 0);
-    
-    if (matchDate.getTime() === today.getTime()) {
-        return 'Today';
-    }
-    
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    if (matchDate.getTime() === tomorrow.getTime()) {
-        return 'Tomorrow';
-    }
-    
-    return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
+// Render predictions into the existing table body
+function renderPredictions(predictions) {
+    const predictionsBody = document.getElementById('predictions-body');
 
-// Get date key for grouping
-function getDateKey(dateString) {
-    const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
+    if (!predictions || predictions.length === 0) {
+        predictionsBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center py-4">
+                    <p class="mb-0" style="color: rgba(255, 255, 255, 0.7);">
+                        <i class="bi bi-info-circle me-2"></i>
+                        No predictions available for today. Check back soon!
+                    </p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    let html = '';
+    predictions.forEach(prediction => {
+        const flag = prediction.flag || prediction.league || '⚽';
+        // Show flag image when the value is an HTTP(S) URL, otherwise show as text/emoji
+        const leagueDisplay = /^https?:\/\//i.test(flag)
+            ? `<img src="${escapeHtml(flag)}" alt="${escapeHtml(prediction.country || prediction.league || 'League')}" class="league-flag" style="width:22px;height:22px;object-fit:contain;" loading="lazy">`
+            : `<span class="team-flag">${escapeHtml(flag)}</span>`;
+
+        const stick = escapeHtml(prediction.stick || '');
+
+        html += `
+            <tr>
+                <td class="text-center">${leagueDisplay}</td>
+                <td class="team-cell">${escapeHtml(prediction.homeTeam)}</td>
+                <td class="team-cell">${escapeHtml(prediction.awayTeam)}</td>
+                <td class="prediction-cell"><strong>${escapeHtml(prediction.prediction)}</strong></td>
+                <td class="text-center" style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">${stick}</td>
+            </tr>
+        `;
+    });
+
+    predictionsBody.innerHTML = html;
 }
 
 // Load predictions from API
 async function loadPredictions() {
     const predictionsBody = document.getElementById('predictions-body');
-    
+
     if (!predictionsBody) {
         console.error('Predictions body element not found');
         return;
     }
-    
+
     // Show loading state
     predictionsBody.innerHTML = `
         <tr>
@@ -60,57 +72,22 @@ async function loadPredictions() {
             </td>
         </tr>
     `;
-    
+
     try {
         const response = await fetch('/api/predictions/today');
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const predictions = await response.json();
-        
-        // Check if response is an error message
+
         if (predictions.message) {
             throw new Error(predictions.message);
         }
-        
-        if (!predictions || predictions.length === 0) {
-            predictionsBody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="text-center py-4">
-                        <p class="mb-0" style="color: rgba(255, 255, 255, 0.7);">
-                            <i class="bi bi-info-circle me-2"></i>
-                            No predictions available for today. Check back soon!
-                        </p>
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-        
-        // Render today's predictions directly (no date grouping needed)
-        let html = '';
-        predictions.forEach(prediction => {
-            const league = prediction.league || '⚽';
-            const date = new Date(prediction.date);
-            const timeStr = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 
-            html += `
-                <tr>
-                    <td class="text-center">
-                        <span class="team-flag">${league}</span>
-                    </td>
-                    <td class="team-cell">${prediction.homeTeam}</td>
-                    <td class="team-cell">${prediction.awayTeam}</td>
-                    <td class="prediction-cell"><strong>${prediction.prediction}</strong></td>
-                    <td class="text-center" style="color: rgba(255,255,255,0.5); font-size: 0.8rem;">${timeStr}</td>
-                </tr>
-            `;
-        });
+        renderPredictions(predictions);
 
-        predictionsBody.innerHTML = html;
-        
     } catch (error) {
         console.error('Error loading predictions:', error);
         predictionsBody.innerHTML = `
@@ -133,3 +110,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Expose for external use
 window.loadPredictions = loadPredictions;
+window.renderPredictions = renderPredictions;
