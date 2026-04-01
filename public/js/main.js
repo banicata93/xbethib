@@ -30,11 +30,19 @@ function renderPredictions(predictions) {
 
     let html = '';
     predictions.forEach(prediction => {
-        const flag = prediction.flag || prediction.league || '⚽';
-        // Show flag image when the value is an HTTP(S) URL, otherwise show as text/emoji
-        const leagueDisplay = /^https?:\/\//i.test(flag)
-            ? `<img src="${escapeHtml(flag)}" alt="${escapeHtml(prediction.country || prediction.league || 'League')}" class="league-flag" style="width:22px;height:22px;object-fit:contain;" loading="lazy">`
-            : `<span class="team-flag">${escapeHtml(flag)}</span>`;
+        const flag = prediction.flag || '';
+        // League display: image if URL, emoji if short (≤4 chars), else plain text
+        let leagueDisplay;
+        if (/^https?:\/\//i.test(flag)) {
+            leagueDisplay = `<img src="${escapeHtml(flag)}" alt="${escapeHtml(prediction.country || prediction.league || 'League')}" class="league-flag" style="width:22px;height:22px;object-fit:contain;" loading="lazy">`;
+        } else if (flag && [...flag].length <= 4) {
+            // emoji flag (1-2 emoji codepoints)
+            leagueDisplay = `<span class="team-flag">${escapeHtml(flag)}</span>`;
+        } else {
+            // Text league name — show truncated, same size as other cells
+            const leagueName = escapeHtml(prediction.league || flag || '—');
+            leagueDisplay = `<span style="font-size:0.75rem;opacity:0.8;">${leagueName}</span>`;
+        }
 
         const stick = escapeHtml(prediction.stick || '');
 
