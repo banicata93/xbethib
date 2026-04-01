@@ -62,16 +62,13 @@ async function loadPredictions() {
     `;
     
     try {
-        // Add cache busting parameter to force fresh data
-        const cacheBuster = new Date().getTime();
-        const response = await fetch(`/api/predictions?_=${cacheBuster}`);
+        const response = await fetch('/api/predictions/today');
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const predictions = await response.json();
-        console.log('Loaded predictions:', predictions.length, 'total');
         
         // Check if response is an error message
         if (predictions.message) {
@@ -84,7 +81,7 @@ async function loadPredictions() {
                     <td colspan="5" class="text-center py-4">
                         <p class="mb-0" style="color: rgba(255, 255, 255, 0.7);">
                             <i class="bi bi-info-circle me-2"></i>
-                            No predictions available. Check back soon!
+                            No predictions available for today. Check back soon!
                         </p>
                     </td>
                 </tr>
@@ -92,59 +89,26 @@ async function loadPredictions() {
             return;
         }
         
-        // All predictions are regular now (Match of the Day is separate)
-        const regularPredictions = predictions;
-        console.log('Regular predictions:', regularPredictions.length);
-        
-        // Group predictions by date
-        const groupedByDate = {};
-        regularPredictions.forEach(prediction => {
-            const dateKey = getDateKey(prediction.matchDate);
-            if (!groupedByDate[dateKey]) {
-                groupedByDate[dateKey] = [];
-            }
-            groupedByDate[dateKey].push(prediction);
-        });
-        
-        // Sort dates in DESCENDING order (newest first)
-        const sortedDates = Object.keys(groupedByDate).sort().reverse();
-        console.log('Dates:', sortedDates.slice(0, 5));
-        
-        // Build table rows with date separators
+        // Render today's predictions directly (no date grouping needed)
         let html = '';
-        sortedDates.forEach(dateKey => {
-            const datePredictions = groupedByDate[dateKey];
-            const dateDisplay = formatDate(datePredictions[0].matchDate);
-            
-            // Add date separator row - FULL WIDTH, CENTERED, COMPACT
+        predictions.forEach(prediction => {
+            const league = prediction.league || '⚽';
+            const date = new Date(prediction.date);
+            const timeStr = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
             html += `
-                <tr class="date-separator">
-                    <td colspan="5" class="date-header">
-                        <i class="bi bi-calendar3"></i> ${dateDisplay}
+                <tr>
+                    <td class="text-center">
+                        <span class="team-flag">${league}</span>
                     </td>
+                    <td class="team-cell">${prediction.homeTeam}</td>
+                    <td class="team-cell">${prediction.awayTeam}</td>
+                    <td class="prediction-cell"><strong>${prediction.prediction}</strong></td>
+                    <td class="text-center" style="color: rgba(255,255,255,0.5); font-size: 0.8rem;">${timeStr}</td>
                 </tr>
             `;
-            
-            // Add predictions for this date
-            datePredictions.forEach(prediction => {
-                const statusBadge = getStatusBadge(prediction.result || 'pending');
-                // Use leagueFlag emoji from database
-                const leagueFlag = prediction.leagueFlag || '⚽';
-                
-                html += `
-                    <tr>
-                        <td class="text-center">
-                            <span class="team-flag">${leagueFlag}</span>
-                        </td>
-                        <td class="team-cell">${prediction.homeTeam}</td>
-                        <td class="team-cell">${prediction.awayTeam}</td>
-                        <td class="prediction-cell"><strong>${prediction.prediction}</strong></td>
-                        <td class="text-center">${statusBadge}</td>
-                    </tr>
-                `;
-            });
         });
-        
+
         predictionsBody.innerHTML = html;
         
     } catch (error) {
@@ -154,10 +118,7 @@ async function loadPredictions() {
                 <td colspan="5" class="text-center py-4">
                     <p class="mb-0 text-danger">
                         <i class="bi bi-exclamation-triangle me-2"></i>
-                        Database connection error. Please check MongoDB Atlas connection.
-                    </p>
-                    <p class="mb-0 mt-2" style="color: rgba(255, 255, 255, 0.5); font-size: 0.85rem;">
-                        ${error.message}
+                        Unable to load predictions. Please try again later.
                     </p>
                 </td>
             </tr>
