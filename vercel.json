@@ -2,7 +2,7 @@
   "version": 2,
   "functions": {
     "api/index.js": {
-      "includeFiles": "public/**,views/**,middleware/**,routes/**,models/**,utils/**,config/**,functions/**"
+      "includeFiles": "{public,views,middleware,routes,models,utils,config,functions}/**"
     }
   },
   "routes": [
