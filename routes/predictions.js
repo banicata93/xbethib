@@ -226,33 +226,65 @@ router.patch('/:id/result', auth, validate(resultUpdateSchema), async (req, res)
 // Get today's predictions
 router.get('/today', cacheMiddleware(300), async (req, res) => {
     try {
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date();
-        endOfDay.setHours(23, 59, 59, 999);
+        const now = new Date();
+        const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+        const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
 
+        const dateFilter = { $gte: startOfDay, $lte: endOfDay };
+
+        // Bot saves date in 'date'; manual entries use 'matchDate'
         const predictions = await Prediction.find({
-            matchDate: { $gte: startOfDay, $lte: endOfDay }
+            $or: [
+                { matchDate: dateFilter },
+                { date: dateFilter }
+            ]
         })
-            .sort({ matchDate: 1 })
+            .sort({ matchDate: 1, date: 1 })
             .limit(20)
-            .select('-__v');
+            .select('-__v')
+            .lean();
 
         const formatted = predictions.map(p => ({
             fixtureId: p.fixtureId || p._id,
-            league: p.league || p.leagueFlag,
+            league: p.league || p.leagueFlag || '',
             country: p.country || '',
-            flag: p.flag || p.leagueFlag,
-            homeTeam: p.homeTeam,
-            awayTeam: p.awayTeam,
-            date: p.matchDate,
-            prediction: p.prediction,
-            stick: p.stick || ''
+            flag: p.flag || p.leagueFlag || '',
+            homeTeam: p.homeTeam || p.home || '',
+            awayTeam: p.awayTeam || p.away || '',
+            date: p.matchDate || p.date,
+            // Bot saves prediction in 'winner'; manual entries use 'prediction'
+            prediction: p.prediction || p.winner || p.advice || p.tip || '',
+            stick: p.stick || p.underOver || ''
         }));
 
         res.json(formatted);
     } catch (error) {
         console.error('Error in GET /predictions/today:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Debug endpoint — shows raw documents so you can verify field names from the bot
+// Visit /api/predictions/debug in the browser to inspect the actual MongoDB structure
+router.get('/debug', async (req, res) => {
+    try {
+        const now = new Date();
+        // Broad 3-day window to catch near-today records regardless of timezone offset
+        const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1));
+        const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 2));
+
+        const samples = await Prediction.find({
+            matchDate: { $gte: from, $lte: to }
+        }).limit(5).lean();
+
+        const total = await Prediction.countDocuments();
+
+        res.json({
+            totalInCollection: total,
+            queryWindow: { from, to },
+            sampleDocuments: samples
+        });
+    } catch (error) {
         res.status(500).json({ message: error.message });
     }
 });
