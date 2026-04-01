@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const predictionSchema = new mongoose.Schema({
+    fixtureId: {
+        type: Number,
+        default: null
+    },
     matchDate: {
         type: Date,
         required: true
@@ -9,6 +13,18 @@ const predictionSchema = new mongoose.Schema({
         type: String,
         required: true,
         maxlength: 16
+    },
+    league: {
+        type: String,
+        default: ''
+    },
+    country: {
+        type: String,
+        default: ''
+    },
+    flag: {
+        type: String,
+        default: ''
     },
     homeTeam: {
         type: String,
@@ -29,6 +45,10 @@ const predictionSchema = new mongoose.Schema({
     prediction: {
         type: String,
         required: true
+    },
+    stick: {
+        type: String,
+        default: ''
     },
     result: {
         type: String,
