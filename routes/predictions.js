@@ -223,6 +223,36 @@ router.patch('/:id/result', auth, validate(resultUpdateSchema), async (req, res)
     }
 });
 
+// Get today's predictions
+router.get('/today', cacheMiddleware(300), async (req, res) => {
+    try {
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const predictions = await Prediction.find({
+            matchDate: { $gte: startOfDay, $lte: endOfDay }
+        }).sort({ matchDate: 1 });
+
+        const formatted = predictions.map(p => ({
+            fixtureId: p._id,
+            homeTeam: p.homeTeam,
+            awayTeam: p.awayTeam,
+            league: p.leagueFlag,
+            date: p.matchDate,
+            prediction: p.prediction,
+            winner: p.prediction,
+            underOver: null
+        }));
+
+        res.json(formatted);
+    } catch (error) {
+        console.error('Error in GET /predictions/today:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // NOTE: Match of the Day functionality has been moved to /api/match-of-the-day
 // This old endpoint is deprecated and should not be used
 // Use the new MatchOfTheDay model and routes instead
