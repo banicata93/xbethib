@@ -233,17 +233,21 @@ router.get('/today', cacheMiddleware(300), async (req, res) => {
 
         const predictions = await Prediction.find({
             matchDate: { $gte: startOfDay, $lte: endOfDay }
-        }).sort({ matchDate: 1 });
+        })
+            .sort({ matchDate: 1 })
+            .limit(20)
+            .select('-__v');
 
         const formatted = predictions.map(p => ({
-            fixtureId: p._id,
+            fixtureId: p.fixtureId || p._id,
+            league: p.league || p.leagueFlag,
+            country: p.country || '',
+            flag: p.flag || p.leagueFlag,
             homeTeam: p.homeTeam,
             awayTeam: p.awayTeam,
-            league: p.leagueFlag,
             date: p.matchDate,
             prediction: p.prediction,
-            winner: p.prediction,
-            underOver: null
+            stick: p.stick || ''
         }));
 
         res.json(formatted);
