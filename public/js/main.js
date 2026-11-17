@@ -1,4 +1,4 @@
-// Main.js - Load predictions from API with caching
+// Main.js - Load current and past predictions, grouped by match date
 
 // League name → country flag emoji mapping
 const LEAGUE_FLAGS = {
@@ -166,17 +166,52 @@ function escapeHtml(str) {
         .replace(/'/g, '&#039;');
 }
 
-// Render predictions into the existing table body
+function getPredictionDisplayDate(prediction) {
+    // Manual entries use matchDate; older bot imports use date.
+    for (const value of [prediction.matchDate, prediction.date]) {
+        if (value == null || value === '') continue;
+        const date = new Date(value);
+        if (Number.isFinite(date.getTime())) return date;
+    }
+    return null;
+}
+
+function normalizeDisplayPrediction(prediction) {
+    const league = prediction.league;
+    const leagueObject = league && typeof league === 'object' ? league : null;
+    return {
+        ...prediction,
+        date: getPredictionDisplayDate(prediction),
+        league: leagueObject ? leagueObject.name || '' : league || prediction.leagueFlag || '',
+        flag: prediction.flag || prediction.leagueFlag || leagueObject?.flag || '',
+        homeTeam: prediction.homeTeam || prediction.home || '',
+        awayTeam: prediction.awayTeam || prediction.away || '',
+        prediction: prediction.prediction || prediction.winner || prediction.advice || prediction.tip || '',
+        stick: prediction.stick || prediction.underOver || ''
+    };
+}
+
+// Render predictions into the existing table body, newest dates first.
 function renderPredictions(predictions) {
     const predictionsBody = document.getElementById('predictions-body');
+    if (!predictionsBody) return;
 
-    if (!predictions || predictions.length === 0) {
+    const sortedPredictions = (Array.isArray(predictions) ? predictions : [])
+        .filter(prediction => prediction && typeof prediction === 'object' && !Array.isArray(prediction))
+        .map(normalizeDisplayPrediction)
+        .sort((a, b) => {
+            if (!a.date) return b.date ? 1 : 0;
+            if (!b.date) return -1;
+            return b.date - a.date;
+        });
+
+    if (sortedPredictions.length === 0) {
         predictionsBody.innerHTML = `
             <tr>
                 <td colspan="5" class="text-center py-4">
                     <p class="mb-0" style="color: rgba(255, 255, 255, 0.7);">
                         <i class="bi bi-info-circle me-2"></i>
-                        No predictions available for today. Check back soon!
+                        No predictions available yet. Check back soon!
                     </p>
                 </td>
             </tr>
@@ -185,14 +220,36 @@ function renderPredictions(predictions) {
     }
 
     let html = '';
-    predictions.forEach(prediction => {
+    let currentDate;
+    sortedPredictions.forEach(prediction => {
+        // Keep the calendar day consistent with the API's UTC date filtering.
+        const dateKey = prediction.date ? prediction.date.toISOString().slice(0, 10) : 'undated';
+        if (dateKey !== currentDate) {
+            currentDate = dateKey;
+            const dateLabel = prediction.date
+                ? prediction.date.toLocaleDateString('en-GB', {
+                    day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC'
+                })
+                : 'Date not available';
+            const dateContent = prediction.date
+                ? `<time datetime="${dateKey}">${escapeHtml(dateLabel)}</time>`
+                : dateLabel;
+            html += `
+                <tr class="date-separator">
+                    <td colspan="5" class="date-header">
+                        <i class="bi bi-calendar-event me-2" aria-hidden="true"></i>${dateContent}
+                    </td>
+                </tr>
+            `;
+        }
+
         const flag = prediction.flag || '';
         const leagueInfo = getLeagueFlag(prediction.league, prediction.country, flag);
         let leagueDisplay;
         if (leagueInfo.type === 'img') {
             leagueDisplay = `<img src="${escapeHtml(leagueInfo.value)}" alt="${escapeHtml(leagueInfo.alt)}" class="league-flag" style="width:22px;height:22px;object-fit:contain;" loading="lazy">`;
         } else if (leagueInfo.type === 'emoji') {
-            leagueDisplay = `<span class="team-flag">${leagueInfo.value}</span>`;
+            leagueDisplay = `<span class="team-flag">${escapeHtml(leagueInfo.value)}</span>`;
         } else {
             leagueDisplay = `<span style="font-size:0.72rem;opacity:0.8;line-height:1.2;display:inline-block;">${escapeHtml(leagueInfo.value)}</span>`;
         }
@@ -235,7 +292,7 @@ async function loadPredictions() {
     `;
 
     try {
-        const response = await fetch('/api/predictions/today');
+        const response = await fetch('/api/predictions', { cache: 'no-cache' });
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -243,8 +300,8 @@ async function loadPredictions() {
 
         const predictions = await response.json();
 
-        if (predictions.message) {
-            throw new Error(predictions.message);
+        if (!Array.isArray(predictions)) {
+            throw new Error('Invalid predictions response');
         }
 
         renderPredictions(predictions);
