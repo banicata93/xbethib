@@ -193,20 +193,17 @@ test('League Flag retains its exact original markup and date/team inputs retain 
 });
 
 async function statsFor(records) {
-    function matches(record, query) {
-        if (query.matchDate?.$gte && new Date(record.matchDate) < query.matchDate.$gte) return false;
-        if (typeof query.result === 'string' && record.result !== query.result) return false;
-        if (query.result?.$in && !query.result.$in.includes(record.result)) return false;
-        return true;
-    }
+    // These fixtures all have the same match date within the last 24 hours.
+    const odds = records.map(record => record.odds).filter(value => typeof value === 'number');
+    const grouped = [{
+        total: records.length,
+        wins: records.filter(record => record.result === 'win').length,
+        losses: records.filter(record => record.result === 'loss').length,
+        voids: records.filter(record => record.result === 'void').length,
+        avgOdds: odds.length ? odds.reduce((a, b) => a + b, 0) / odds.length : null
+    }];
     const model = {
-        countDocuments: async query => records.filter(record => matches(record, query || {})).length,
-        find(query) { return { sort() { return { limit(limit) { return { select: async () => records.filter(record => matches(record, query)).slice(0, limit) }; } }; } }; },
-        aggregate: async pipeline => {
-            const odds = records.filter(record => matches(record, pipeline[0].$match))
-                .map(record => record.odds).filter(value => typeof value === 'number');
-            return odds.length ? [{ avgOdds: odds.reduce((a, b) => a + b, 0) / odds.length }] : [];
-        }
+        aggregate: () => ({ option: async () => [{ overall: grouped, last30days: grouped, last24hours: grouped, recentResults: [] }] })
     };
     const context = {
         module: { exports: {} },
@@ -216,6 +213,7 @@ async function statsFor(records) {
         require(name) {
             if (name === 'mongoose') return { connect: async () => ({}), connection: {} };
             if (name === '../models/prediction') return model;
+            if (name === '../utils/predictionStats') return require('../utils/predictionStats');
             throw new Error('Unexpected module');
         },
         process: { env: { MONGODB_URI: 'offline-fixture' } },

@@ -189,6 +189,7 @@ app.use('/api/predictions', predictionsRouter);
 app.use('/api/match-of-the-day', matchOfTheDayRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/health', healthRouter);
+app.all('/api/stats', require('./functions/stats'));
 
 // Diagnostic endpoint - показва статуса на MongoDB връзката
 app.get('/api/db-check', async (req, res) => {

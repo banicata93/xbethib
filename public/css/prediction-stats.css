@@ -1,0 +1,39 @@
+.prediction-stats {
+    margin: 0 0 1.25rem;
+    padding: 1rem;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 14px;
+    background: rgba(17, 15, 35, 0.88);
+    color: #e5e7eb;
+}
+.prediction-stats .prediction-stats-heading {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 0.85rem;
+}
+.prediction-stats h2 { margin: 0; font-size: 1.05rem; color: #f3f4f6; }
+.prediction-stats .prediction-stats-period { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; }
+.prediction-stats select, .prediction-stats button {
+    padding: 0.4rem 0.55rem;
+    border: 1px solid rgba(167, 139, 250, 0.5);
+    border-radius: 7px;
+    background: #19152b;
+    color: #f3f4f6;
+    font: inherit;
+}
+.prediction-stats select:focus-visible, .prediction-stats button:focus-visible { outline: 2px solid #a78bfa; outline-offset: 3px; }
+.prediction-stats dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin: 0; }
+.prediction-stats dl > div { min-width: 0; padding: 0.5rem; background: rgba(139, 92, 246, 0.08); border-radius: 8px; }
+.prediction-stats dt { color: #c4b5d5; font-size: 0.78rem; font-weight: 400; }
+.prediction-stats dd { margin: 0.15rem 0 0; font-size: 1.25rem; line-height: 1.2; font-weight: 700; color: #f3f4f6; }
+.prediction-stats #stats-win-rate { color: #c4b5fd; }
+.prediction-stats .prediction-stats-status { margin: 0.75rem 0 0; font-size: 0.8rem; color: #e5e7eb; }
+.prediction-stats .prediction-stats-note { margin: 0.4rem 0 0; color: #b8aec8; font-size: 0.73rem; line-height: 1.5; }
+.prediction-stats #stats-retry { margin-top: 0.5rem; font-size: 0.8rem; cursor: pointer; }
+.prediction-stats [hidden] { display: none; }
+@media (max-width: 360px) {
+    .prediction-stats dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

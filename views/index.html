@@ -57,6 +57,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="/css/style.css?v=1.3" rel="stylesheet">
+    <link href="/css/prediction-stats.css?v=1.0" rel="stylesheet">
     
     <!-- Structured Data / Schema.org -->
     <script type="application/ld+json">
@@ -109,7 +110,7 @@
                     <li class="nav-item">
                         <span class="nav-stats">
                             <i class="bi bi-trophy-fill"></i>
-                            <span class="stats-text">Win Rate: <strong>87%</strong></span>
+                            <span class="stats-text" title="Wins divided by wins plus losses. Pending and void predictions are excluded.">All-time win rate: <strong id="header-win-rate">—</strong></span>
                         </span>
                     </li>
                 </ul>
@@ -159,6 +160,32 @@
                         <h1 class="text-center mb-4">Today's Free Sports Betting Predictions</h1>
                     </header>
                     
+                    <section class="prediction-stats" id="prediction-stats" aria-labelledby="prediction-stats-heading" aria-busy="true">
+                        <div class="prediction-stats-heading">
+                            <h2 id="prediction-stats-heading">Prediction results</h2>
+                            <div class="prediction-stats-period">
+                                <label for="stats-period">Period</label>
+                                <select id="stats-period">
+                                    <option value="overall">All time</option>
+                                    <option value="last30days">Last 30 days</option>
+                                </select>
+                            </div>
+                        </div>
+                        <dl>
+                            <div><dt>Total predictions</dt><dd id="stats-total">—</dd></div>
+                            <div><dt>Win rate</dt><dd id="stats-win-rate">—</dd></div>
+                            <div><dt>Wins</dt><dd id="stats-wins">—</dd></div>
+                            <div><dt>Losses</dt><dd id="stats-losses">—</dd></div>
+                            <div><dt>Pending</dt><dd id="stats-pending">—</dd></div>
+                            <div><dt>Void</dt><dd id="stats-voids">—</dd></div>
+                        </dl>
+                        <p id="stats-status" class="prediction-stats-status" role="status" aria-live="polite">Loading results…</p>
+                        <button id="stats-retry" type="button" hidden>Try again</button>
+                        <p class="prediction-stats-note">Win rate = wins ÷ (wins + losses). Pending and void predictions are excluded. Match of the Day is tracked separately.</p>
+                        <p class="prediction-stats-note">Last 30 days uses match dates in UTC, up to now. Undated predictions appear in All time only.</p>
+                        <noscript><p class="prediction-stats-status">Enable JavaScript to load prediction statistics.</p></noscript>
+                    </section>
+
                     <!-- Match of the Day Section -->
                     <section class="match-of-the-day" aria-labelledby="motd-heading">
                         <div class="motd-header">
@@ -293,7 +320,7 @@
     <link rel="stylesheet" href="/css/toast.css">
     <script src="/js/toast.js"></script>
     <script src="/js/analytics-tracker.js?v=1.0"></script>
-    <script src="/js/stats.js?v=1.1"></script>
+    <script src="/js/stats.js?v=2.0"></script>
     <script src="/js/match-of-the-day.js?v=1.0"></script>
     <script src="/js/main.js?v=2.3"></script>
     
@@ -630,4 +657,4 @@
     </script>
     -->
 </body>
-</html> 
+</html>
