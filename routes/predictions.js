@@ -4,6 +4,7 @@ const Prediction = require('../models/prediction');
 const auth = require('../middleware/auth');
 const { validate, predictionSchema, bulkPredictionSchema, resultUpdateSchema } = require('../utils/validationSchemas');
 const { cacheMiddleware, invalidateCache } = require('../utils/cache');
+const { createManualPrediction } = require('../utils/manualPrediction');
 
 // Get all predictions (cached for 5 minutes)
 router.get('/', cacheMiddleware(300), async (req, res) => {
@@ -59,7 +60,7 @@ router.post('/', auth, async (req, res) => {
                 try {
                     const { matchDate, homeTeam, awayTeam, leagueFlag, prediction, odds, result } = predData;
 
-                    const newPrediction = new Prediction({
+                    const savedPrediction = await createManualPrediction({
                         matchDate: new Date(matchDate),
                         homeTeam,
                         awayTeam,
@@ -69,7 +70,6 @@ router.post('/', auth, async (req, res) => {
                         result: result || 'pending'
                     });
 
-                    const savedPrediction = await newPrediction.save();
                     results.success.push(savedPrediction);
                 } catch (error) {
                     results.failed.push({
@@ -109,7 +109,7 @@ router.post('/', auth, async (req, res) => {
             
             const { matchDate, homeTeam, awayTeam, leagueFlag, prediction } = value;
 
-            const newPrediction = new Prediction({
+            const savedPrediction = await createManualPrediction({
                 matchDate: new Date(matchDate),
                 homeTeam,
                 awayTeam,
@@ -117,8 +117,6 @@ router.post('/', auth, async (req, res) => {
                 prediction
             });
 
-            const savedPrediction = await newPrediction.save();
-            
             // Invalidate predictions cache
             invalidateCache('/api/predictions');
             

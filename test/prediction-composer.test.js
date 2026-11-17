@@ -9,6 +9,7 @@ const composer = require('../public/js/prediction-composer');
 const schemas = require('../utils/validationSchemas');
 const mongoose = require('mongoose');
 const Prediction = require('../models/prediction');
+const { createManualPrediction } = require('../utils/manualPrediction');
 
 const root = path.join(__dirname, '..');
 const base = { matchDate: '2026-11-17', homeTeam: 'Alpha', awayTeam: 'Beta', leagueFlag: '🇧🇬' };
@@ -81,6 +82,9 @@ test('retains custom text and existing odds, while rejecting empty or oversized 
 function routeHandlers() {
     const handlers = {};
     const saved = [];
+    // Reproduce the production unique, non-sparse fixtureId index and its
+    // already-existing manual record with fixtureId: null.
+    const fixtureIds = new Set([null, 12345]);
     const router = {};
     for (const method of ['get', 'post', 'put', 'patch', 'delete']) {
         router[method] = (route, ...callbacks) => { handlers[method + ' ' + route] = callbacks.at(-1); };
@@ -91,6 +95,12 @@ function routeHandlers() {
             const error = this.document.validateSync();
             if (error) throw error;
             const value = this.document.toObject();
+            if (fixtureIds.has(value.fixtureId)) {
+                throw Object.assign(new Error('Duplicate fixture ID'), {
+                    code: 11000, keyPattern: { fixtureId: 1 }, keyValue: { fixtureId: value.fixtureId }
+                });
+            }
+            fixtureIds.add(value.fixtureId);
             saved.push(value);
             return value;
         }
@@ -101,7 +111,10 @@ function routeHandlers() {
         '../models/prediction': MemoryPrediction,
         '../middleware/auth': () => {},
         '../utils/validationSchemas': schemas,
-        '../utils/cache': { cacheMiddleware: () => () => {}, invalidateCache: () => {} }
+        '../utils/cache': { cacheMiddleware: () => () => {}, invalidateCache: () => {} },
+        '../utils/manualPrediction': {
+            createManualPrediction: data => createManualPrediction(data, { PredictionModel: MemoryPrediction })
+        }
     };
     const context = {
         module: { exports: {} },
@@ -124,13 +137,31 @@ test('the existing POST handler saves new predictions without odds and PUT prese
         assert.equal(res.code, 201);
         assert.equal(res.body.prediction, prediction);
         assert.equal(res.body.odds, null);
+        assert.ok(Number.isSafeInteger(res.body.fixtureId) && res.body.fixtureId < 0);
     }
     assert.equal(saved.length, 5);
+    assert.equal(new Set(saved.map(record => record.fixtureId)).size, 5);
     const res = response();
     await handlers['put /:id']({ params: { id: 'existing' }, body: { ...base, prediction: 'Custom legacy tip', odds: 2.4, result: 'win' } }, res);
     assert.equal(res.code, 200);
     assert.equal(res.body.odds, 2.4);
     assert.equal(res.body.result, 'win');
+});
+
+test('bulk manual creation also succeeds with the same existing unique fixture index', async () => {
+    const { handlers, saved } = routeHandlers();
+    const res = response();
+    await handlers['post /']({ body: { predictions: [
+        { ...base, prediction: '1', odds: 2.4, result: 'win' },
+        { ...base, prediction: 'X + Under 2.5' }
+    ] } }, res);
+    assert.equal(res.code, 201);
+    assert.equal(res.body.success, 2);
+    assert.equal(res.body.failed, 0);
+    assert.equal(saved[0].odds, 2.4);
+    assert.equal(saved[0].result, 'win');
+    assert.ok(saved.every(record => Number.isSafeInteger(record.fixtureId) && record.fixtureId < 0));
+    assert.notEqual(saved[0].fixtureId, saved[1].fixtureId);
 });
 
 test('the unchanged public renderer displays every new combination and legacy text', () => {
