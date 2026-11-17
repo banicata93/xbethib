@@ -2,7 +2,7 @@
 window.token = null;
 let token = null;
 
-console.log('🚀 Admin.js loaded! Version: 1762262334 - CSP Fixed!');
+console.log('🚀 Admin.js loaded! Version: prediction-composer-1');
 
 // Global helper functions for date and prediction buttons
 window.setTodayDate = function() {
@@ -25,7 +25,9 @@ window.setTomorrowDate = function() {
 };
 
 window.setPrediction = function(value) {
-    document.getElementById('prediction').value = value;
+    const composer = window.PredictionComposer?.get(document.getElementById('predictionForm'));
+    if (composer) composer.setManualValue(value);
+    else document.getElementById('prediction').value = value;
 };
 
 window.logout = function() {
@@ -56,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.setTodayDate();
     
     if (predictionForm) {
+        window.PredictionComposer.initialize(predictionForm);
         predictionForm.addEventListener('submit', window.handleAddPrediction);
     }
     
@@ -90,16 +93,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 window.handleAddPrediction = async function(e) {
     e.preventDefault();
+    const composer = window.PredictionComposer.get(e.target);
+    if (!composer || !composer.validate()) return;
     
     const matchDate = document.getElementById('matchDate').value;
-    const oddsValue = document.getElementById('odds').value;
     const formData = {
         matchDate: matchDate,
         homeTeam: document.getElementById('homeTeam').value,
         awayTeam: document.getElementById('awayTeam').value,
         leagueFlag: document.getElementById('leagueFlag').value.trim(),
-        prediction: document.getElementById('prediction').value,
-        odds: oddsValue ? parseFloat(oddsValue) : null
+        prediction: composer.getValue()
     };
 
     try {

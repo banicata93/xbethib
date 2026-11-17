@@ -23,8 +23,8 @@ const predictionSchema = Joi.object({
         'string.max': 'League flag must not exceed 16 characters',
         'any.required': 'League flag is required'
     }),
-    prediction: Joi.string().min(2).max(200).required().messages({
-        'string.min': 'Prediction must be at least 2 characters',
+    prediction: Joi.string().min(1).max(200).required().messages({
+        'string.min': 'Prediction must be at least 1 character',
         'string.max': 'Prediction must not exceed 200 characters',
         'any.required': 'Prediction is required'
     }),
@@ -76,7 +76,7 @@ const bulkPredictionSchema = Joi.object({
             homeTeam: Joi.string().min(2).max(100).required(),
             awayTeam: Joi.string().min(2).max(100).required(),
             leagueFlag: Joi.string().max(16).optional().default('⚽'),
-            prediction: Joi.string().min(2).max(200).required(),
+            prediction: Joi.string().min(1).max(200).required(),
             odds: Joi.number().min(1.01).max(100).optional().allow(null),
             result: Joi.string().valid('pending', 'win', 'loss', 'void').optional().default('pending'),
             homeTeamFlag: Joi.string().max(16).optional().allow(''),
