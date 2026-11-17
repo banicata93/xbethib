@@ -66,6 +66,13 @@
 .prediction-composer .prediction-error { margin: 0.55rem 0 0; color: #fecaca; font-size: 0.85rem; }
 #predictionForm .prediction-form-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
 #predictionForm .prediction-form-actions .btn { min-height: 44px; padding: 0.65rem 1.25rem; font-size: 0.95rem; }
+#predictionForm [hidden] { display: none !important; }
+#predictionForm .prediction-submit-status { margin: 0.85rem 0 0; padding: 0.7rem 0.85rem; border-radius: 8px; background: rgba(52, 152, 219, 0.16); color: #e2e8f0; }
+#predictionForm .prediction-submit-status[data-state="error"] { background: rgba(185, 28, 28, 0.22); color: #fecaca; }
+#predictionForm .prediction-submit-status[data-state="success"] { background: rgba(21, 128, 61, 0.22); color: #bbf7d0; }
+#predictionForm .prediction-login-link { color: #bfdbfe; text-decoration: underline; }
+/* Bootstrap hides .toast without .show; this admin-only override keeps custom notices visible. */
+.toast-container .toast { display: flex; }
 
 @media (max-width: 767px) {
     .prediction-composer { padding: 0.75rem; }

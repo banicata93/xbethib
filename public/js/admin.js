@@ -2,7 +2,56 @@
 window.token = null;
 let token = null;
 
-console.log('🚀 Admin.js loaded! Version: prediction-composer-1');
+console.log('🚀 Admin.js loaded! Version: prediction-composer-2');
+
+const pendingPredictionForms = new WeakSet();
+
+function setPredictionSubmitStatus(form, state, message, needsLogin = false) {
+    const status = form.querySelector('#predictionSubmitStatus');
+    if (status) {
+        status.textContent = message;
+        status.dataset.state = state;
+        status.hidden = !message;
+    }
+    const loginLink = form.querySelector('#predictionLoginLink');
+    if (loginLink) loginLink.hidden = !needsLogin;
+}
+
+function notifyPredictionSubmit(type, message) {
+    // Inline feedback must still work if the optional toast library fails.
+    try { window.Toast?.[type]?.(message); } catch (_) {}
+}
+
+function predictionSaveError(status, data) {
+    if (status === 401) return 'Сесията за вход е изтекла или не е валидна. Влез отново и опитай пак.';
+    if (status === 403) return 'Няма разрешение за запис. Влез отново и опитай пак.';
+    if (status === 429) return 'Има твърде много заявки. Изчакай малко и опитай отново.';
+    if (status >= 500) return 'Сървърът не потвърди записа. Провери списъка с прогнози, преди да опиташ отново.';
+    const messages = {
+        matchDate: 'Избери валидна дата за мача.',
+        homeTeam: 'Името на домакина трябва да съдържа между 2 и 100 знака.',
+        awayTeam: 'Името на госта трябва да съдържа между 2 и 100 знака.',
+        leagueFlag: 'Избери държава или лига от League Flag.',
+        prediction: 'Избери прогноза или въведи ръчен текст до 200 знака.'
+    };
+    const details = Array.isArray(data?.errors)
+        ? [...new Set(data.errors.map(error => messages[error?.field]).filter(Boolean))] : [];
+    return details.join(' ') || 'Сървърът не прие прогнозата. Провери полетата и опитай отново.';
+}
+
+function initializePredictionSubmitFeedback(form) {
+    const requiredMessages = {
+        matchDate: 'Избери валидна дата за мача.',
+        leagueFlag: 'Избери държава или лига от League Flag.',
+        homeTeam: 'Попълни отбора домакин.',
+        awayTeam: 'Попълни гостуващия отбор.',
+        manualPrediction: 'Въведи ръчна прогноза до 200 знака.'
+    };
+    form.addEventListener('invalid', event => {
+        setPredictionSubmitStatus(form, 'error', requiredMessages[event.target.id] || 'Провери задължителните полета.');
+    }, true);
+    form.addEventListener('reset', () => setPredictionSubmitStatus(form, '', ''));
+}
 
 // Global helper functions for date and prediction buttons
 window.setTodayDate = function() {
@@ -59,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (predictionForm) {
         window.PredictionComposer.initialize(predictionForm);
+        initializePredictionSubmitFeedback(predictionForm);
         predictionForm.addEventListener('submit', window.handleAddPrediction);
     }
     
@@ -93,43 +143,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
 window.handleAddPrediction = async function(e) {
     e.preventDefault();
-    const composer = window.PredictionComposer.get(e.target);
-    if (!composer || !composer.validate()) return;
-    
-    const matchDate = document.getElementById('matchDate').value;
-    const formData = {
-        matchDate: matchDate,
-        homeTeam: document.getElementById('homeTeam').value,
-        awayTeam: document.getElementById('awayTeam').value,
-        leagueFlag: document.getElementById('leagueFlag').value.trim(),
-        prediction: composer.getValue()
-    };
+    const form = e.currentTarget || e.target;
+    if (pendingPredictionForms.has(form)) return;
+    const composer = window.PredictionComposer?.get(form);
+    if (!composer) {
+        setPredictionSubmitStatus(form, 'error', 'Формата не е заредена правилно. Презареди страницата.');
+        return;
+    }
+    if (!composer.validate()) {
+        setPredictionSubmitStatus(form, 'error', 'Избери поне една опция или въведи прогноза ръчно.');
+        return;
+    }
 
+    const submitButton = form.querySelector('button[type="submit"]');
+    const buttonContent = submitButton?.innerHTML;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
+    pendingPredictionForms.add(form);
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.setAttribute('aria-busy', 'true');
+        submitButton.textContent = 'Записване…';
+    }
+    setPredictionSubmitStatus(form, 'pending', 'Записвам прогнозата…');
     try {
+        const formData = {
+            matchDate: form.querySelector('#matchDate').value,
+            homeTeam: form.querySelector('#homeTeam').value,
+            awayTeam: form.querySelector('#awayTeam').value,
+            leagueFlag: form.querySelector('#leagueFlag').value.trim(),
+            prediction: composer.getValue()
+        };
         const response = await fetch('/api/predictions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify(formData),
+            signal: controller.signal
         });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            Toast.success('Prediction added successfully! ✅');
-            loadAdminPredictions();
-            e.target.reset();
-        } else {
-            throw new Error(data.message || 'Failed to add prediction');
+        const data = await response.json().catch(() => null);
+        if (!response.ok) {
+            const message = predictionSaveError(response.status, data);
+            setPredictionSubmitStatus(form, 'error', message, response.status === 401 || response.status === 403);
+            notifyPredictionSubmit('error', message);
+            return;
         }
-    } catch (error) {
-        console.error('Error adding prediction:', error);
-        if (error.message === 'Invalid token') {
-            window.location.href = '/login';
-        } else {
-            Toast.error('Failed to add prediction: ' + error.message);
+        if (!data || !data._id) {
+            const message = 'Записът не е потвърден. Провери списъка с прогнози, преди да опиташ отново.';
+            setPredictionSubmitStatus(form, 'error', message);
+            notifyPredictionSubmit('error', message);
+            return;
+        }
+        form.reset();
+        setPredictionSubmitStatus(form, 'success', 'Прогнозата е записана успешно.');
+        notifyPredictionSubmit('success', 'Прогнозата е записана успешно.');
+        loadAdminPredictions();
+    } catch (_) {
+        const message = 'Няма потвърждение за записа. Провери връзката и списъка с прогнози, преди да опиташ отново.';
+        setPredictionSubmitStatus(form, 'error', message);
+        notifyPredictionSubmit('error', message);
+    } finally {
+        clearTimeout(timeout);
+        pendingPredictionForms.delete(form);
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.removeAttribute('aria-busy');
+            submitButton.innerHTML = buttonContent;
         }
     }
 }
